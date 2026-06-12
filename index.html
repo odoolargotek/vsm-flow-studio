@@ -9,18 +9,18 @@
 <body>
   <div id="app">
 
-    <!-- TOP BAR -->
     <header class="topbar">
       <div class="brand">
         <span class="brand-icon">⬡</span>
         <span class="brand-name">VSM <strong>Flow Studio</strong></span>
+        <span class="brand-version">v2</span>
       </div>
       <div class="toolbar-actions">
-        <button onclick="newDiagram()" title="Nuevo diagrama">＋ Nuevo</button>
-        <button onclick="saveDiagram()" title="Guardar en LocalStorage">💾 Guardar</button>
-        <button onclick="loadDiagram()" title="Cargar guardado">📂 Cargar</button>
-        <button onclick="exportJSON()" title="Exportar JSON">⬇ JSON</button>
-        <button onclick="window.print()" title="Imprimir/PDF" class="btn-accent">🖨 PDF</button>
+        <button onclick="newDiagram()">＋ Nuevo</button>
+        <button onclick="saveDiagram()">💾 Guardar</button>
+        <button onclick="loadDiagram()">📂 Cargar</button>
+        <button onclick="exportJSON()">⬇ JSON</button>
+        <button onclick="window.print()" class="btn-accent">🖨 PDF</button>
       </div>
     </header>
 
@@ -28,61 +28,61 @@
 
       <!-- TOOLBOX -->
       <aside class="toolbox">
-        <div class="toolbox-title">Elementos VSM</div>
+        <div class="toolbox-title">Elementos</div>
 
         <div class="tool-group">
           <div class="tool-label">FLUJO</div>
-          <div class="tool-item" draggable="true" data-type="supplier" title="Proveedor">
-            <div class="tool-icon supplier-icon">▣</div>
-            <span>Proveedor</span>
+          <div class="tool-item" draggable="true" data-type="supplier">
+            <div class="tool-icon supplier-icon">▣</div><span>Proveedor</span>
           </div>
-          <div class="tool-item" draggable="true" data-type="customer" title="Cliente">
-            <div class="tool-icon customer-icon">▣</div>
-            <span>Cliente</span>
+          <div class="tool-item" draggable="true" data-type="customer">
+            <div class="tool-icon customer-icon">▣</div><span>Cliente</span>
           </div>
-          <div class="tool-item" draggable="true" data-type="process" title="Proceso">
-            <div class="tool-icon process-icon">▬</div>
-            <span>Proceso</span>
+          <div class="tool-item" draggable="true" data-type="process">
+            <div class="tool-icon process-icon">▬</div><span>Proceso</span>
           </div>
-          <div class="tool-item" draggable="true" data-type="inventory" title="Inventario / WIP">
-            <div class="tool-icon inventory-icon">▲</div>
-            <span>Inventario</span>
+          <div class="tool-item" draggable="true" data-type="inventory">
+            <div class="tool-icon inventory-icon">▲</div><span>Inventario</span>
           </div>
         </div>
 
         <div class="tool-group">
-          <div class="tool-label">CONEXIONES</div>
-          <div class="tool-item" id="btn-push-arrow" onclick="setArrowMode('push')">
-            <div class="tool-icon arrow-push">⟶</div>
-            <span>Flecha Push</span>
+          <div class="tool-label">CONECTAR</div>
+          <div class="tool-item" id="btn-push-arrow" onclick="setArrowMode('push')" title="Push: click en origen, luego en destino">
+            <div class="tool-icon arrow-push">⟶</div><span>Push</span>
           </div>
-          <div class="tool-item" id="btn-pull-arrow" onclick="setArrowMode('pull')">
-            <div class="tool-icon arrow-pull">⇢</div>
-            <span>Flecha Pull</span>
+          <div class="tool-item" id="btn-pull-arrow" onclick="setArrowMode('pull')" title="Pull: click en origen, luego en destino">
+            <div class="tool-icon arrow-pull">⇢</div><span>Pull</span>
           </div>
-          <div class="tool-item" id="btn-info-arrow" onclick="setArrowMode('info')">
-            <div class="tool-icon arrow-info">⤳</div>
-            <span>Flujo Info</span>
+          <div class="tool-item" id="btn-info-arrow" onclick="setArrowMode('info')" title="Flujo de información">
+            <div class="tool-icon arrow-info">⤳</div><span>Info</span>
           </div>
         </div>
 
         <div class="tool-group">
           <div class="tool-label">MEJORA</div>
           <div class="tool-item" draggable="true" data-type="kaizen">
-            <div class="tool-icon kaizen-icon">✸</div>
-            <span>Kaizen Burst</span>
+            <div class="tool-icon kaizen-icon">✸</div><span>Kaizen</span>
           </div>
         </div>
 
         <div class="tool-group">
           <div class="tool-label">ACCIONES</div>
           <div class="tool-item danger" onclick="deleteSelected()">
-            <div class="tool-icon">🗑</div>
-            <span>Eliminar</span>
+            <div class="tool-icon">🗑</div><span>Eliminar</span>
           </div>
           <div class="tool-item" onclick="runSimulation()">
-            <div class="tool-icon sim-icon">▶</div>
-            <span>Simular</span>
+            <div class="tool-icon sim-icon">▶</div><span>Simular</span>
+          </div>
+        </div>
+
+        <div class="tool-group">
+          <div class="tool-label">CONEXIÓN</div>
+          <div class="connect-guide">
+            <div>① Click ⟶ Push</div>
+            <div>② Click ORIGEN</div>
+            <div>③ Click DESTINO</div>
+            <div class="guide-esc">ESC = cancelar</div>
           </div>
         </div>
       </aside>
@@ -91,19 +91,18 @@
       <main class="canvas-area">
         <div class="canvas-hint" id="canvas-hint">Arrastra elementos al canvas para comenzar tu VSM</div>
         <svg id="arrows-svg"></svg>
-        <div id="canvas" 
-          ondragover="event.preventDefault()" 
+        <div id="canvas"
+          ondragover="event.preventDefault()"
           ondrop="onDrop(event)"
           onclick="onCanvasClick(event)">
         </div>
-        <!-- Timeline bar -->
         <div class="timeline-bar" id="timeline-bar">
           <div class="timeline-label">TIMELINE</div>
           <div class="timeline-content" id="timeline-content"></div>
         </div>
       </main>
 
-      <!-- SIMULATION PANEL -->
+      <!-- SIM PANEL -->
       <aside class="sim-panel">
         <div class="sim-header">
           <span>📊 Simulación</span>
@@ -130,6 +129,13 @@
             <label>Turnos/día</label>
             <div class="sim-input-row">
               <input type="number" id="shifts" value="1" min="1" max="3">
+              <span class="sim-unit">#</span>
+            </div>
+          </div>
+          <div class="sim-field">
+            <label>Iteraciones MC</label>
+            <div class="sim-input-row">
+              <input type="number" id="mc-runs" value="500" min="100" max="5000" step="100">
               <span class="sim-unit">#</span>
             </div>
           </div>
@@ -175,7 +181,7 @@
         </div>
 
         <div class="sim-section">
-          <div class="sim-section-title">ESTADO</div>
+          <div class="sim-section-title">LOG</div>
           <div id="sim-log" class="sim-log">Agrega procesos al canvas y presiona CALCULAR.</div>
         </div>
       </aside>
@@ -183,7 +189,7 @@
     </div>
   </div>
 
-  <!-- NODE PROPERTIES MODAL -->
+  <!-- MODAL -->
   <div id="modal-overlay" class="modal-overlay hidden" onclick="closeModal(event)">
     <div class="modal" onclick="event.stopPropagation()">
       <div class="modal-header">

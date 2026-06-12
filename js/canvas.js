@@ -1,11 +1,12 @@
-// ===== CANVAS ENGINE — VSM Flow Studio =====
+// ===== CANVAS ENGINE v2 — VSM Flow Studio =====
+// Fix: arrows use canvas-relative positions (not viewport getBoundingClientRect)
 
-let arrowMode = null;   // null | 'push' | 'pull' | 'info'
-let connectingFrom = null;
+let arrowMode = null;
+let connectingFrom = null;   // nodeId waiting for target
 let draggingNode = null;
 let dragOffsetX = 0, dragOffsetY = 0;
 
-// ── DRAG FROM TOOLBOX ────────────────────────────────────────────
+// ─ DRAG FROM TOOLBOX ─────────────────────────────────────────────
 document.querySelectorAll('.tool-item[draggable]').forEach(item => {
   item.addEventListener('dragstart', e => {
     e.dataTransfer.setData('node-type', item.dataset.type);
@@ -20,48 +21,58 @@ function onDrop(e) {
   const rect = canvas.getBoundingClientRect();
   const x = e.clientX - rect.left - 65;
   const y = e.clientY - rect.top - 35;
-  const node = createNode(type, x, y);
+  const node = createNode(type, Math.max(0, x), Math.max(0, y));
   renderNode(node);
   document.getElementById('canvas-hint').style.display = 'none';
+  renderAllArrows();
 }
 
-// ── RENDER NODE ──────────────────────────────────────────────────
+// ─ RENDER NODE ──────────────────────────────────────────────────
 function renderNode(node) {
   const canvas = document.getElementById('canvas');
   const el = document.createElement('div');
   el.id = node.id;
   el.className = `vsm-node node-${node.type}`;
   el.style.left = node.x + 'px';
-  el.style.top = node.y + 'px';
-  el.innerHTML = getNodeHTML(node);
+  el.style.top  = node.y + 'px';
+  el.innerHTML  = getNodeHTML(node);
 
-  // Drag to move
   el.addEventListener('mousedown', e => startDrag(e, node));
-  // Double-click to edit
-  el.addEventListener('dblclick', e => { e.stopPropagation(); openModal(node.id); });
+  el.addEventListener('dblclick',  e => { e.stopPropagation(); openModal(node.id); });
 
-  // Port clicks
-  el.querySelectorAll('.node-port').forEach(port => {
-    port.addEventListener('click', e => { e.stopPropagation(); onPortClick(node.id); });
-  });
-
+  bindPorts(el, node.id);
   canvas.appendChild(el);
+}
+
+function bindPorts(el, nodeId) {
+  el.querySelectorAll('.node-port').forEach(port => {
+    port.addEventListener('mousedown', e => { e.stopPropagation(); });
+    port.addEventListener('click', e => { e.stopPropagation(); onPortClick(nodeId); });
+  });
 }
 
 function getNodeHTML(node) {
   const p = node.props;
-  let html = '<button class="node-edit-btn" onclick="event.stopPropagation(); openModal(\'' + node.id + '\')" title="Editar">✎</button>';
-  html += '<div class="node-port port-right"></div>';
-  html += '<div class="node-port port-left"></div>';
-  html += '<div class="node-port port-bottom"></div>';
-  html += '<div class="node-port port-top"></div>';
+  const distBadge = p.distType && p.distType !== 'fixed'
+    ? `<div class="node-dist-badge">${p.distType === 'normal' ? '~N' : '~T'}</div>` : '';
+
+  let html = `<button class="node-edit-btn" onclick="event.stopPropagation();openModal('${node.id}')" title="Editar">✎</button>`;
+  html += '<div class="node-port port-right" title="Conectar desde aquí"></div>';
+  html += '<div class="node-port port-left"  title="Conectar desde aquí"></div>';
+  html += '<div class="node-port port-bottom" title="Conectar desde aquí"></div>';
+  html += '<div class="node-port port-top"   title="Conectar desde aquí"></div>';
 
   if (node.type === 'process') {
-    const ops = Array.from({length: Math.max(p.operators||1, 1)}).map((_, i) => `<div class="node-op active"></div>`).join('');
+    const ops = Array.from({length: Math.max(p.operators||1,1)}).map(() => '<div class="node-op active"></div>').join('');
+    const ctDisplay = p.distType === 'normal'
+      ? `${p.ct}s ±${p.ctStd||0}s`
+      : p.distType === 'triangular'
+      ? `[${p.ctMin||p.ct},${p.ct},${p.ctMax||p.ct}]s`
+      : `${p.ct}s`;
     html += `<div class="node-body">
-      <div class="node-title">${p.label}</div>
+      <div class="node-title">${p.label}${distBadge}</div>
       <div class="node-stats">
-        CT: <span>${p.ct}s</span><br>
+        CT: <span>${ctDisplay}</span><br>
         C/O: <span>${p.co}min</span><br>
         Uptime: <span>${p.uptime}%</span>
       </div>
@@ -85,15 +96,14 @@ function refreshNodeElement(nodeId) {
   const el = document.getElementById(nodeId);
   if (!el) return;
   el.innerHTML = getNodeHTML(node);
-  el.querySelectorAll('.node-port').forEach(port => {
-    port.addEventListener('click', e => { e.stopPropagation(); onPortClick(node.id); });
-  });
+  bindPorts(el, nodeId);
   renderAllArrows();
 }
 
-// ── DRAG TO MOVE ─────────────────────────────────────────────────
+// ─ DRAG TO MOVE ────────────────────────────────────────────────
 function startDrag(e, node) {
-  if (e.target.classList.contains('node-port') || e.target.classList.contains('node-edit-btn')) return;
+  if (e.target.classList.contains('node-port') ||
+      e.target.classList.contains('node-edit-btn')) return;
   if (arrowMode) return;
   draggingNode = node;
   const el = document.getElementById(node.id);
@@ -101,7 +111,7 @@ function startDrag(e, node) {
   dragOffsetX = e.clientX - rect.left;
   dragOffsetY = e.clientY - rect.top;
   document.addEventListener('mousemove', onDragMove);
-  document.addEventListener('mouseup', onDragEnd);
+  document.addEventListener('mouseup',   onDragEnd);
   selectNode(node.id);
   e.preventDefault();
 }
@@ -110,23 +120,21 @@ function onDragMove(e) {
   if (!draggingNode) return;
   const canvas = document.getElementById('canvas');
   const rect = canvas.getBoundingClientRect();
-  const x = e.clientX - rect.left - dragOffsetX;
-  const y = e.clientY - rect.top - dragOffsetY;
-  draggingNode.x = Math.max(0, x);
-  draggingNode.y = Math.max(0, y);
+  draggingNode.x = Math.max(0, e.clientX - rect.left - dragOffsetX);
+  draggingNode.y = Math.max(0, e.clientY - rect.top  - dragOffsetY);
   const el = document.getElementById(draggingNode.id);
   el.style.left = draggingNode.x + 'px';
-  el.style.top = draggingNode.y + 'px';
+  el.style.top  = draggingNode.y + 'px';
   renderAllArrows();
 }
 
 function onDragEnd() {
   draggingNode = null;
   document.removeEventListener('mousemove', onDragMove);
-  document.removeEventListener('mouseup', onDragEnd);
+  document.removeEventListener('mouseup',   onDragEnd);
 }
 
-// ── SELECTION ────────────────────────────────────────────────────
+// ─ SELECTION ────────────────────────────────────────────────────
 function selectNode(id) {
   document.querySelectorAll('.vsm-node').forEach(el => el.classList.remove('selected'));
   const el = document.getElementById(id);
@@ -138,14 +146,18 @@ function onCanvasClick(e) {
   if (e.target === document.getElementById('canvas')) {
     document.querySelectorAll('.vsm-node').forEach(el => el.classList.remove('selected'));
     selectedNodeId = null;
-    connectingFrom = null;
-    clearArrowModeUI();
+    if (connectingFrom) {
+      // Cancel pending connection
+      connectingFrom = null;
+      setArrowMode(null);
+      showConnectHint(false);
+    }
   }
 }
 
-// ── ARROW MODE ───────────────────────────────────────────────────
+// ─ ARROW CONNECTION SYSTEM ───────────────────────────────────────
 function setArrowMode(mode) {
-  arrowMode = arrowMode === mode ? null : mode;
+  arrowMode = (arrowMode === mode) ? null : mode;
   clearArrowModeUI();
   if (arrowMode) {
     const btn = document.getElementById('btn-' + mode + '-arrow');
@@ -153,40 +165,74 @@ function setArrowMode(mode) {
     document.getElementById('canvas').style.cursor = 'crosshair';
   } else {
     document.getElementById('canvas').style.cursor = 'default';
+    connectingFrom = null;
+    showConnectHint(false);
   }
-  connectingFrom = null;
 }
 
 function clearArrowModeUI() {
-  ['push', 'pull', 'info'].forEach(m => {
+  ['push','pull','info'].forEach(m => {
     const btn = document.getElementById('btn-' + m + '-arrow');
     if (btn) btn.classList.remove('active');
   });
 }
 
-function onPortClick(nodeId) {
-  if (!arrowMode) {
-    setArrowMode('push');
+function showConnectHint(active, fromLabel) {
+  let hint = document.getElementById('connect-hint');
+  if (!hint) {
+    hint = document.createElement('div');
+    hint.id = 'connect-hint';
+    hint.className = 'connect-hint';
+    document.querySelector('.canvas-area').appendChild(hint);
   }
+  if (active) {
+    hint.textContent = `⚡ "${fromLabel}" seleccionado — ahora haz click en el nodo DESTINO`;
+    hint.style.display = 'block';
+  } else {
+    hint.style.display = 'none';
+  }
+}
+
+function onPortClick(nodeId) {
+  // Auto-activate push mode if none selected
+  if (!arrowMode) setArrowMode('push');
+
   if (!connectingFrom) {
+    // First click: pick source
     connectingFrom = nodeId;
     selectNode(nodeId);
+    const node = getNode(nodeId);
+    showConnectHint(true, node ? node.props.label : nodeId);
   } else {
+    // Second click: pick target
     if (connectingFrom !== nodeId) {
       addArrow(connectingFrom, nodeId, arrowMode);
       renderAllArrows();
     }
     connectingFrom = null;
     setArrowMode(null);
+    showConnectHint(false);
   }
 }
 
-// ── ARROWS SVG ───────────────────────────────────────────────────
+// Also allow clicking the node BODY as target when connectingFrom is set
+document.getElementById('canvas').addEventListener('click', function(e) {
+  if (!connectingFrom) return;
+  const nodeEl = e.target.closest('.vsm-node');
+  if (nodeEl && nodeEl.id && nodeEl.id !== connectingFrom) {
+    addArrow(connectingFrom, nodeEl.id, arrowMode);
+    renderAllArrows();
+    connectingFrom = null;
+    setArrowMode(null);
+    showConnectHint(false);
+  }
+}, true);
+
+// ─ ARROWS SVG (canvas-relative coordinates) ─────────────────────
+// KEY FIX: use node.x/node.y (canvas-relative) NOT getBoundingClientRect()
 function renderAllArrows() {
   const svg = document.getElementById('arrows-svg');
-  svg.innerHTML = '';
 
-  // Define arrowhead markers
   svg.innerHTML = `
     <defs>
       <marker id="arr-push" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
@@ -202,43 +248,61 @@ function renderAllArrows() {
 
   arrows.forEach(arrow => {
     const fromNode = getNode(arrow.fromId);
-    const toNode = getNode(arrow.toId);
+    const toNode   = getNode(arrow.toId);
     if (!fromNode || !toNode) return;
 
     const fromEl = document.getElementById(arrow.fromId);
-    const toEl = document.getElementById(arrow.toId);
+    const toEl   = document.getElementById(arrow.toId);
     if (!fromEl || !toEl) return;
 
-    const svgRect = svg.getBoundingClientRect();
-    const fr = fromEl.getBoundingClientRect();
-    const tr = toEl.getBoundingClientRect();
+    // Use canvas-relative position + element size
+    const fw = fromEl.offsetWidth;
+    const fh = fromEl.offsetHeight;
+    const tw = toEl.offsetWidth;
+    const th = toEl.offsetHeight;
 
-    const x1 = fr.right - svgRect.left;
-    const y1 = fr.top + fr.height / 2 - svgRect.top;
-    const x2 = tr.left - svgRect.left;
-    const y2 = tr.top + tr.height / 2 - svgRect.top;
+    // Start: right-center of source, End: left-center of target
+    const x1 = fromNode.x + fw;
+    const y1 = fromNode.y + fh / 2;
+    const x2 = toNode.x;
+    const y2 = toNode.y + th / 2;
 
-    const cx1 = x1 + Math.abs(x2 - x1) * 0.4;
-    const cx2 = x2 - Math.abs(x2 - x1) * 0.4;
+    // Bezier control points
+    const dx = Math.abs(x2 - x1);
+    const cx1 = x1 + dx * 0.45;
+    const cx2 = x2 - dx * 0.45;
 
-    const cls = `arrow-${arrow.type}-line`;
-    const marker = `arr-${arrow.type}`;
-    const dash = arrow.type === 'push' ? '' : `stroke-dasharray="${arrow.type === 'pull' ? '8,4' : '4,4'}"`;
+    const strokeColor = arrow.type === 'push' ? '#58a6ff' : arrow.type === 'pull' ? '#3fb950' : '#d29922';
+    const dashArr     = arrow.type === 'push' ? '' : arrow.type === 'pull' ? '8,4' : '4,4';
+    const marker      = `arr-${arrow.type}`;
 
     const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
     path.setAttribute('d', `M ${x1} ${y1} C ${cx1} ${y1} ${cx2} ${y2} ${x2} ${y2}`);
-    path.setAttribute('class', `vsm-arrow ${cls}`);
-    path.setAttribute('marker-end', `url(#${marker})`);
-    if (dash) path.setAttribute('stroke-dasharray', arrow.type === 'pull' ? '8,4' : '4,4');
-    path.setAttribute('stroke-width', '2');
+    path.setAttribute('stroke', strokeColor);
+    path.setAttribute('stroke-width', '2.5');
     path.setAttribute('fill', 'none');
+    path.setAttribute('marker-end', `url(#${marker})`);
+    if (dashArr) path.setAttribute('stroke-dasharray', dashArr);
     svg.appendChild(path);
+
+    // Arrow type label on midpoint
+    const mx = (x1 + x2) / 2;
+    const my = (y1 + y2) / 2 - 8;
+    const label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+    label.setAttribute('x', mx);
+    label.setAttribute('y', my);
+    label.setAttribute('fill', strokeColor);
+    label.setAttribute('font-size', '9');
+    label.setAttribute('text-anchor', 'middle');
+    label.setAttribute('font-family', 'monospace');
+    label.textContent = arrow.type.toUpperCase();
+    svg.appendChild(label);
   });
 }
 
-// ── DELETE ───────────────────────────────────────────────────────
+// ─ DELETE ───────────────────────────────────────────────────────
 function deleteSelected() {
-  if (!selectedNodeId) { alert('Selecciona un nodo primero.'); return; }
+  if (!selectedNodeId) { alert('Selecciona un nodo primero (click sobre él).'); return; }
   deleteNode(selectedNodeId);
   const el = document.getElementById(selectedNodeId);
   if (el) el.remove();
@@ -247,13 +311,14 @@ function deleteSelected() {
 }
 
 document.addEventListener('keydown', e => {
-  if (e.key === 'Delete' || e.key === 'Backspace') {
-    if (document.activeElement.tagName !== 'INPUT' && selectedNodeId) {
-      deleteSelected();
-    }
+  if ((e.key === 'Delete' || e.key === 'Backspace') &&
+      document.activeElement.tagName !== 'INPUT' &&
+      document.activeElement.tagName !== 'SELECT') {
+    if (selectedNodeId) deleteSelected();
   }
   if (e.key === 'Escape') {
     setArrowMode(null);
     connectingFrom = null;
+    showConnectHint(false);
   }
 });
