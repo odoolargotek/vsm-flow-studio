@@ -62,10 +62,10 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg-app);color:
 .vsm-node.bottleneck .node-body{outline:2px solid var(--danger)!important;box-shadow:0 0 14px rgba(248,81,73,.5);}
 
 /* Process states */
-.vsm-node.state-busy   .node-body{border-color:#3fb950!important;box-shadow:0 0 10px rgba(63,185,80,.4);}
+.vsm-node.state-busy    .node-body{border-color:#3fb950!important;box-shadow:0 0 10px rgba(63,185,80,.4);}
 .vsm-node.state-starved .node-body{border-color:#d29922!important;box-shadow:0 0 8px rgba(210,153,34,.3);}
 .vsm-node.state-blocked .node-body{border-color:#f85149!important;box-shadow:0 0 8px rgba(248,81,73,.3);}
-.vsm-node.state-down   .node-body{border-color:#6e7681!important;opacity:.7;}
+.vsm-node.state-down    .node-body{border-color:#6e7681!important;opacity:.7;}
 
 /* State dot & label */
 .state-dot{position:absolute;bottom:-5px;left:50%;transform:translateX(-50%);width:10px;height:10px;border-radius:50%;border:1px solid #000;z-index:50;}
@@ -73,10 +73,51 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg-app);color:
 .cust-count{font-size:11px;font-weight:700;color:var(--accent2);text-align:center;margin-top:2px;}
 
 /* Pulse animations */
-@keyframes pulse-supply  {0%{box-shadow:0 0 0 0 rgba(31,111,235,.6)}70%{box-shadow:0 0 0 12px rgba(31,111,235,0)}100%{box-shadow:0 0 0 0 rgba(31,111,235,0)}}
-@keyframes pulse-receive {0%{box-shadow:0 0 0 0 rgba(63,185,80,.6)} 70%{box-shadow:0 0 0 12px rgba(63,185,80,0)} 100%{box-shadow:0 0 0 0 rgba(63,185,80,0)}}
+@keyframes pulse-supply  {0%{box-shadow:0 0 0 0 rgba(31,111,235,.7)}70%{box-shadow:0 0 0 14px rgba(31,111,235,0)}100%{box-shadow:0 0 0 0 rgba(31,111,235,0)}}
+@keyframes pulse-receive {0%{box-shadow:0 0 0 0 rgba(63,185,80,.7)} 70%{box-shadow:0 0 0 14px rgba(63,185,80,0)} 100%{box-shadow:0 0 0 0 rgba(63,185,80,0)}}
 .pulse-supply  .node-body{animation:pulse-supply  .5s ease-out;}
 .pulse-receive .node-body{animation:pulse-receive .5s ease-out;}
+
+/* ===================== INBOX TRAY (bandeja de entrada) =====================
+   Sits below each process node. Shows queued units as colored dots.
+   More dots = more backlog. Color: green → yellow → red.
+*/
+.inbox-tray{
+  position:absolute;
+  bottom:-30px; left:50%; transform:translateX(-50%);
+  display:flex;
+  flex-direction:row;
+  align-items:center;
+  gap:3px;
+  background:rgba(12,16,22,.85);
+  border:1px solid var(--border);
+  border-radius:20px;
+  padding:3px 8px 3px 6px;
+  min-width:32px;
+  white-space:nowrap;
+  z-index:30;
+  pointer-events:none;
+}
+.inbox-dot{
+  width:9px; height:9px;
+  border-radius:50%;
+  border:1px solid rgba(0,0,0,.4);
+  flex-shrink:0;
+  transition:background .2s;
+}
+@keyframes inbox-pop {0%{transform:scale(0)} 60%{transform:scale(1.4)} 100%{transform:scale(1)}}
+.inbox-dot-new{ animation:inbox-pop .25s ease-out; }
+.inbox-overflow{
+  font-size:8px; font-weight:700;
+  color:var(--danger);
+  margin-left:1px;
+}
+.inbox-count{
+  font-size:9px; font-weight:700;
+  margin-left:4px;
+  font-family:monospace;
+}
+/* ========================================================================== */
 
 /* Process */
 .node-process .node-body{background:var(--bg-node);border:1.5px solid var(--process-color);border-radius:var(--radius);width:140px;padding:8px;box-shadow:var(--shadow);}
@@ -99,8 +140,6 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg-app);color:
 .node-triangle{width:0;height:0;border-left:30px solid transparent;border-right:30px solid transparent;border-bottom:52px solid var(--inventory-color);filter:drop-shadow(0 2px 4px rgba(0,0,0,.5));transition:border-bottom-color .3s;}
 .node-inv-label{margin-top:4px;font-size:10px;color:var(--inventory-color);font-weight:700;text-align:center;}
 .node-inv-units{font-size:9px;color:var(--text-muted);}
-
-/* WIP dots */
 .wip-dots{display:flex;flex-wrap:wrap;justify-content:center;gap:2px;margin-top:3px;max-width:72px;}
 .wip-dot{width:7px;height:7px;border-radius:50%;border:1px solid rgba(0,0,0,.3);}
 .wip-dot-more{font-size:8px;color:var(--danger);font-weight:700;margin-top:1px;}
@@ -120,7 +159,6 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg-app);color:
 .vsm-node:hover .port-left{opacity:1;transform:translateY(-50%);}
 .vsm-node:hover .port-bottom{opacity:1;transform:translateX(-50%);}
 .vsm-node:hover .port-top{opacity:1;transform:translateX(-50%);}
-
 .node-edit-btn{position:absolute;top:-9px;right:-9px;width:20px;height:20px;background:var(--accent);color:#000;border:none;border-radius:50%;font-size:11px;cursor:pointer;opacity:0;z-index:40;line-height:20px;text-align:center;transition:opacity .15s;}
 .vsm-node:hover .node-edit-btn{opacity:1;}
 
