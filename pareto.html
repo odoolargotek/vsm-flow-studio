@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pareto 80/20 — Lean Suite</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300..700&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{
+      --bg:#0d1117;--surface:#161b22;--surface2:#21262d;--border:#30363d;
+      --text:#e6edf3;--muted:#8b949e;--faint:#484f58;
+      --accent:#4f98a3;--green:#3fb950;--warn:#d29922;--danger:#f85149;
+      --purple:#bc8cff;--orange:#ffa657;
+      --radius:12px;--radius-sm:8px;
+      --trans:180ms cubic-bezier(.16,1,.3,1);
+    }
+    body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;flex-direction:column}
+    .topnav{display:flex;align-items:center;justify-content:space-between;padding:0 28px;height:54px;background:var(--surface);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:100}
+    .brand{display:flex;align-items:center;gap:10px;font-size:15px;font-weight:600;text-decoration:none;color:var(--text)}
+    .brand-icon{font-family:'Instrument Serif',serif;font-size:22px;color:var(--accent)}
+    .nav-links{display:flex;gap:4px}
+    .nav-link{padding:6px 13px;border-radius:var(--radius-sm);font-size:13px;color:var(--muted);text-decoration:none;transition:all var(--trans)}
+    .nav-link:hover,.nav-link.active{background:var(--surface2);color:var(--text)}
+    .nav-actions{display:flex;gap:8px}
+    .btn{padding:7px 16px;border-radius:var(--radius-sm);font-size:13px;font-weight:600;cursor:pointer;border:none;transition:all var(--trans);font-family:inherit}
+    .btn-primary{background:var(--accent);color:#fff}.btn-primary:hover{background:#3a7f8a}
+    .btn-ghost{background:transparent;color:var(--muted);border:1px solid var(--border)}.btn-ghost:hover{background:var(--surface2);color:var(--text)}
+
+    /* LAYOUT */
+    .app{display:flex;flex:1;overflow:hidden;height:calc(100vh - 54px)}
+
+    /* SIDEBAR */
+    .sidebar{width:340px;flex-shrink:0;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden}
+    .sb-head{padding:16px 20px 12px;border-bottom:1px solid var(--border)}
+    .sb-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-bottom:10px}
+    .meta-row{display:flex;flex-direction:column;gap:4px;margin-bottom:8px}
+    .meta-row label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--faint)}
+    .meta-row input,.meta-row select{background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:7px 10px;border-radius:var(--radius-sm);font-size:13px;font-family:inherit;outline:none;width:100%;transition:border-color var(--trans)}
+    .meta-row input:focus,.meta-row select:focus{border-color:var(--accent)}
+
+    .sb-body{flex:1;overflow-y:auto;padding:12px 20px}
+    .sb-body::-webkit-scrollbar{width:4px}.sb-body::-webkit-scrollbar-thumb{background:var(--border);border-radius:99px}
+
+    .items-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+    .items-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted)}
+    .add-btn{font-size:11px;font-weight:700;padding:4px 10px;border-radius:6px;border:1px dashed var(--border);background:transparent;color:var(--muted);cursor:pointer;transition:all var(--trans);font-family:inherit}
+    .add-btn:hover{border-color:var(--accent);color:var(--accent)}
+
+    .item-row{display:flex;gap:6px;align-items:center;margin-bottom:6px}
+    .item-color{width:12px;height:12px;border-radius:50%;flex-shrink:0}
+    .item-name{flex:1;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:6px 8px;border-radius:6px;font-size:12px;font-family:inherit;outline:none;transition:border-color var(--trans)}
+    .item-name:focus{border-color:var(--accent)}
+    .item-val{width:72px;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:6px 8px;border-radius:6px;font-size:12px;font-family:inherit;outline:none;text-align:right;transition:border-color var(--trans)}
+    .item-val:focus{border-color:var(--warn)}
+    .item-del{width:24px;height:24px;border-radius:4px;border:none;background:transparent;color:var(--faint);cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;transition:all var(--trans);flex-shrink:0}
+    .item-del:hover{background:rgba(248,81,73,.15);color:var(--danger)}
+
+    .threshold-row{display:flex;align-items:center;gap:10px;padding:12px 0;border-top:1px solid var(--border);margin-top:8px}
+    .threshold-label{font-size:11px;color:var(--muted);white-space:nowrap}
+    .threshold-slider{flex:1;accent-color:var(--danger)}
+    .threshold-val{font-size:12px;font-weight:700;color:var(--danger);width:36px;text-align:right}
+
+    .sb-foot{padding:12px 20px;border-top:1px solid var(--border);display:flex;gap:8px}
+    .sb-foot .btn{flex:1;font-size:12px;padding:8px}
+
+    /* MAIN */
+    .main{flex:1;overflow-y:auto;padding:28px 32px;display:flex;flex-direction:column;gap:24px}
+    .main::-webkit-scrollbar{width:6px}.main::-webkit-scrollbar-thumb{background:var(--border);border-radius:99px}
+
+    /* STATS ROW */
+    .stats-row{display:flex;gap:14px;flex-wrap:wrap}
+    .stat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 18px;flex:1;min-width:120px}
+    .stat-card .sv{font-size:22px;font-weight:700;color:var(--text)}
+    .stat-card .sl{font-size:10px;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-top:2px}
+    .stat-card.accent{border-color:var(--danger);background:color-mix(in srgb,var(--danger) 6%,var(--surface))}
+    .stat-card.accent .sv{color:var(--danger)}
+
+    /* CHART CARD */
+    .chart-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px 24px}
+    .chart-title{font-size:13px;font-weight:700;margin-bottom:4px}
+    .chart-sub{font-size:11px;color:var(--muted);margin-bottom:20px}
+    .chart-wrap{position:relative;width:100%;overflow:hidden}
+    canvas{display:block;width:100%!important}
+
+    /* TABLE */
+    .table-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
+    .table-head{display:flex;align-items:center;justify-content:space-between;padding:14px 20px;border-bottom:1px solid var(--border)}
+    .table-title{font-size:13px;font-weight:700}
+    .vital-badge{font-size:10px;font-weight:700;padding:3px 9px;border-radius:99px;background:rgba(248,81,73,.15);color:var(--danger)}
+    table{width:100%;border-collapse:collapse}
+    thead th{padding:10px 16px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);text-align:left;border-bottom:1px solid var(--border)}
+    tbody tr{border-bottom:1px solid var(--border);transition:background var(--trans)}
+    tbody tr:last-child{border-bottom:none}
+    tbody tr:hover{background:var(--surface2)}
+    tbody td{padding:10px 16px;font-size:12px}
+    tbody tr.vital td:first-child{border-left:3px solid var(--danger)}
+    tbody tr.trivial td:first-child{border-left:3px solid var(--border)}
+    .pct-bar-wrap{background:var(--surface2);border-radius:99px;height:6px;width:100px;overflow:hidden;display:inline-block;vertical-align:middle;margin-left:8px}
+    .pct-bar{height:100%;border-radius:99px;background:var(--danger)}
+    .cum-chip{display:inline-block;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700}
+    .cum-vital{background:rgba(248,81,73,.15);color:var(--danger)}
+    .cum-trivial{background:var(--surface2);color:var(--muted)}
+
+    @media(max-width:768px){.sidebar{display:none}.app{flex-direction:column}}
+  </style>
+</head>
+<body>
+
+<nav class="topnav">
+  <a class="brand" href="index.html"><span class="brand-icon">⧡</span><span>Lean <strong>Suite</strong></span></a>
+  <div class="nav-links">
+    <a class="nav-link" href="index.html">🏠 Inicio</a>
+    <a class="nav-link" href="vsm.html">🗺️ VSM</a>
+    <a class="nav-link" href="ishikawa.html">🐟 Ishikawa</a>
+    <a class="nav-link" href="5-porques.html">❓ 5 Porqués</a>
+    <a class="nav-link active" href="pareto.html">📊 Pareto</a>
+    <a class="nav-link" href="5s.html">🧹 5S</a>
+    <a class="nav-link" href="pdca.html">🔄 PDCA</a>
+  </div>
+  <div class="nav-actions">
+    <button class="btn btn-ghost" onclick="loadDemo()">🧪 Demo</button>
+    <button class="btn btn-ghost" onclick="exportCSV()">⬇ CSV</button>
+    <button class="btn btn-primary" onclick="exportChart()">🖼️ PNG</button>
+  </div>
+</nav>
+
+<div class="app">
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sb-head">
+      <div class="sb-title">📊 Datos del Análisis</div>
+      <div class="meta-row"><label>Título</label><input id="meta-title" value="Defectos en Línea A" oninput="renderAll()"></div>
+      <div class="meta-row"><label>Unidad</label>
+        <select id="meta-unit" onchange="renderAll()">
+          <option value="ocurrencias">Ocurrencias</option>
+          <option value="defectos">Defectos</option>
+          <option value="minutos">Minutos</option>
+          <option value="unidades">Unidades</option>
+          <option value="dólares">Dólares ($)</option>
+          <option value="horas">Horas</option>
+        </select>
+      </div>
+      <div class="meta-row"><label>Analista</label><input id="meta-analyst" placeholder="Nombre"></div>
+      <div class="meta-row"><label>Fecha</label><input id="meta-date" type="date"></div>
+    </div>
+
+    <div class="sb-body">
+      <div class="items-header">
+        <span class="items-label">Causas / Categorías</span>
+        <button class="add-btn" onclick="addItem()">+ Agregar</button>
+      </div>
+      <div id="items-list"></div>
+
+      <div class="threshold-row">
+        <span class="threshold-label">Línea crítica</span>
+        <input type="range" class="threshold-slider" id="threshold" min="50" max="95" value="80" oninput="renderAll()">
+        <span class="threshold-val" id="threshold-val">80%</span>
+      </div>
+    </div>
+
+    <div class="sb-foot">
+      <button class="btn btn-ghost" onclick="clearAll()">🗑 Limpiar</button>
+      <button class="btn btn-primary" onclick="renderAll()">▶ Actualizar</button>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main">
+    <div class="stats-row" id="stats-row"></div>
+    <div class="chart-card">
+      <div class="chart-title" id="chart-title">Diagrama de Pareto</div>
+      <div class="chart-sub" id="chart-sub"></div>
+      <div class="chart-wrap"><canvas id="pareto-chart" height="320"></canvas></div>
+    </div>
+    <div class="table-card">
+      <div class="table-head">
+        <span class="table-title">Tabla de Frecuencias</span>
+        <span class="vital-badge" id="vital-count">—</span>
+      </div>
+      <table><thead><tr>
+        <th>#</th><th>Causa / Categoría</th>
+        <th>Frecuencia</th><th>% Relativo</th><th>% Acumulado</th><th>Clasificación</th>
+      </tr></thead><tbody id="freq-table"></tbody></table>
+    </div>
+  </main>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+<script>
+// ---- PALETTE ----
+const PALETTE = ['#4f98a3','#3fb950','#d29922','#bc8cff','#ffa657','#f85149','#58a6ff','#79c0ff','#56d364','#e3b341'];
+
+// ---- STATE ----
+let items = [];
+let chartInstance = null;
+
+function newItem(name='', value=0){
+  return { id: Date.now()+Math.random(), name, value };
+}
+
+function loadDemo(){
+  items = [
+    newItem('Mal ajuste de herramental', 142),
+    newItem('Materia prima fuera de spec', 98),
+    newItem('Error operador', 73),
+    newItem('Falla equipo', 41),
+    newItem('Procedimiento no seguido', 28),
+    newItem('Cambio no documentado', 17),
+    newItem('Problema proveedor', 11),
+    newItem('Otro', 6),
+  ];
+  document.getElementById('meta-title').value = 'Defectos Línea A — Junio 2026';
+  renderSidebar();
+  renderAll();
+}
+
+// ---- SIDEBAR ----
+function renderSidebar(){
+  const list = document.getElementById('items-list');
+  list.innerHTML = items.map((it,i)=>`
+    <div class="item-row">
+      <div class="item-color" style="background:${PALETTE[i%PALETTE.length]}"></div>
+      <input class="item-name" value="${escHtml(it.name)}" placeholder="Causa ${i+1}"
+        oninput="items[${i}].name=this.value;renderAll()">
+      <input class="item-val" type="number" min="0" value="${it.value}"
+        oninput="items[${i}].value=+this.value||0;renderAll()">
+      <button class="item-del" onclick="removeItem(${i})" title="Eliminar">×</button>
+    </div>
+  `).join('');
+}
+
+function addItem(){
+  items.push(newItem('',0));
+  renderSidebar();
+  renderAll();
+  // focus last name input
+  setTimeout(()=>{
+    const inputs = document.querySelectorAll('.item-name');
+    if(inputs.length) inputs[inputs.length-1].focus();
+  },40);
+}
+
+function removeItem(i){
+  items.splice(i,1);
+  renderSidebar();
+  renderAll();
+}
+
+function clearAll(){
+  if(!confirm('¿Limpiar todos los datos?')) return;
+  items=[];
+  renderSidebar();
+  renderAll();
+}
+
+// ---- COMPUTE ----
+function compute(){
+  const threshold = +document.getElementById('threshold').value;
+  document.getElementById('threshold-val').textContent = threshold+'%';
+  const sorted = [...items]
+    .filter(it=>it.value>0)
+    .map((it,i)=>({...it,color:PALETTE[i%PALETTE.length]}))
+    .sort((a,b)=>b.value-a.value);
+  const total = sorted.reduce((s,it)=>s+it.value,0);
+  let cum=0;
+  const rows = sorted.map((it,i)=>{
+    cum+=it.value;
+    const rel = total ? it.value/total*100 : 0;
+    const cumPct = total ? cum/total*100 : 0;
+    return { ...it, rank:i+1, rel, cumPct, vital: cumPct <= threshold || (i>0 && (cum-it.value)/total*100 < threshold) };
+  });
+  // fix: mark vital = first N items whose cumulative reaches threshold
+  let c2=0;
+  rows.forEach(r=>{
+    c2+=r.value;
+    r.vital = total ? c2/total*100 <= threshold+0.01 : false;
+  });
+  // always mark at least the first item vital if it crosses threshold
+  if(rows.length && !rows[0].vital) rows[0].vital=true;
+  return { rows, total, threshold };
+}
+
+// ---- RENDER ALL ----
+function renderAll(){
+  if(!items.length){ clearChart(); renderStats(null); renderTable(null); return; }
+  const data = compute();
+  renderStats(data);
+  renderChart(data);
+  renderTable(data);
+  document.getElementById('chart-title').textContent = document.getElementById('meta-title').value || 'Diagrama de Pareto';
+  const unit = document.getElementById('meta-unit').value;
+  const vital = data.rows.filter(r=>r.vital).length;
+  document.getElementById('chart-sub').textContent =
+    `${data.rows.length} categorías · ${data.total.toLocaleString()} ${unit} totales · Pocas vitales: ${vital} de ${data.rows.length}`;
+}
+
+// ---- STATS ----
+function renderStats(data){
+  const row = document.getElementById('stats-row');
+  if(!data){ row.innerHTML=''; return; }
+  const vital = data.rows.filter(r=>r.vital);
+  const trivial = data.rows.filter(r=>!r.vital);
+  const vitalPct = data.total ? vital.reduce((s,r)=>s+r.value,0)/data.total*100 : 0;
+  const unit = document.getElementById('meta-unit').value;
+  row.innerHTML = `
+    <div class="stat-card"><div class="sv">${data.rows.length}</div><div class="sl">Categorías</div></div>
+    <div class="stat-card"><div class="sv">${data.total.toLocaleString()}</div><div class="sl">Total ${unit}</div></div>
+    <div class="stat-card accent"><div class="sv">${vital.length}</div><div class="sl">Pocas Vitales</div></div>
+    <div class="stat-card"><div class="sv">${trivial.length}</div><div class="sl">Muchas Triviales</div></div>
+    <div class="stat-card accent"><div class="sv">${vitalPct.toFixed(1)}%</div><div class="sl">% de ${unit}</div></div>
+  `;
+}
+
+// ---- CHART ----
+function renderChart(data){
+  const ctx = document.getElementById('pareto-chart').getContext('2d');
+  if(chartInstance){ chartInstance.destroy(); chartInstance=null; }
+
+  const labels = data.rows.map(r=>r.name.length>18?r.name.slice(0,16)+'…':r.name);
+  const vals   = data.rows.map(r=>r.value);
+  const cums   = data.rows.map(r=>r.cumPct);
+  const barColors = data.rows.map(r=> r.vital ? '#f85149' : '#4f98a3');
+  const threshold = data.threshold;
+
+  chartInstance = new Chart(ctx,{
+    data:{
+      labels,
+      datasets:[
+        {
+          type:'bar',
+          label: document.getElementById('meta-unit').value,
+          data: vals,
+          backgroundColor: barColors,
+          borderRadius: 4,
+          yAxisID:'y',
+          order:2,
+        },
+        {
+          type:'line',
+          label:'% Acumulado',
+          data: cums,
+          borderColor:'#e3b341',
+          backgroundColor:'rgba(227,179,65,.12)',
+          borderWidth:2.5,
+          pointRadius:5,
+          pointBackgroundColor:'#e3b341',
+          fill:false,
+          yAxisID:'y2',
+          tension:.3,
+          order:1,
+        }
+      ]
+    },
+    options:{
+      responsive:true,
+      maintainAspectRatio:true,
+      interaction:{mode:'index',intersect:false},
+      plugins:{
+        legend:{labels:{color:'#8b949e',font:{size:11}}},
+        tooltip:{
+          backgroundColor:'#21262d',
+          borderColor:'#30363d',
+          borderWidth:1,
+          titleColor:'#e6edf3',
+          bodyColor:'#8b949e',
+          callbacks:{
+            label:ctx=>{
+              if(ctx.dataset.type==='line') return ` Acum: ${ctx.parsed.y.toFixed(1)}%`;
+              return ` ${ctx.dataset.label}: ${ctx.parsed.y.toLocaleString()}`;
+            }
+          }
+        },
+        annotation: undefined
+      },
+      scales:{
+        x:{ticks:{color:'#8b949e',font:{size:11}},grid:{color:'rgba(48,54,61,.5)'}},
+        y:{ticks:{color:'#8b949e',font:{size:11}},grid:{color:'rgba(48,54,61,.5)'},title:{display:true,text:document.getElementById('meta-unit').value,color:'#8b949e',font:{size:10}}},
+        y2:{position:'right',min:0,max:100,ticks:{color:'#e3b341',font:{size:11},callback:v=>v+'%'},grid:{display:false},title:{display:true,text:'% Acumulado',color:'#e3b341',font:{size:10}}},
+      }
+    },
+    plugins:[{
+      id:'thresholdLine',
+      afterDraw(chart){
+        const {ctx,scales:{y2},chartArea:{left,right}}=chart;
+        if(!y2) return;
+        const y=y2.getPixelForValue(threshold);
+        ctx.save();
+        ctx.setLineDash([6,4]);
+        ctx.strokeStyle='rgba(248,81,73,.6)';
+        ctx.lineWidth=1.5;
+        ctx.beginPath();ctx.moveTo(left,y);ctx.lineTo(right,y);ctx.stroke();
+        ctx.fillStyle='rgba(248,81,73,.85)';
+        ctx.font='bold 10px Inter,sans-serif';
+        ctx.fillText(threshold+'%',right+4,y+4);
+        ctx.restore();
+      }
+    }]
+  });
+}
+
+function clearChart(){
+  if(chartInstance){chartInstance.destroy();chartInstance=null;}
+  document.getElementById('stats-row').innerHTML='';
+  document.getElementById('chart-sub').textContent='';
+  document.getElementById('freq-table').innerHTML='';
+  document.getElementById('vital-count').textContent='—';
+}
+
+// ---- TABLE ----
+function renderTable(data){
+  const tbody = document.getElementById('freq-table');
+  const vbadge = document.getElementById('vital-count');
+  if(!data){tbody.innerHTML='';vbadge.textContent='—';return;}
+  const vital = data.rows.filter(r=>r.vital);
+  vbadge.textContent = `${vital.length} pocas vitales — ${(vital.reduce((s,r)=>s+r.value,0)/data.total*100).toFixed(1)}% del total`;
+  tbody.innerHTML = data.rows.map(r=>`
+    <tr class="${r.vital?'vital':'trivial'}">
+      <td>${r.rank}</td>
+      <td style="font-weight:${r.vital?700:400};color:${r.vital?'var(--text)':'var(--muted)'}">${escHtml(r.name)}</td>
+      <td>${r.value.toLocaleString()}
+        <span class="pct-bar-wrap"><span class="pct-bar" style="width:${Math.min(r.rel,100)}%;background:${r.vital?'var(--danger)':'var(--accent)'}"></span></span>
+      </td>
+      <td>${r.rel.toFixed(1)}%</td>
+      <td><span class="cum-chip ${r.vital?'cum-vital':'cum-trivial'}">${r.cumPct.toFixed(1)}%</span></td>
+      <td style="font-weight:700;color:${r.vital?'var(--danger)':'var(--muted)'}">${r.vital?'🔴 Vital':'⚪ Trivial'}</td>
+    </tr>
+  `).join('');
+}
+
+// ---- EXPORT ----
+function exportCSV(){
+  if(!items.length){alert('Agrega datos primero.');return;}
+  const data = compute();
+  const title = document.getElementById('meta-title').value||'Pareto';
+  const unit  = document.getElementById('meta-unit').value;
+  const analyst = document.getElementById('meta-analyst').value||'N/A';
+  const fecha = document.getElementById('meta-date').value||new Date().toISOString().slice(0,10);
+  let csv=`Título,"${title}"\nAnalista,"${analyst}"\nFecha,"${fecha}"\nUnidad,"${unit}"\nUmbral 80/20,"${data.threshold}%"\n\n#,Causa / Categoría,Frecuencia,% Relativo,% Acumulado,Clasificación\n`;
+  data.rows.forEach(r=>{
+    csv+=`${r.rank},"${r.name}",${r.value},${r.rel.toFixed(2)}%,${r.cumPct.toFixed(2)}%,${r.vital?'Vital':'Trivial'}\n`;
+  });
+  const blob=new Blob([csv],{type:'text/csv;charset=utf-8;'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');a.href=url;a.download=`Pareto_${(title).replace(/\s+/g,'_').slice(0,30)}.csv`;a.click();
+  URL.revokeObjectURL(url);
+}
+
+function exportChart(){
+  if(!chartInstance){alert('Genera el gráfico primero.');return;}
+  const a=document.createElement('a');
+  a.href=document.getElementById('pareto-chart').toDataURL('image/png',1);
+  const title=document.getElementById('meta-title').value||'Pareto';
+  a.download=`Pareto_${title.replace(/\s+/g,'_').slice(0,30)}.png`;a.click();
+}
+
+function escHtml(s){return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+
+// ---- INIT ----
+document.getElementById('meta-date').value = new Date().toISOString().slice(0,10);
+loadDemo();
+</script>
+</body>
+</html>
