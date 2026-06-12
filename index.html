@@ -13,20 +13,19 @@
       <div class="brand">
         <span class="brand-icon">⧡</span>
         <span class="brand-name">VSM <strong>Flow Studio</strong></span>
-        <span class="brand-version">v4.3</span>
+        <span class="brand-version">v4.4</span>
       </div>
       <div class="toolbar-actions">
         <button onclick="newDiagram()">＋ Nuevo</button>
         <button onclick="saveDiagram()">💾 Guardar</button>
         <button onclick="loadDiagram()">📂 Cargar</button>
         <button onclick="exportJSON()">⬇ JSON</button>
+        <button onclick="openReport()" class="btn-report">📋 Reporte</button>
         <button onclick="window.print()" class="btn-accent">🖸 PDF</button>
       </div>
     </header>
 
     <div class="workspace">
-
-      <!-- TOOLBOX -->
       <aside class="toolbox">
         <div class="toolbox-title">Elementos</div>
         <div class="tool-group">
@@ -62,38 +61,31 @@
         </div>
       </aside>
 
-      <!-- CANVAS -->
       <main class="canvas-area">
         <div class="canvas-hint" id="canvas-hint">Arrastra elementos al canvas para comenzar tu VSM</div>
         <svg id="arrows-svg"></svg>
-        <div id="canvas"
-          ondragover="event.preventDefault()"
-          ondrop="onDrop(event)"
-          onclick="onCanvasClick(event)">
-        </div>
+        <div id="canvas" ondragover="event.preventDefault()" ondrop="onDrop(event)" onclick="onCanvasClick(event)"></div>
 
-        <!-- ANIMATION CONTROL BAR -->
         <div class="anim-bar" id="anim-bar">
           <div class="anim-controls">
             <button id="btn-anim-start" class="anim-btn start" onclick="startAnimation()">&#9654; Animar</button>
-            <button id="btn-anim-stop"  class="anim-btn stop"  onclick="stopAnimation()"  disabled>&#9646;&#9646; Stop</button>
+            <button id="btn-anim-stop"  class="anim-btn stop"  onclick="stopAnimation()" disabled>&#9646;&#9646; Stop</button>
             <button class="anim-btn reset" onclick="resetAnimation()">&#8635; Reset</button>
             <div class="speed-group">
               <span class="speed-label">Velocidad:</span>
               <button class="speed-btn active" data-speed="1"  onclick="setAnimSpeed(1)">1X</button>
-              <button class="speed-btn"        data-speed="5"  onclick="setAnimSpeed(5)">5X</button>
-              <button class="speed-btn"        data-speed="10" onclick="setAnimSpeed(10)">10X</button>
-              <button class="speed-btn"        data-speed="20" onclick="setAnimSpeed(20)">20X</button>
-              <button class="speed-btn"        data-speed="30" onclick="setAnimSpeed(30)">30X</button>
+              <button class="speed-btn" data-speed="5"  onclick="setAnimSpeed(5)">5X</button>
+              <button class="speed-btn" data-speed="10" onclick="setAnimSpeed(10)">10X</button>
+              <button class="speed-btn" data-speed="20" onclick="setAnimSpeed(20)">20X</button>
+              <button class="speed-btn" data-speed="30" onclick="setAnimSpeed(30)">30X</button>
             </div>
           </div>
           <div class="anim-stats-row">
             <div id="anim-stats" class="anim-stats"></div>
-            <div id="anim-log"   class="anim-log">Presiona ▶ para iniciar.</div>
+            <div id="anim-log" class="anim-log">Presiona ▶ para iniciar.</div>
           </div>
         </div>
 
-        <!-- VALUE STREAM TIMELINE -->
         <div class="vt-bar" id="vt-bar">
           <div class="vt-header">
             <span class="vt-title">VALUE STREAM TIMELINE</span>
@@ -103,10 +95,8 @@
             <svg id="vt-svg" xmlns="http://www.w3.org/2000/svg"></svg>
           </div>
         </div>
-
       </main>
 
-      <!-- SIM PANEL -->
       <aside class="sim-panel">
         <div class="sim-header">
           <span>📊 Simulación</span>
@@ -137,11 +127,10 @@
           <div id="sim-log" class="sim-log">Agrega procesos y presiona CALCULAR.</div>
         </div>
       </aside>
-
     </div>
   </div>
 
-  <!-- MODAL -->
+  <!-- MODAL nodo -->
   <div id="modal-overlay" class="modal-overlay hidden" onclick="closeModal(event)">
     <div class="modal" onclick="event.stopPropagation()">
       <div class="modal-header"><span id="modal-title">Propiedades</span><button class="modal-close" onclick="closeModal()">&#x2715;</button></div>
@@ -153,10 +142,25 @@
     </div>
   </div>
 
+  <!-- MODAL REPORTE -->
+  <div id="report-overlay" class="modal-overlay hidden" onclick="closeReport(event)">
+    <div class="modal report-modal" onclick="event.stopPropagation()">
+      <div class="modal-header">
+        <span>📋 Reporte VSM Completo</span>
+        <div style="display:flex;gap:8px;align-items:center">
+          <button onclick="exportReportCSV()" class="btn-csv">⬇ CSV</button>
+          <button class="modal-close" onclick="closeReport()">&#x2715;</button>
+        </div>
+      </div>
+      <div class="modal-body" id="report-body"></div>
+    </div>
+  </div>
+
   <script src="js/nodes.js"></script>
   <script src="js/simulation.js"></script>
   <script src="js/canvas.js"></script>
   <script src="js/ui.js"></script>
   <script src="js/animator.js"></script>
+  <script src="js/report.js"></script>
 </body>
 </html>
