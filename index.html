@@ -3,167 +3,244 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>VSM Flow Studio</title>
-  <link rel="stylesheet" href="css/style.css">
+  <title>Lean Analysis Suite — Portal</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300..700&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{
+      --bg:#0d1117;--surface:#161b22;--surface2:#21262d;--border:#30363d;
+      --text:#e6edf3;--muted:#8b949e;--faint:#484f58;
+      --accent:#4f98a3;--accent2:#3fb950;--warn:#d29922;--danger:#f85149;
+      --purple:#bc8cff;--orange:#ffa657;
+      --radius:14px;--radius-sm:8px;
+    }
+    html{scroll-behavior:smooth}
+    body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+
+    /* NAV */
+    .topnav{display:flex;align-items:center;justify-content:space-between;padding:0 32px;height:56px;background:var(--surface);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:100}
+    .brand{display:flex;align-items:center;gap:10px;font-size:15px;font-weight:600;text-decoration:none;color:var(--text)}
+    .brand-icon{font-family:'Instrument Serif',serif;font-size:22px;color:var(--accent)}
+    .nav-links{display:flex;gap:4px}
+    .nav-link{padding:6px 14px;border-radius:var(--radius-sm);font-size:13px;color:var(--muted);cursor:pointer;text-decoration:none;transition:all .18s}
+    .nav-link:hover,.nav-link.active{background:var(--surface2);color:var(--text)}
+
+    /* HERO */
+    .hero{padding:72px 32px 52px;max-width:900px;margin:0 auto;text-align:center}
+    .hero-eyebrow{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--accent);margin-bottom:18px;font-weight:600}
+    .hero-title{font-family:'Instrument Serif',serif;font-size:clamp(2.2rem,5vw,3.6rem);line-height:1.1;margin-bottom:18px}
+    .hero-title em{color:var(--accent);font-style:italic}
+    .hero-sub{font-size:15px;color:var(--muted);max-width:520px;margin:0 auto 36px;line-height:1.75}
+    .hero-cta{display:inline-flex;align-items:center;gap:8px;padding:12px 28px;background:var(--accent);color:#fff;border-radius:99px;font-size:14px;font-weight:600;text-decoration:none;transition:background .18s}
+    .hero-cta:hover{background:#3a7f8a}
+
+    /* STATS */
+    .stats-bar{display:flex;justify-content:center;gap:32px;padding:28px 32px;border-top:1px solid var(--border);border-bottom:1px solid var(--border);background:var(--surface);flex-wrap:wrap}
+    .stat{text-align:center}
+    .stat-val{font-size:22px;font-weight:700;color:var(--text)}
+    .stat-lbl{font-size:11px;color:var(--muted);margin-top:2px;letter-spacing:.05em;text-transform:uppercase}
+
+    /* PHASES */
+    .phases{max-width:960px;margin:0 auto;padding:48px 32px 80px}
+    .phase-header{display:flex;align-items:center;gap:12px;margin:44px 0 18px}
+    .phase-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+    .phase-label{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+    .phase-line{flex:1;height:1px;background:var(--border)}
+
+    /* CARDS */
+    .tools-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:16px}
+    .tool-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:24px;cursor:pointer;text-decoration:none;color:inherit;display:flex;flex-direction:column;gap:12px;transition:all .22s;position:relative;overflow:hidden}
+    .tool-card::after{content:'';position:absolute;inset:0;opacity:0;transition:opacity .22s;background:var(--card-accent,var(--accent));border-radius:var(--radius)}
+    .tool-card:hover{border-color:var(--card-accent,var(--accent));transform:translateY(-3px);box-shadow:0 10px 28px rgba(0,0,0,.35)}
+    .tool-card:hover::after{opacity:.04}
+    .tool-card.locked{opacity:.45;cursor:not-allowed;pointer-events:none}
+    .tool-card .card-content{position:relative;z-index:1;display:flex;flex-direction:column;gap:12px;height:100%}
+    .card-top{display:flex;align-items:flex-start;justify-content:space-between;gap:8px}
+    .card-icon{font-size:30px;line-height:1}
+    .card-badge{font-size:10px;font-weight:700;letter-spacing:.06em;padding:3px 9px;border-radius:99px;text-transform:uppercase;white-space:nowrap}
+    .badge-active{background:rgba(79,152,163,.18);color:var(--accent)}
+    .badge-new{background:rgba(63,185,80,.18);color:var(--accent2)}
+    .badge-soon{background:rgba(72,79,88,.3);color:var(--faint)}
+    .badge-pending{background:rgba(139,148,158,.12);color:var(--muted)}
+    .card-title{font-size:15px;font-weight:700;line-height:1.3}
+    .card-desc{font-size:12px;color:var(--muted);line-height:1.65;flex:1}
+    .card-footer{display:flex;align-items:center;justify-content:space-between;margin-top:auto}
+    .card-tag{font-size:10px;font-weight:600;padding:2px 8px;border-radius:99px;background:var(--surface2);color:var(--muted)}
+    .card-arrow{font-size:16px;color:var(--muted);transition:transform .2s,color .2s}
+    .tool-card:hover .card-arrow{transform:translateX(5px);color:var(--card-accent,var(--accent))}
+
+    /* FOOTER */
+    footer{border-top:1px solid var(--border);padding:24px 32px;text-align:center;color:var(--faint);font-size:11px}
+
+    @media(max-width:600px){
+      .hero{padding:48px 20px 36px}
+      .phases{padding:24px 20px 60px}
+      .stats-bar{gap:20px}
+    }
+  </style>
 </head>
 <body>
-  <div id="app">
 
-    <header class="topbar">
-      <div class="brand">
-        <span class="brand-icon">⧡</span>
-        <span class="brand-name">VSM <strong>Flow Studio</strong></span>
-        <span class="brand-version">v4.5</span>
+<nav class="topnav">
+  <a class="brand" href="index.html">
+    <span class="brand-icon">⧡</span>
+    <span>Lean <strong>Suite</strong></span>
+  </a>
+  <div class="nav-links">
+    <a class="nav-link active" href="index.html">🏠 Inicio</a>
+    <a class="nav-link" href="vsm.html">🗺️ VSM</a>
+    <a class="nav-link" href="5s.html">5S</a>
+    <a class="nav-link" href="caso-negocio.html">📋 Caso</a>
+    <a class="nav-link" href="a3-report.html">📄 A3</a>
+    <a class="nav-link" href="pdca.html">🔄 PDCA</a>
+  </div>
+</nav>
+
+<section class="hero">
+  <div class="hero-eyebrow">Lean Manufacturing · Mejora Continua</div>
+  <h1 class="hero-title">Lean Analysis <em>Suite</em></h1>
+  <p class="hero-sub">Plataforma integrada de herramientas Lean para definir, medir, analizar, mejorar y controlar procesos industriales.</p>
+  <a class="hero-cta" href="vsm.html">▶ Ir al VSM Flow Studio</a>
+</section>
+
+<div class="stats-bar">
+  <div class="stat"><div class="stat-val">6</div><div class="stat-lbl">Herramientas</div></div>
+  <div class="stat"><div class="stat-val">4</div><div class="stat-lbl">Fases Lean</div></div>
+  <div class="stat"><div class="stat-val">DMAIC</div><div class="stat-lbl">Metodología</div></div>
+  <div class="stat"><div class="stat-val">v5.0</div><div class="stat-lbl">Versión</div></div>
+</div>
+
+<div class="phases">
+
+  <!-- FASE 1 -->
+  <div class="phase-header">
+    <div class="phase-dot" style="background:#4f98a3"></div>
+    <div class="phase-label">Fase 1 — Definir el Problema</div>
+    <div class="phase-line"></div>
+  </div>
+  <div class="tools-grid">
+    <a class="tool-card" href="caso-negocio.html" style="--card-accent:#4f98a3">
+      <div class="card-content">
+        <div class="card-top"><div class="card-icon">📋</div><div class="card-badge badge-active">Disponible</div></div>
+        <div class="card-title">Caso de Negocio</div>
+        <div class="card-desc">Define el problema, impacto económico, alcance del proyecto, KPIs meta y equipo responsable.</div>
+        <div class="card-footer"><span class="card-tag">Project Charter</span><span class="card-arrow">→</span></div>
       </div>
-      <div class="toolbar-actions">
-        <button onclick="newDiagram()">&#xFF0B; Nuevo</button>
-        <button onclick="saveDiagram()">💾 Guardar</button>
-        <button onclick="loadDiagram()">📂 Cargar</button>
-        <button onclick="exportJSON()">⬇ JSON</button>
-        <button onclick="openReport()" class="btn-report">📋 Reporte</button>
-        <button onclick="window.print()" class="btn-accent">🖸 PDF</button>
+    </a>
+    <a class="tool-card locked" style="--card-accent:#4f98a3">
+      <div class="card-content">
+        <div class="card-top"><div class="card-icon">🗣</div><div class="card-badge badge-soon">Próximamente</div></div>
+        <div class="card-title">VOC / CTQ Tree</div>
+        <div class="card-desc">Voz del Cliente → Requisitos Críticos de Calidad. Conecta necesidades del cliente con métricas medibles.</div>
+        <div class="card-footer"><span class="card-tag">Voice of Customer</span><span class="card-arrow">→</span></div>
       </div>
-    </header>
-
-    <div class="workspace">
-      <aside class="toolbox">
-        <div class="toolbox-title">Elementos</div>
-        <div class="tool-group">
-          <div class="tool-label">FLUJO</div>
-          <div class="tool-item" draggable="true" data-type="supplier"><div class="tool-icon supplier-icon">▣</div><span>Proveedor</span></div>
-          <div class="tool-item" draggable="true" data-type="customer"><div class="tool-icon customer-icon">▣</div><span>Cliente</span></div>
-          <div class="tool-item" draggable="true" data-type="process"><div class="tool-icon process-icon">▬</div><span>Proceso</span></div>
-          <div class="tool-item" draggable="true" data-type="inventory"><div class="tool-icon inventory-icon">▲</div><span>Inventario</span></div>
-        </div>
-        <div class="tool-group">
-          <div class="tool-label">CONECTAR</div>
-          <div class="tool-item" id="btn-push-arrow" onclick="setArrowMode('push')" title="Push"><div class="tool-icon arrow-push">⟶</div><span>Push</span></div>
-          <div class="tool-item" id="btn-pull-arrow" onclick="setArrowMode('pull')" title="Pull"><div class="tool-icon arrow-pull">⇢</div><span>Pull</span></div>
-          <div class="tool-item" id="btn-info-arrow" onclick="setArrowMode('info')" title="Info"><div class="tool-icon arrow-info">⤳</div><span>Info</span></div>
-        </div>
-        <div class="tool-group">
-          <div class="tool-label">MEJORA</div>
-          <div class="tool-item" draggable="true" data-type="kaizen"><div class="tool-icon kaizen-icon">✸</div><span>Kaizen</span></div>
-        </div>
-        <div class="tool-group">
-          <div class="tool-label">ACCIONES</div>
-          <div class="tool-item danger" onclick="deleteSelected()"><div class="tool-icon">🗑</div><span>Eliminar</span></div>
-          <div class="tool-item" onclick="runSimulation()"><div class="tool-icon sim-icon">▶</div><span>Calcular</span></div>
-        </div>
-        <div class="tool-group">
-          <div class="tool-label">CONEXIÓN</div>
-          <div class="connect-guide">
-            <div>① Click ⟶ Push</div>
-            <div>② Click ORIGEN</div>
-            <div>③ Click DESTINO</div>
-            <div class="guide-esc">ESC = cancelar</div>
-          </div>
-        </div>
-      </aside>
-
-      <main class="canvas-area">
-        <div class="canvas-hint" id="canvas-hint">Arrastra elementos al canvas para comenzar tu VSM</div>
-        <svg id="arrows-svg"></svg>
-        <div id="canvas" ondragover="event.preventDefault()" ondrop="onDrop(event)" onclick="onCanvasClick(event)"></div>
-
-        <div class="anim-bar" id="anim-bar">
-          <div class="anim-controls">
-            <button id="btn-anim-start" class="anim-btn start" onclick="startAnimation()">&#9654; Animar</button>
-            <button id="btn-anim-stop"  class="anim-btn stop"  onclick="stopAnimation()" disabled>&#9646;&#9646; Stop</button>
-            <button class="anim-btn reset" onclick="resetAnimation()">&#8635; Reset</button>
-            <div class="speed-group">
-              <span class="speed-label">Velocidad:</span>
-              <button class="speed-btn active" data-speed="1"   onclick="setAnimSpeed(1)">1X</button>
-              <button class="speed-btn" data-speed="5"   onclick="setAnimSpeed(5)">5X</button>
-              <button class="speed-btn" data-speed="10"  onclick="setAnimSpeed(10)">10X</button>
-              <button class="speed-btn" data-speed="20"  onclick="setAnimSpeed(20)">20X</button>
-              <button class="speed-btn" data-speed="30"  onclick="setAnimSpeed(30)">30X</button>
-              <button class="speed-btn" data-speed="60"  onclick="setAnimSpeed(60)">60X</button>
-              <button class="speed-btn" data-speed="120" onclick="setAnimSpeed(120)">120X</button>
-              <button class="speed-btn speed-btn-turbo" data-speed="480" onclick="setAnimSpeed(480)">480X ⏩</button>
-            </div>
-          </div>
-          <div class="anim-stats-row">
-            <div id="anim-stats" class="anim-stats"></div>
-            <div id="anim-log" class="anim-log">Presiona ▶ para iniciar.</div>
-          </div>
-        </div>
-
-        <div class="vt-bar" id="vt-bar">
-          <div class="vt-header">
-            <span class="vt-title">VALUE STREAM TIMELINE</span>
-            <div id="vt-summary" class="vt-summary"></div>
-          </div>
-          <div class="vt-scroll">
-            <svg id="vt-svg" xmlns="http://www.w3.org/2000/svg"></svg>
-          </div>
-        </div>
-      </main>
-
-      <aside class="sim-panel">
-        <div class="sim-header">
-          <span>📊 Simulación</span>
-          <button class="btn-run" onclick="runSimulation()">▶ CALCULAR</button>
-        </div>
-        <div class="sim-section">
-          <div class="sim-section-title">PARÁMETROS GLOBALES</div>
-          <div class="sim-field"><label>Demanda cliente</label><div class="sim-input-row"><input type="number" id="demand" value="400" min="1"><span class="sim-unit">u/día</span></div></div>
-          <div class="sim-field"><label>Horas/turno</label><div class="sim-input-row"><input type="number" id="hours-shift" value="8" min="1" max="24"><span class="sim-unit">h</span></div></div>
-          <div class="sim-field"><label>Turnos/día</label><div class="sim-input-row"><input type="number" id="shifts" value="1" min="1" max="3"><span class="sim-unit">#</span></div></div>
-          <div class="sim-field"><label>Iteraciones MC</label><div class="sim-input-row"><input type="number" id="mc-runs" value="500" min="100" max="5000" step="100"><span class="sim-unit">#</span></div></div>
-        </div>
-        <div class="sim-section kpi-section" id="kpi-section">
-          <div class="sim-section-title">KPIs VSM</div>
-          <div class="kpi-card" id="kpi-takt"><div class="kpi-label">⏱ Takt Time</div><div class="kpi-value">—</div><div class="kpi-sub">seg/unidad</div></div>
-          <div class="kpi-card" id="kpi-lt"><div class="kpi-label">📦 Lead Time</div><div class="kpi-value">—</div><div class="kpi-sub">días</div></div>
-          <div class="kpi-card" id="kpi-pt"><div class="kpi-label">⚡ Process Time</div><div class="kpi-value">—</div><div class="kpi-sub">seg (VA)</div></div>
-          <div class="kpi-card highlight" id="kpi-pce"><div class="kpi-label">📈 PCE Ratio</div><div class="kpi-value">—</div><div class="kpi-sub">% valor agregado</div></div>
-          <div class="kpi-card bottleneck" id="kpi-bn"><div class="kpi-label">🔴 Cuello de Botella</div><div class="kpi-value">—</div><div class="kpi-sub"></div></div>
-          <div class="kpi-card" id="kpi-avail"><div class="kpi-label">🏭 Tiempo Disponible</div><div class="kpi-value">—</div><div class="kpi-sub">seg/día</div></div>
-        </div>
-        <div class="sim-section" id="process-list-section">
-          <div class="sim-section-title">PROCESOS</div>
-          <div id="process-list"></div>
-        </div>
-        <div class="sim-section">
-          <div class="sim-section-title">LOG</div>
-          <div id="sim-log" class="sim-log">Agrega procesos y presiona CALCULAR.</div>
-        </div>
-      </aside>
-    </div>
+    </a>
   </div>
 
-  <!-- MODAL nodo -->
-  <div id="modal-overlay" class="modal-overlay hidden" onclick="closeModal(event)">
-    <div class="modal" onclick="event.stopPropagation()">
-      <div class="modal-header"><span id="modal-title">Propiedades</span><button class="modal-close" onclick="closeModal()">&#x2715;</button></div>
-      <div class="modal-body" id="modal-body"></div>
-      <div class="modal-footer">
-        <button onclick="saveNodeProps()" class="btn-accent">✔ Guardar</button>
-        <button onclick="closeModal()">Cancelar</button>
+  <!-- FASE 2 -->
+  <div class="phase-header">
+    <div class="phase-dot" style="background:#d29922"></div>
+    <div class="phase-label">Fase 2 — Medir y Analizar</div>
+    <div class="phase-line"></div>
+  </div>
+  <div class="tools-grid">
+    <a class="tool-card" href="vsm.html" style="--card-accent:#d29922">
+      <div class="card-content">
+        <div class="card-top"><div class="card-icon">🗺️</div><div class="card-badge badge-active">Disponible</div></div>
+        <div class="card-title">VSM Flow Studio</div>
+        <div class="card-desc">Value Stream Map con simulación Monte Carlo, animación de flujo, análisis de cuellos de botella, PCE y tamaño de lote.</div>
+        <div class="card-footer"><span class="card-tag">Value Stream Map</span><span class="card-arrow">→</span></div>
       </div>
-    </div>
+    </a>
+    <a class="tool-card locked" style="--card-accent:#d29922">
+      <div class="card-content">
+        <div class="card-top"><div class="card-icon">🐟</div><div class="card-badge badge-soon">Próximamente</div></div>
+        <div class="card-title">Diagrama Ishikawa</div>
+        <div class="card-desc">Espina de pescado (6M): Máquina, Mano de Obra, Método, Material, Medio, Medición. Análisis visual de causas.</div>
+        <div class="card-footer"><span class="card-tag">Causa-Raíz</span><span class="card-arrow">→</span></div>
+      </div>
+    </a>
+    <a class="tool-card locked" style="--card-accent:#d29922">
+      <div class="card-content">
+        <div class="card-top"><div class="card-icon">❓</div><div class="card-badge badge-soon">Próximamente</div></div>
+        <div class="card-title">5 Porqués</div>
+        <div class="card-desc">Drill-down iterativo de causa raíz. Parte del síntoma y pregunta "¿por qué?" cinco veces.</div>
+        <div class="card-footer"><span class="card-tag">Root Cause</span><span class="card-arrow">→</span></div>
+      </div>
+    </a>
+    <a class="tool-card locked" style="--card-accent:#ffa657">
+      <div class="card-content">
+        <div class="card-top"><div class="card-icon">📊</div><div class="card-badge badge-soon">Próximamente</div></div>
+        <div class="card-title">Pareto 80/20</div>
+        <div class="card-desc">Identifica el 20% de causas que generan el 80% de los problemas. Gráfica de barras + curva acumulada.</div>
+        <div class="card-footer"><span class="card-tag">Priorización</span><span class="card-arrow">→</span></div>
+      </div>
+    </a>
   </div>
 
-  <!-- MODAL REPORTE -->
-  <div id="report-overlay" class="modal-overlay hidden" onclick="closeReport(event)">
-    <div class="modal report-modal" onclick="event.stopPropagation()">
-      <div class="modal-header">
-        <span>📋 Reporte VSM Completo</span>
-        <div style="display:flex;gap:8px;align-items:center">
-          <button onclick="exportReportCSV()" class="btn-csv">⬇ CSV</button>
-          <button class="modal-close" onclick="closeReport()">&#x2715;</button>
-        </div>
+  <!-- FASE 3 -->
+  <div class="phase-header">
+    <div class="phase-dot" style="background:#3fb950"></div>
+    <div class="phase-label">Fase 3 — Mejorar</div>
+    <div class="phase-line"></div>
+  </div>
+  <div class="tools-grid">
+    <a class="tool-card" href="5s.html" style="--card-accent:#3fb950">
+      <div class="card-content">
+        <div class="card-top"><div class="card-icon">🧹</div><div class="card-badge badge-new">¡Nuevo!</div></div>
+        <div class="card-title">Auditoría 5S</div>
+        <div class="card-desc">Checklist interactivo: Seiri · Seiton · Seiso · Seiketsu · Shitsuke. Puntuación por categoría, hallazgos y reporte.</div>
+        <div class="card-footer"><span class="card-tag">5S Lean</span><span class="card-arrow">→</span></div>
       </div>
-      <div class="modal-body" id="report-body"></div>
-    </div>
+    </a>
+    <a class="tool-card" href="a3-report.html" style="--card-accent:#3fb950">
+      <div class="card-content">
+        <div class="card-top"><div class="card-icon">📄</div><div class="card-badge badge-active">Disponible</div></div>
+        <div class="card-title">A3 Report</div>
+        <div class="card-desc">Formato Toyota A3: Background → Estado Actual → Objetivo → Análisis → Contramedidas → Plan → Seguimiento.</div>
+        <div class="card-footer"><span class="card-tag">Toyota A3</span><span class="card-arrow">→</span></div>
+      </div>
+    </a>
+    <a class="tool-card" href="pdca.html" style="--card-accent:#bc8cff">
+      <div class="card-content">
+        <div class="card-top"><div class="card-icon">🔄</div><div class="card-badge badge-active">Disponible</div></div>
+        <div class="card-title">Ciclo PDCA</div>
+        <div class="card-desc">Plan → Do → Check → Act. Gestión de tareas de mejora con responsables, fechas y estado de avance.</div>
+        <div class="card-footer"><span class="card-tag">Deming Cycle</span><span class="card-arrow">→</span></div>
+      </div>
+    </a>
   </div>
 
-  <script src="js/nodes.js"></script>
-  <script src="js/simulation.js"></script>
-  <script src="js/canvas.js"></script>
-  <script src="js/ui.js"></script>
-  <script src="js/animator.js"></script>
-  <script src="js/report.js"></script>
+  <!-- FASE 4 -->
+  <div class="phase-header">
+    <div class="phase-dot" style="background:#f85149"></div>
+    <div class="phase-label">Fase 4 — Controlar y Sostener</div>
+    <div class="phase-line"></div>
+  </div>
+  <div class="tools-grid">
+    <a class="tool-card locked" style="--card-accent:#ffa657">
+      <div class="card-content">
+        <div class="card-top"><div class="card-icon">⚙️</div><div class="card-badge badge-soon">Próximamente</div></div>
+        <div class="card-title">OEE Calculator</div>
+        <div class="card-desc">Overall Equipment Effectiveness = Disponibilidad × Rendimiento × Calidad. Benchmark y tendencia histórica.</div>
+        <div class="card-footer"><span class="card-tag">OEE</span><span class="card-arrow">→</span></div>
+      </div>
+    </a>
+    <a class="tool-card locked" style="--card-accent:#f85149">
+      <div class="card-content">
+        <div class="card-top"><div class="card-icon">📉</div><div class="card-badge badge-soon">Próximamente</div></div>
+        <div class="card-title">Gráfica de Control SPC</div>
+        <div class="card-desc">Control estadístico de proceso. UCL / LCL calculados automáticamente. Detecta causas especiales.</div>
+        <div class="card-footer"><span class="card-tag">SPC · Control Chart</span><span class="card-arrow">→</span></div>
+      </div>
+    </a>
+  </div>
+
+</div>
+
+<footer>Lean Analysis Suite · VSM Flow Studio · v5.0 · 2026</footer>
+
 </body>
 </html>
