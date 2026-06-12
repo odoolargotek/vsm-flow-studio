@@ -11,16 +11,16 @@
 
     <header class="topbar">
       <div class="brand">
-        <span class="brand-icon">⬡</span>
+        <span class="brand-icon">⧡</span>
         <span class="brand-name">VSM <strong>Flow Studio</strong></span>
-        <span class="brand-version">v4</span>
+        <span class="brand-version">v4.3</span>
       </div>
       <div class="toolbar-actions">
         <button onclick="newDiagram()">＋ Nuevo</button>
         <button onclick="saveDiagram()">💾 Guardar</button>
         <button onclick="loadDiagram()">📂 Cargar</button>
         <button onclick="exportJSON()">⬇ JSON</button>
-        <button onclick="window.print()" class="btn-accent">🖨 PDF</button>
+        <button onclick="window.print()" class="btn-accent">🖸 PDF</button>
       </div>
     </header>
 
@@ -93,7 +93,7 @@
           </div>
         </div>
 
-        <!-- VALUE STREAM TIMELINE (classic VSM sawtooth) -->
+        <!-- VALUE STREAM TIMELINE -->
         <div class="vt-bar" id="vt-bar">
           <div class="vt-header">
             <span class="vt-title">VALUE STREAM TIMELINE</span>
@@ -144,7 +144,7 @@
   <!-- MODAL -->
   <div id="modal-overlay" class="modal-overlay hidden" onclick="closeModal(event)">
     <div class="modal" onclick="event.stopPropagation()">
-      <div class="modal-header"><span id="modal-title">Propiedades</span><button class="modal-close" onclick="closeModal()">✕</button></div>
+      <div class="modal-header"><span id="modal-title">Propiedades</span><button class="modal-close" onclick="closeModal()">&#x2715;</button></div>
       <div class="modal-body" id="modal-body"></div>
       <div class="modal-footer">
         <button onclick="saveNodeProps()" class="btn-accent">✔ Guardar</button>
