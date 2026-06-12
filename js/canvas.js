@@ -1,14 +1,10 @@
-// ===== CANVAS ENGINE v4.1 — VSM Flow Studio =====
-// Fixes:
-//   1. #arrows-svg z-index:3 > #canvas z-index:2, hit paths have pointer-events:stroke
-//      so arrows are truly clickable without blocking node interaction
-//   2. arrowMode cancels AUTOMATICALLY after each successful connection (one-shot)
-//   3. Arrow select/edit/delete fully working
+// ===== CANVAS ENGINE v4.2 — VSM Flow Studio =====
 
-let arrowMode     = null;
+let arrowMode      = null;
 let connectingFrom = null;
 let draggingNode   = null;
 let dragOffsetX    = 0, dragOffsetY = 0;
+let _blockNextPortClick = false;  // guard: prevents destination port from re-triggering as new source
 
 // ─ DRAG FROM TOOLBOX ─────────────────────────────────────────────────
 document.querySelectorAll('.tool-item[draggable]').forEach(item => {
@@ -89,7 +85,7 @@ function refreshNodeElement(nodeId) {
   renderAllArrows();
 }
 
-// ─ DRAG TO MOVE ────────────────────────────────────────────────────
+// ─ DRAG TO MOVE ───────────────────────────────────────────────────
 function startDrag(e, node) {
   if (e.target.classList.contains('node-port') || e.target.classList.contains('node-edit-btn')) return;
   if (arrowMode) return;
@@ -121,7 +117,7 @@ function onDragEnd() {
   document.removeEventListener('mouseup',   onDragEnd);
 }
 
-// ─ NODE SELECTION ───────────────────────────────────────────────────
+// ─ NODE SELECTION ──────────────────────────────────────────────────
 function selectNode(id) {
   deselectArrow();
   document.querySelectorAll('.vsm-node').forEach(el => el.classList.remove('selected'));
@@ -135,13 +131,12 @@ function onCanvasClick(e) {
     document.querySelectorAll('.vsm-node').forEach(el => el.classList.remove('selected'));
     selectedNodeId = null;
     deselectArrow();
-    if (connectingFrom) { connectingFrom = null; cancelArrowMode(); }
+    if (connectingFrom) cancelArrowMode();
   }
 }
 
-// ─ ARROW MODE (one-shot: cancels after each successful connection) ──────────────
+// ─ ARROW MODE ───────────────────────────────────────────────────────────
 function setArrowMode(mode) {
-  // Toggle off if clicking same mode button again
   if (arrowMode === mode && !connectingFrom) { cancelArrowMode(); return; }
   arrowMode = mode;
   clearArrowModeUI();
@@ -150,11 +145,14 @@ function setArrowMode(mode) {
 }
 
 function cancelArrowMode() {
-  arrowMode = null;
+  arrowMode      = null;
   connectingFrom = null;
   clearArrowModeUI();
   document.getElementById('canvas').style.cursor = 'default';
   showConnectHint(false);
+  // Deselect any highlighted source node
+  document.querySelectorAll('.vsm-node').forEach(el => el.classList.remove('selected'));
+  selectedNodeId = null;
 }
 
 function clearArrowModeUI() {
@@ -164,40 +162,51 @@ function clearArrowModeUI() {
 function showConnectHint(active, fromLabel) {
   let hint = document.getElementById('connect-hint');
   if (!hint) {
-    hint = document.createElement('div'); hint.id='connect-hint'; hint.className='connect-hint';
+    hint = document.createElement('div');
+    hint.id = 'connect-hint';
+    hint.className = 'connect-hint';
     document.querySelector('.canvas-area').appendChild(hint);
   }
   hint.textContent = active ? `⚡ "${fromLabel}" listo — ahora click en el nodo DESTINO` : '';
   hint.style.display = active ? 'block' : 'none';
 }
 
-// ─ PORT CLICK ─────────────────────────────────────────────────────────────
+// ─ PORT CLICK ───────────────────────────────────────────────────────────
 function onPortClick(nodeId) {
-  if (!arrowMode) setArrowMode('push'); // default to push
+  // Guard: skip if we just finished a connection (same event bubble)
+  if (_blockNextPortClick) return;
+
+  if (!arrowMode) setArrowMode('push');
 
   if (!connectingFrom) {
-    // First click: select source
+    // Step 1: pick source
     connectingFrom = nodeId;
     selectNode(nodeId);
     showConnectHint(true, getNode(nodeId)?.props.label || nodeId);
+  } else if (connectingFrom === nodeId) {
+    // Clicked source again — cancel
+    cancelArrowMode();
   } else {
-    // Second click: create arrow then CANCEL mode (one-shot)
-    if (connectingFrom !== nodeId) {
-      addArrow(connectingFrom, nodeId, arrowMode);
-      renderAllArrows();
-    }
-    cancelArrowMode(); // ← KEY FIX: always cancel after connecting
+    // Step 2: pick destination — create arrow then fully cancel
+    addArrow(connectingFrom, nodeId, arrowMode);
+    renderAllArrows();
+
+    // Block the next port-click that would fire from this same DOM event
+    _blockNextPortClick = true;
+    setTimeout(() => { _blockNextPortClick = false; }, 0);
+
+    cancelArrowMode();
   }
 }
 
-// Also allow clicking the node BODY as target
+// Also allow clicking the node BODY (not just ports) as destination
 document.getElementById('canvas').addEventListener('click', function(e) {
   if (!connectingFrom) return;
   const nodeEl = e.target.closest('.vsm-node');
   if (nodeEl && nodeEl.id && nodeEl.id !== connectingFrom) {
     addArrow(connectingFrom, nodeEl.id, arrowMode);
     renderAllArrows();
-    cancelArrowMode(); // ← KEY FIX: always cancel after connecting
+    cancelArrowMode();
   }
 }, true);
 
@@ -205,17 +214,14 @@ document.getElementById('canvas').addEventListener('click', function(e) {
 function selectArrow(arrowId) {
   deselectArrow();
   document.querySelectorAll('.vsm-node').forEach(el => el.classList.remove('selected'));
-  selectedNodeId = null;
+  selectedNodeId  = null;
   selectedArrowId = arrowId;
-  renderAllArrows(); // re-render so selected arrow gets white colour
+  renderAllArrows();
   showArrowToolbar(arrowId);
 }
 
 function deselectArrow() {
-  if (selectedArrowId) {
-    selectedArrowId = null;
-    renderAllArrows();
-  }
+  if (selectedArrowId) { selectedArrowId = null; renderAllArrows(); }
   document.getElementById('arrow-toolbar')?.remove();
 }
 
@@ -227,16 +233,13 @@ function showArrowToolbar(arrowId) {
   const tb = document.createElement('div');
   tb.id = 'arrow-toolbar';
   tb.className = 'arrow-toolbar';
-  // Position in canvas-relative coordinates (canvas-area is the offset parent)
   tb.style.left = (mid.x - 60) + 'px';
   tb.style.top  = (mid.y - 40) + 'px';
   tb.innerHTML = `
     <span class="arrow-tb-label">${arrowTypeLabel(arrow.type)} • ${arrow.transportDays||0.5}d</span>
     <button onclick="openArrowModal('${arrowId}')" title="Editar">✎</button>
-    <button class="danger" onclick="confirmDeleteArrow('${arrowId}')" title="Eliminar">🗑</button>
-  `;
+    <button class="danger" onclick="confirmDeleteArrow('${arrowId}')" title="Eliminar">🗑</button>`;
   tb.addEventListener('mousedown', e => e.stopPropagation());
-  // Append to canvas-area (the positioned parent), not #canvas
   document.querySelector('.canvas-area').appendChild(tb);
 }
 
@@ -250,7 +253,7 @@ function getArrowMidpoint(fromId, toId) {
   const x1=fn.x+fEl.offsetWidth, y1=fn.y+fEl.offsetHeight/2;
   const x2=tn.x,                 y2=tn.y+tEl.offsetHeight/2;
   const dx=Math.abs(x2-x1), cx1=x1+dx*0.45, cx2=x2-dx*0.45;
-  const t=0.5,u=0.5;
+  const t=0.5, u=0.5;
   return {
     x: u*u*u*x1+3*u*u*t*cx1+3*u*t*t*cx2+t*t*t*x2,
     y: u*u*u*y1+3*u*u*t*y1 +3*u*t*t*y2 +t*t*t*y2
@@ -310,7 +313,7 @@ function confirmDeleteArrow(arrowId) {
   }
 }
 
-// ─ KEYBOARD ────────────────────────────────────────────────────────────
+// ─ KEYBOARD ───────────────────────────────────────────────────────────
 document.addEventListener('keydown', e => {
   if (e.key==='Escape') { cancelArrowMode(); deselectArrow(); }
   if ((e.key==='Delete'||e.key==='Backspace') && !e.target.matches('input,select,textarea')) {
@@ -319,7 +322,7 @@ document.addEventListener('keydown', e => {
   }
 });
 
-// ─ ARROWS SVG ────────────────────────────────────────────────────────────────
+// ─ ARROWS SVG ───────────────────────────────────────────────────────────────
 function renderAllArrows() {
   const svg = document.getElementById('arrows-svg');
   svg.innerHTML = `
@@ -346,20 +349,17 @@ function renderAllArrows() {
     const dash   = arrow.type==='push'?'':arrow.type==='pull'?'8,4':'4,4';
     const mkSfx  = isSel?'-sel':'';
 
-    // Fat invisible hit area — pointer-events:stroke makes ONLY the stroke area clickable
-    // so you can still click through to nodes when not hovering the arrow line itself
     const hit = document.createElementNS('http://www.w3.org/2000/svg','path');
     hit.setAttribute('d', d);
-    hit.setAttribute('stroke','rgba(255,255,255,0.001)'); // near-transparent but not 'none'
+    hit.setAttribute('stroke','rgba(255,255,255,0.01)');
     hit.setAttribute('stroke-width','18');
     hit.setAttribute('fill','none');
     hit.style.cursor = 'pointer';
-    hit.style.pointerEvents = 'stroke'; // ← KEY: only the stroke line is clickable
+    hit.style.pointerEvents = 'stroke';
     hit.addEventListener('click',    ev => { ev.stopPropagation(); selectArrow(arrow.id); });
     hit.addEventListener('dblclick', ev => { ev.stopPropagation(); openArrowModal(arrow.id); });
     svg.appendChild(hit);
 
-    // Visible path
     const path = document.createElementNS('http://www.w3.org/2000/svg','path');
     path.setAttribute('id','arrow-path-'+arrow.id);
     path.setAttribute('d', d);
@@ -371,7 +371,6 @@ function renderAllArrows() {
     path.style.pointerEvents = 'none';
     svg.appendChild(path);
 
-    // Transport label (only when non-default)
     const td = arrow.transportDays;
     if (td && td !== 0.5) {
       const mx=0.125*x1+0.375*cx1+0.375*cx2+0.125*x2;
@@ -387,6 +386,5 @@ function renderAllArrows() {
     }
   });
 
-  // Re-show toolbar if an arrow is still selected
   if (selectedArrowId) showArrowToolbar(selectedArrowId);
 }
