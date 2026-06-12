@@ -41,15 +41,26 @@ function runSimulation() {
   for (let i = 0; i < iters; i++) {
     let totalVA=0, bnCT=0, bnId=null;
     processes.forEach(node => {
-      const ct    = sampleCT(node.props);
-      procCTSamples[node.id].push(ct);
-      const netCT = ct / ((node.props.uptime||90)/100);
-      if (node.props.isVA !== false) totalVA += ct;
+      const ct       = sampleCT(node.props);
+      const batch    = node.props.batchSize > 1 ? node.props.batchSize : 1;
+      // effective CT per unit = CT + (batch-1)*CT / batch = CT  (same per-unit)
+      // but batch delay added to lead time: first unit at process waits (batch-1)*CT before being released
+      const ctPerUnit = ct; // cycle time per piece is unchanged
+      procCTSamples[node.id].push(ctPerUnit);
+      const netCT = ctPerUnit / ((node.props.uptime||90)/100);
+      if (node.props.isVA !== false) totalVA += ctPerUnit;
       if (netCT > bnCT) { bnCT=netCT; bnId=node.id; }
     });
+    // batch delay contribution to lead time (waiting for full batch to be ready)
+    const batchDelaySec = processes.reduce((s, node) => {
+      const batch = node.props.batchSize > 1 ? node.props.batchSize : 1;
+      const ct    = node.props.ct || 0;
+      return s + (batch - 1) * ct;
+    }, 0);
     const wipDays  = inventories.reduce((s,inv) => s+(inv.props.units||0)/demand, 0);
     const procDays = totalVA / availSec;
-    const lt = wipDays + procDays;
+    const batchDays = batchDelaySec / availSec;
+    const lt = wipDays + procDays + batchDays;
     ltSamples.push(lt);
     pceSamples.push(lt>0 ? (procDays/lt)*100 : 0);
     if (bnId) bnCounts[bnId] = (bnCounts[bnId]||0)+1;
@@ -66,8 +77,10 @@ function runSimulation() {
     const s=procCTSamples[node.id];
     const ctMean=mean(s), ctP90=pct(s,.90);
     const netCT=ctMean/((node.props.uptime||90)/100);
+    const batch=node.props.batchSize > 1 ? node.props.batchSize : 1;
     return { id:node.id, label:node.props.label, ctMean, ctP90, netCT,
       capacity: availSec*((node.props.uptime||90)/100)/ctMean,
+      batchSize: batch,
       status: netCT<=taktTime?'ok':'overloaded', isBn:node.id===bnId,
       uptime:node.props.uptime, operators:node.props.operators,
       defectRate:node.props.defectRate, distType:node.props.distType||'fixed',
@@ -140,16 +153,20 @@ function updateProcessList(procResults, taktTime) {
   const dl={fixed:'Fijo',normal:'Normal',triangular:'Triangular'};
   procResults.forEach(p => {
     const cls=p.status==='ok'?'proc-ok':'proc-bad';
+    const batchTag = p.batchSize > 1
+      ? `<span class="proc-item-badge" style="background:#1f6feb;color:#cae8ff">LOTE ×${p.batchSize}</span>`
+      : '';
     c.innerHTML+=`
       <div class="proc-item ${p.isBn?'is-bn':''}">
         <div class="proc-item-name">${p.label}
           ${p.status!=='ok'?'<span class="proc-item-badge">SOBRECARGADO</span>':''}
           ${p.isBn?'<span class="proc-item-badge" style="background:#d29922">CUELLO</span>':''}
+          ${batchTag}
         </div>
         <div class="proc-item-stats">
           CT: <span class="${cls}">${p.ctMean.toFixed(1)}s${p.distType!=='fixed'?` (P90:${p.ctP90.toFixed(1)}s)`:''}</span><br>
           Net CT: <span class="${cls}">${p.netCT.toFixed(1)}s</span> vs Takt: ${taktTime.toFixed(1)}s<br>
-          Uptime: ${p.uptime}% | Ops: ${p.operators} | Dist: <em>${dl[p.distType]||p.distType}</em>
+          Uptime: ${p.uptime}% | Ops: ${p.operators} | Dist: <em>${dl[p.distType]||p.distType}</em>${p.batchSize>1?' | Lote: '+p.batchSize+' u':''}
         </div>
       </div>`;
   });
@@ -232,7 +249,10 @@ function buildFlowSequence() {
 
 function nodeToSegment(node) {
   if(node.type==='process'){
-    return {type:node.props.isVA!==false?'va':'nva',label:node.props.label,valueSec:node.props.ct,valueLabel:fmtTime(node.props.ct)};
+    const batch = node.props.batchSize > 1 ? node.props.batchSize : 1;
+    // total time a unit waits at this process = CT (own) + (batch-1)*CT (waiting peers)
+    const totalSec = node.props.ct * batch;
+    return {type:node.props.isVA!==false?'va':'nva',label:node.props.label+(batch>1?` ×${batch}`:''),valueSec:totalSec,valueLabel:fmtTime(totalSec)};
   }
   if(node.type==='inventory'){
     const demand=parseFloat(document.getElementById('demand')?.value)||400;

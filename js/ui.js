@@ -17,6 +17,7 @@ function openModal(nodeId) {
 function buildModalForm(node) {
   const p = node.props;
   if (node.type === 'process') {
+    const batchSize = p.batchSize != null ? p.batchSize : 1;
     return `
       <div class="prop-group">
         <label>Nombre del proceso</label>
@@ -100,6 +101,20 @@ function buildModalForm(node) {
       </div>
 
       <hr class="prop-divider">
+      <div class="prop-section-title">📦 LOTE</div>
+
+      <div class="prop-row">
+        <div class="prop-group">
+          <label>Tamaño de Lote (u/lote)</label>
+          <input type="number" id="prop-batch" value="${batchSize}" min="1" step="1" oninput="recalcModalPreview()"
+            style="font-size:1.1rem;font-weight:700;">
+        </div>
+        <div class="prop-group" style="align-self:flex-end;padding-bottom:4px;">
+          <small style="color:var(--c-muted)">Unidades que deben completarse antes de pasar al siguiente proceso.</small>
+        </div>
+      </div>
+
+      <hr class="prop-divider">
       <div class="prop-calc" id="modal-calc"></div>`;
   } else if (node.type === 'inventory') {
     return `
@@ -135,18 +150,22 @@ function updateDistFields() {
 function recalcModalPreview() {
   const calc = document.getElementById('modal-calc');
   if (!calc) return;
-  const ct      = parseFloat(document.getElementById('prop-ct')?.value)     || 0;
-  const uptime  = parseFloat(document.getElementById('prop-uptime')?.value)  || 90;
-  const shifts  = parseFloat(document.getElementById('prop-shifts')?.value)  || 1;
-  const hours   = parseFloat(document.getElementById('prop-hours')?.value)   || 8;
-  const dist    = document.getElementById('prop-dist')?.value || 'fixed';
-  const std     = parseFloat(document.getElementById('prop-ctStd')?.value)   || 0;
-  const ctMin   = parseFloat(document.getElementById('prop-ctMin')?.value)   || 0;
-  const ctMax   = parseFloat(document.getElementById('prop-ctMax')?.value)   || ct;
+  const ct        = parseFloat(document.getElementById('prop-ct')?.value)      || 0;
+  const uptime    = parseFloat(document.getElementById('prop-uptime')?.value)   || 90;
+  const shifts    = parseFloat(document.getElementById('prop-shifts')?.value)   || 1;
+  const hours     = parseFloat(document.getElementById('prop-hours')?.value)    || 8;
+  const dist      = document.getElementById('prop-dist')?.value || 'fixed';
+  const std       = parseFloat(document.getElementById('prop-ctStd')?.value)    || 0;
+  const ctMin     = parseFloat(document.getElementById('prop-ctMin')?.value)    || 0;
+  const ctMax     = parseFloat(document.getElementById('prop-ctMax')?.value)    || ct;
+  const batchSize = parseInt(document.getElementById('prop-batch')?.value)      || 1;
 
   const availSec  = hours * shifts * 3600 * (uptime / 100);
   const netCT     = ct > 0 ? (ct / (uptime / 100)).toFixed(1) : '—';
   const capacity  = ct > 0 ? Math.floor(availSec / ct) : '—';
+  const batchDelay = batchSize > 1 && ct > 0
+    ? `<br>Retardo de lote: <span>${((batchSize - 1) * ct).toFixed(0)}s ≈ ${((batchSize - 1) * ct / 3600).toFixed(2)}h</span>`
+    : '';
 
   let distInfo = '';
   if (dist === 'normal') {
@@ -159,7 +178,7 @@ function recalcModalPreview() {
   calc.innerHTML = `
     Tiempo disponible: <span>${availSec.toLocaleString(undefined,{maximumFractionDigits:0})} seg/día</span><br>
     CT neto (ajustado uptime): <span>${netCT}s</span><br>
-    Capacidad estimada: <span>${capacity} u/día</span>${distInfo}`;
+    Capacidad estimada: <span>${capacity} u/día</span>${distInfo}${batchDelay}`;
 }
 
 function saveNodeProps() {
@@ -179,6 +198,7 @@ function saveNodeProps() {
     node.props.ctStd       = parseFloat(document.getElementById('prop-ctStd')?.value)  || 0;
     node.props.ctMin       = parseFloat(document.getElementById('prop-ctMin')?.value)  || 0;
     node.props.ctMax       = parseFloat(document.getElementById('prop-ctMax')?.value)  || 0;
+    node.props.batchSize   = parseInt(document.getElementById('prop-batch')?.value)    || 1;
   } else if (node.type === 'inventory') {
     node.props.units = parseInt(document.getElementById('prop-units')?.value) || 0;
   }
