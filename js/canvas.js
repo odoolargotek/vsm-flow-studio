@@ -1,12 +1,16 @@
-// ===== CANVAS ENGINE v4 — VSM Flow Studio =====
-// Arrows are now clickable: single click = select, dblclick = edit modal, Delete key = delete
+// ===== CANVAS ENGINE v4.1 — VSM Flow Studio =====
+// Fixes:
+//   1. #arrows-svg z-index:3 > #canvas z-index:2, hit paths have pointer-events:stroke
+//      so arrows are truly clickable without blocking node interaction
+//   2. arrowMode cancels AUTOMATICALLY after each successful connection (one-shot)
+//   3. Arrow select/edit/delete fully working
 
-let arrowMode    = null;
+let arrowMode     = null;
 let connectingFrom = null;
-let draggingNode  = null;
-let dragOffsetX   = 0, dragOffsetY = 0;
+let draggingNode   = null;
+let dragOffsetX    = 0, dragOffsetY = 0;
 
-// ─ DRAG FROM TOOLBOX ──────────────────────────────────────────────────
+// ─ DRAG FROM TOOLBOX ─────────────────────────────────────────────────
 document.querySelectorAll('.tool-item[draggable]').forEach(item => {
   item.addEventListener('dragstart', e => e.dataTransfer.setData('node-type', item.dataset.type));
 });
@@ -23,7 +27,7 @@ function onDrop(e) {
   renderAllArrows();
 }
 
-// ─ RENDER NODE ──────────────────────────────────────────────────────
+// ─ RENDER NODE ─────────────────────────────────────────────────────
 function renderNode(node) {
   const canvas = document.getElementById('canvas');
   const el = document.createElement('div');
@@ -85,7 +89,7 @@ function refreshNodeElement(nodeId) {
   renderAllArrows();
 }
 
-// ─ DRAG TO MOVE ─────────────────────────────────────────────────────
+// ─ DRAG TO MOVE ────────────────────────────────────────────────────
 function startDrag(e, node) {
   if (e.target.classList.contains('node-port') || e.target.classList.contains('node-edit-btn')) return;
   if (arrowMode) return;
@@ -117,7 +121,7 @@ function onDragEnd() {
   document.removeEventListener('mouseup',   onDragEnd);
 }
 
-// ─ NODE SELECTION ────────────────────────────────────────────────────
+// ─ NODE SELECTION ───────────────────────────────────────────────────
 function selectNode(id) {
   deselectArrow();
   document.querySelectorAll('.vsm-node').forEach(el => el.classList.remove('selected'));
@@ -131,151 +135,26 @@ function onCanvasClick(e) {
     document.querySelectorAll('.vsm-node').forEach(el => el.classList.remove('selected'));
     selectedNodeId = null;
     deselectArrow();
-    if (connectingFrom) { connectingFrom = null; setArrowMode(null); showConnectHint(false); }
+    if (connectingFrom) { connectingFrom = null; cancelArrowMode(); }
   }
 }
 
-// ─ ARROW SELECTION & EDITING ───────────────────────────────────────────
-function selectArrow(arrowId) {
-  deselectArrow();
-  document.querySelectorAll('.vsm-node').forEach(el => el.classList.remove('selected'));
-  selectedNodeId = null;
-  selectedArrowId = arrowId;
-  const path = document.getElementById('arrow-path-' + arrowId);
-  if (path) path.classList.add('arrow-selected');
-  showArrowToolbar(arrowId);
-}
-
-function deselectArrow() {
-  if (selectedArrowId) {
-    const path = document.getElementById('arrow-path-' + selectedArrowId);
-    if (path) path.classList.remove('arrow-selected');
-    selectedArrowId = null;
-  }
-  document.getElementById('arrow-toolbar')?.remove();
-}
-
-function showArrowToolbar(arrowId) {
-  document.getElementById('arrow-toolbar')?.remove();
-  const arrow  = getArrow(arrowId); if (!arrow) return;
-  const midPt  = getArrowMidpoint(arrow.fromId, arrow.toId);
-  if (!midPt) return;
-
-  const canvasEl = document.getElementById('canvas');
-  const tb = document.createElement('div');
-  tb.id = 'arrow-toolbar';
-  tb.className = 'arrow-toolbar';
-  tb.style.left = (midPt.x - 60) + 'px';
-  tb.style.top  = (midPt.y - 36) + 'px';
-  tb.innerHTML = `
-    <span class="arrow-tb-label">${arrowTypeLabel(arrow.type)} • ${arrow.transportDays||0.5}d</span>
-    <button onclick="openArrowModal('${arrowId}')" title="Editar">✎</button>
-    <button class="danger" onclick="confirmDeleteArrow('${arrowId}')" title="Eliminar">🗑</button>
-  `;
-  tb.addEventListener('mousedown', e => e.stopPropagation());
-  canvasEl.appendChild(tb);
-}
-
-function arrowTypeLabel(type) {
-  return type === 'push' ? '⟶ Push' : type === 'pull' ? '⇢ Pull' : '⤳ Info';
-}
-
-function getArrowMidpoint(fromId, toId) {
-  const fn = getNode(fromId); const tn = getNode(toId); if (!fn || !tn) return null;
-  const fEl = document.getElementById(fromId); const tEl = document.getElementById(toId); if (!fEl || !tEl) return null;
-  const x1 = fn.x + fEl.offsetWidth, y1 = fn.y + fEl.offsetHeight / 2;
-  const x2 = tn.x,                   y2 = tn.y + tEl.offsetHeight / 2;
-  const dx = Math.abs(x2 - x1);
-  const cx1 = x1 + dx*0.45, cx2 = x2 - dx*0.45;
-  const t = 0.5, u = 0.5;
-  return {
-    x: u*u*u*x1 + 3*u*u*t*cx1 + 3*u*t*t*cx2 + t*t*t*x2,
-    y: u*u*u*y1 + 3*u*u*t*y1  + 3*u*t*t*y2  + t*t*t*y2
-  };
-}
-
-function openArrowModal(arrowId) {
-  document.getElementById('arrow-toolbar')?.remove();
-  const arrow = getArrow(arrowId); if (!arrow) return;
-  const fromNode = getNode(arrow.fromId);
-  const toNode   = getNode(arrow.toId);
-  const fromLbl  = fromNode?.props?.label || arrow.fromId;
-  const toLbl    = toNode?.props?.label   || arrow.toId;
-
-  document.getElementById('modal-title').textContent = `Flecha: ${fromLbl} → ${toLbl}`;
-  document.getElementById('modal-body').innerHTML = `
-    <div class="prop-group">
-      <label>Tipo de flujo</label>
-      <select id="arrow-edit-type">
-        <option value="push"  ${arrow.type==='push' ?'selected':''}>⟶ Push (flujo empujado)</option>
-        <option value="pull"  ${arrow.type==='pull' ?'selected':''}>⇢ Pull (flujo jalado)</option>
-        <option value="info"  ${arrow.type==='info' ?'selected':''}>⤳ Flujo de información</option>
-      </select>
-    </div>
-    <div class="prop-group">
-      <label>Tiempo de transporte / espera</label>
-      <div class="sim-input-row">
-        <input type="number" id="arrow-edit-days" value="${arrow.transportDays||0.5}" min="0" step="0.1" style="width:100%">
-        <span class="sim-unit">días</span>
-      </div>
-      <small style="color:var(--text-muted);font-size:9px;margin-top:4px;display:block">
-        Este valor aparece como caja NVA (roja) en el Value Stream Timeline.
-      </small>
-    </div>
-    <div class="prop-group" style="margin-top:12px">
-      <button onclick="confirmDeleteArrow('${arrowId}')" style="background:rgba(248,81,73,.15);border:1px solid var(--danger);color:var(--danger);padding:6px 14px;border-radius:6px;cursor:pointer;font-size:11px;width:100%">
-        🗑 Eliminar esta flecha
-      </button>
-    </div>
-  `;
-
-  const footer = document.querySelector('.modal-footer');
-  footer.querySelector('.btn-accent').onclick = () => saveArrowProps(arrowId);
-  document.getElementById('modal-overlay').classList.remove('hidden');
-}
-
-function saveArrowProps(arrowId) {
-  const arrow = getArrow(arrowId); if (!arrow) return;
-  arrow.type          = document.getElementById('arrow-edit-type').value;
-  arrow.transportDays = parseFloat(document.getElementById('arrow-edit-days').value) || 0.5;
-  closeModal();
-  renderAllArrows();
-}
-
-function confirmDeleteArrow(arrowId) {
-  const arrow = getArrow(arrowId); if (!arrow) return;
-  const from = getNode(arrow.fromId)?.props?.label || '?';
-  const to   = getNode(arrow.toId)?.props?.label   || '?';
-  if (confirm(`¿Eliminar flecha ${from} → ${to}?`)) {
-    deleteArrow(arrowId);
-    closeModal();
-    renderAllArrows();
-  }
-}
-
-document.addEventListener('keydown', e => {
-  if (e.key === 'Escape') { setArrowMode(null); connectingFrom = null; showConnectHint(false); deselectArrow(); }
-  if ((e.key === 'Delete' || e.key === 'Backspace') && !e.target.matches('input,select,textarea')) {
-    if (selectedArrowId) {
-      confirmDeleteArrow(selectedArrowId);
-    } else if (selectedNodeId) {
-      deleteSelected();
-    }
-  }
-});
-
-// ─ ARROW CONNECTION SYSTEM ───────────────────────────────────────────────
+// ─ ARROW MODE (one-shot: cancels after each successful connection) ──────────────
 function setArrowMode(mode) {
-  arrowMode = (arrowMode === mode) ? null : mode;
+  // Toggle off if clicking same mode button again
+  if (arrowMode === mode && !connectingFrom) { cancelArrowMode(); return; }
+  arrowMode = mode;
   clearArrowModeUI();
-  if (arrowMode) {
-    document.getElementById('btn-' + mode + '-arrow')?.classList.add('active');
-    document.getElementById('canvas').style.cursor = 'crosshair';
-  } else {
-    document.getElementById('canvas').style.cursor = 'default';
-    connectingFrom = null;
-    showConnectHint(false);
-  }
+  document.getElementById('btn-' + mode + '-arrow')?.classList.add('active');
+  document.getElementById('canvas').style.cursor = 'crosshair';
+}
+
+function cancelArrowMode() {
+  arrowMode = null;
+  connectingFrom = null;
+  clearArrowModeUI();
+  document.getElementById('canvas').style.cursor = 'default';
+  showConnectHint(false);
 }
 
 function clearArrowModeUI() {
@@ -288,94 +167,226 @@ function showConnectHint(active, fromLabel) {
     hint = document.createElement('div'); hint.id='connect-hint'; hint.className='connect-hint';
     document.querySelector('.canvas-area').appendChild(hint);
   }
-  hint.textContent = active ? `⚡ "${fromLabel}" seleccionado — ahora haz click en el nodo DESTINO` : '';
+  hint.textContent = active ? `⚡ "${fromLabel}" listo — ahora click en el nodo DESTINO` : '';
   hint.style.display = active ? 'block' : 'none';
 }
 
+// ─ PORT CLICK ─────────────────────────────────────────────────────────────
 function onPortClick(nodeId) {
-  if (!arrowMode) setArrowMode('push');
+  if (!arrowMode) setArrowMode('push'); // default to push
+
   if (!connectingFrom) {
-    connectingFrom = nodeId; selectNode(nodeId);
+    // First click: select source
+    connectingFrom = nodeId;
+    selectNode(nodeId);
     showConnectHint(true, getNode(nodeId)?.props.label || nodeId);
   } else {
-    if (connectingFrom !== nodeId) { addArrow(connectingFrom, nodeId, arrowMode); renderAllArrows(); }
-    connectingFrom = null; setArrowMode(null); showConnectHint(false);
+    // Second click: create arrow then CANCEL mode (one-shot)
+    if (connectingFrom !== nodeId) {
+      addArrow(connectingFrom, nodeId, arrowMode);
+      renderAllArrows();
+    }
+    cancelArrowMode(); // ← KEY FIX: always cancel after connecting
   }
 }
 
+// Also allow clicking the node BODY as target
 document.getElementById('canvas').addEventListener('click', function(e) {
   if (!connectingFrom) return;
   const nodeEl = e.target.closest('.vsm-node');
   if (nodeEl && nodeEl.id && nodeEl.id !== connectingFrom) {
     addArrow(connectingFrom, nodeEl.id, arrowMode);
     renderAllArrows();
-    connectingFrom = null; setArrowMode(null); showConnectHint(false);
+    cancelArrowMode(); // ← KEY FIX: always cancel after connecting
   }
 }, true);
 
-// ─ ARROWS SVG ─────────────────────────────────────────────────────────────────
+// ─ ARROW SELECTION & EDITING ───────────────────────────────────────────
+function selectArrow(arrowId) {
+  deselectArrow();
+  document.querySelectorAll('.vsm-node').forEach(el => el.classList.remove('selected'));
+  selectedNodeId = null;
+  selectedArrowId = arrowId;
+  renderAllArrows(); // re-render so selected arrow gets white colour
+  showArrowToolbar(arrowId);
+}
+
+function deselectArrow() {
+  if (selectedArrowId) {
+    selectedArrowId = null;
+    renderAllArrows();
+  }
+  document.getElementById('arrow-toolbar')?.remove();
+}
+
+function showArrowToolbar(arrowId) {
+  document.getElementById('arrow-toolbar')?.remove();
+  const arrow = getArrow(arrowId); if (!arrow) return;
+  const mid   = getArrowMidpoint(arrow.fromId, arrow.toId); if (!mid) return;
+
+  const tb = document.createElement('div');
+  tb.id = 'arrow-toolbar';
+  tb.className = 'arrow-toolbar';
+  // Position in canvas-relative coordinates (canvas-area is the offset parent)
+  tb.style.left = (mid.x - 60) + 'px';
+  tb.style.top  = (mid.y - 40) + 'px';
+  tb.innerHTML = `
+    <span class="arrow-tb-label">${arrowTypeLabel(arrow.type)} • ${arrow.transportDays||0.5}d</span>
+    <button onclick="openArrowModal('${arrowId}')" title="Editar">✎</button>
+    <button class="danger" onclick="confirmDeleteArrow('${arrowId}')" title="Eliminar">🗑</button>
+  `;
+  tb.addEventListener('mousedown', e => e.stopPropagation());
+  // Append to canvas-area (the positioned parent), not #canvas
+  document.querySelector('.canvas-area').appendChild(tb);
+}
+
+function arrowTypeLabel(t) {
+  return t==='push'?'⟶ Push':t==='pull'?'⇢ Pull':'⤳ Info';
+}
+
+function getArrowMidpoint(fromId, toId) {
+  const fn=getNode(fromId), tn=getNode(toId); if(!fn||!tn) return null;
+  const fEl=document.getElementById(fromId), tEl=document.getElementById(toId); if(!fEl||!tEl) return null;
+  const x1=fn.x+fEl.offsetWidth, y1=fn.y+fEl.offsetHeight/2;
+  const x2=tn.x,                 y2=tn.y+tEl.offsetHeight/2;
+  const dx=Math.abs(x2-x1), cx1=x1+dx*0.45, cx2=x2-dx*0.45;
+  const t=0.5,u=0.5;
+  return {
+    x: u*u*u*x1+3*u*u*t*cx1+3*u*t*t*cx2+t*t*t*x2,
+    y: u*u*u*y1+3*u*u*t*y1 +3*u*t*t*y2 +t*t*t*y2
+  };
+}
+
+function openArrowModal(arrowId) {
+  document.getElementById('arrow-toolbar')?.remove();
+  const arrow=getArrow(arrowId); if(!arrow) return;
+  const fromLbl=getNode(arrow.fromId)?.props?.label||arrow.fromId;
+  const toLbl  =getNode(arrow.toId)?.props?.label  ||arrow.toId;
+
+  document.getElementById('modal-title').textContent=`Flecha: ${fromLbl} → ${toLbl}`;
+  document.getElementById('modal-body').innerHTML=`
+    <div class="prop-group">
+      <label>Tipo de flujo</label>
+      <select id="arrow-edit-type">
+        <option value="push" ${arrow.type==='push'?'selected':''}>⟶ Push (flujo empujado)</option>
+        <option value="pull" ${arrow.type==='pull'?'selected':''}>⇢ Pull (flujo jalado)</option>
+        <option value="info" ${arrow.type==='info'?'selected':''}>⤳ Flujo de información</option>
+      </select>
+    </div>
+    <div class="prop-group">
+      <label>Tiempo de transporte / espera</label>
+      <div class="sim-input-row">
+        <input type="number" id="arrow-edit-days" value="${arrow.transportDays||0.5}" min="0" step="0.1" style="width:100%">
+        <span class="sim-unit">días</span>
+      </div>
+      <small style="color:var(--text-muted);font-size:9px;margin-top:4px;display:block">
+        Aparece como caja NVA (roja) en el Value Stream Timeline.
+      </small>
+    </div>
+    <div class="prop-group" style="margin-top:12px">
+      <button onclick="confirmDeleteArrow('${arrowId}')" style="background:rgba(248,81,73,.15);border:1px solid var(--danger);color:var(--danger);padding:6px 14px;border-radius:6px;cursor:pointer;font-size:11px;width:100%">
+        🗑 Eliminar esta flecha
+      </button>
+    </div>`;
+
+  document.querySelector('.modal-footer .btn-accent').onclick = () => saveArrowProps(arrowId);
+  document.getElementById('modal-overlay').classList.remove('hidden');
+}
+
+function saveArrowProps(arrowId) {
+  const arrow=getArrow(arrowId); if(!arrow) return;
+  arrow.type          = document.getElementById('arrow-edit-type').value;
+  arrow.transportDays = parseFloat(document.getElementById('arrow-edit-days').value)||0.5;
+  closeModal();
+  renderAllArrows();
+}
+
+function confirmDeleteArrow(arrowId) {
+  const arrow=getArrow(arrowId); if(!arrow) return;
+  const from=getNode(arrow.fromId)?.props?.label||'?';
+  const to  =getNode(arrow.toId)?.props?.label  ||'?';
+  if(confirm(`¿Eliminar flecha ${from} → ${to}?`)) {
+    deleteArrow(arrowId); closeModal(); renderAllArrows();
+  }
+}
+
+// ─ KEYBOARD ────────────────────────────────────────────────────────────
+document.addEventListener('keydown', e => {
+  if (e.key==='Escape') { cancelArrowMode(); deselectArrow(); }
+  if ((e.key==='Delete'||e.key==='Backspace') && !e.target.matches('input,select,textarea')) {
+    if (selectedArrowId) confirmDeleteArrow(selectedArrowId);
+    else if (selectedNodeId) deleteSelected();
+  }
+});
+
+// ─ ARROWS SVG ────────────────────────────────────────────────────────────────
 function renderAllArrows() {
   const svg = document.getElementById('arrows-svg');
   svg.innerHTML = `
     <defs>
-      <marker id="arr-push" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#58a6ff"/></marker>
-      <marker id="arr-pull" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#3fb950"/></marker>
-      <marker id="arr-info" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#d29922"/></marker>
-      <marker id="arr-push-sel" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#fff"/></marker>
-      <marker id="arr-pull-sel" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#fff"/></marker>
-      <marker id="arr-info-sel" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#fff"/></marker>
+      <marker id="arr-push"     markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0,10 3.5,0 7" fill="#58a6ff"/></marker>
+      <marker id="arr-pull"     markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0,10 3.5,0 7" fill="#3fb950"/></marker>
+      <marker id="arr-info"     markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0,10 3.5,0 7" fill="#d29922"/></marker>
+      <marker id="arr-push-sel" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0,10 3.5,0 7" fill="#ffffff"/></marker>
+      <marker id="arr-pull-sel" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0,10 3.5,0 7" fill="#ffffff"/></marker>
+      <marker id="arr-info-sel" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0,10 3.5,0 7" fill="#ffffff"/></marker>
     </defs>`;
 
   arrows.forEach(arrow => {
-    const fromNode = getNode(arrow.fromId), toNode = getNode(arrow.toId);
-    if (!fromNode || !toNode) return;
-    const fEl = document.getElementById(arrow.fromId), tEl = document.getElementById(arrow.toId);
-    if (!fEl || !tEl) return;
+    const fn=getNode(arrow.fromId), tn=getNode(arrow.toId); if(!fn||!tn) return;
+    const fEl=document.getElementById(arrow.fromId), tEl=document.getElementById(arrow.toId); if(!fEl||!tEl) return;
 
-    const x1 = fromNode.x + fEl.offsetWidth,  y1 = fromNode.y + fEl.offsetHeight / 2;
-    const x2 = toNode.x,                       y2 = toNode.y   + tEl.offsetHeight / 2;
-    const dx = Math.abs(x2 - x1);
-    const cx1 = x1 + dx*0.45, cx2 = x2 - dx*0.45;
+    const x1=fn.x+fEl.offsetWidth, y1=fn.y+fEl.offsetHeight/2;
+    const x2=tn.x,                 y2=tn.y+tEl.offsetHeight/2;
+    const dx=Math.abs(x2-x1), cx1=x1+dx*0.45, cx2=x2-dx*0.45;
+    const d=`M ${x1} ${y1} C ${cx1} ${y1} ${cx2} ${y2} ${x2} ${y2}`;
 
-    const isSelected = arrow.id === selectedArrowId;
-    const strokeColor = isSelected ? '#ffffff'
-      : arrow.type==='push' ? '#58a6ff' : arrow.type==='pull' ? '#3fb950' : '#d29922';
-    const dashArr = arrow.type==='push' ? '' : arrow.type==='pull' ? '8,4' : '4,4';
-    const markerSuffix = isSelected ? '-sel' : '';
-    const strokeW = isSelected ? 3 : 2;
+    const isSel  = arrow.id===selectedArrowId;
+    const stroke = isSel?'#ffffff':arrow.type==='push'?'#58a6ff':arrow.type==='pull'?'#3fb950':'#d29922';
+    const dash   = arrow.type==='push'?'':arrow.type==='pull'?'8,4':'4,4';
+    const mkSfx  = isSel?'-sel':'';
 
+    // Fat invisible hit area — pointer-events:stroke makes ONLY the stroke area clickable
+    // so you can still click through to nodes when not hovering the arrow line itself
     const hit = document.createElementNS('http://www.w3.org/2000/svg','path');
-    hit.setAttribute('d', `M ${x1} ${y1} C ${cx1} ${y1} ${cx2} ${y2} ${x2} ${y2}`);
-    hit.setAttribute('stroke','transparent'); hit.setAttribute('stroke-width','16');
-    hit.setAttribute('fill','none'); hit.style.cursor = 'pointer';
-    hit.addEventListener('click',    e => { e.stopPropagation(); selectArrow(arrow.id); });
-    hit.addEventListener('dblclick', e => { e.stopPropagation(); openArrowModal(arrow.id); });
+    hit.setAttribute('d', d);
+    hit.setAttribute('stroke','rgba(255,255,255,0.001)'); // near-transparent but not 'none'
+    hit.setAttribute('stroke-width','18');
+    hit.setAttribute('fill','none');
+    hit.style.cursor = 'pointer';
+    hit.style.pointerEvents = 'stroke'; // ← KEY: only the stroke line is clickable
+    hit.addEventListener('click',    ev => { ev.stopPropagation(); selectArrow(arrow.id); });
+    hit.addEventListener('dblclick', ev => { ev.stopPropagation(); openArrowModal(arrow.id); });
     svg.appendChild(hit);
 
+    // Visible path
     const path = document.createElementNS('http://www.w3.org/2000/svg','path');
-    path.setAttribute('id', 'arrow-path-' + arrow.id);
-    path.setAttribute('d', `M ${x1} ${y1} C ${cx1} ${y1} ${cx2} ${y2} ${x2} ${y2}`);
-    path.setAttribute('stroke', strokeColor); path.setAttribute('stroke-width', strokeW);
-    path.setAttribute('fill','none'); path.setAttribute('stroke-dasharray', dashArr);
-    path.setAttribute('marker-end', `url(#arr-${arrow.type}${markerSuffix})`);
+    path.setAttribute('id','arrow-path-'+arrow.id);
+    path.setAttribute('d', d);
+    path.setAttribute('stroke', stroke);
+    path.setAttribute('stroke-width', isSel?3:2);
+    path.setAttribute('fill','none');
+    path.setAttribute('stroke-dasharray', dash);
+    path.setAttribute('marker-end',`url(#arr-${arrow.type}${mkSfx})`);
     path.style.pointerEvents = 'none';
-    if (isSelected) path.classList.add('arrow-selected');
     svg.appendChild(path);
 
+    // Transport label (only when non-default)
     const td = arrow.transportDays;
     if (td && td !== 0.5) {
-      const midX = 0.125*x1 + 0.375*cx1 + 0.375*cx2 + 0.125*x2;
-      const midY = 0.125*y1 + 0.375*y1  + 0.375*y2  + 0.125*y2;
-      const lbl = document.createElementNS('http://www.w3.org/2000/svg','text');
-      lbl.setAttribute('x', midX); lbl.setAttribute('y', midY - 8);
-      lbl.setAttribute('fill', strokeColor); lbl.setAttribute('font-size','9');
+      const mx=0.125*x1+0.375*cx1+0.375*cx2+0.125*x2;
+      const my=0.125*y1+0.375*y1 +0.375*y2 +0.125*y2;
+      const lbl=document.createElementNS('http://www.w3.org/2000/svg','text');
+      lbl.setAttribute('x',mx); lbl.setAttribute('y',my-8);
+      lbl.setAttribute('fill',stroke); lbl.setAttribute('font-size','9');
       lbl.setAttribute('text-anchor','middle'); lbl.setAttribute('font-family','monospace');
       lbl.setAttribute('font-weight','700');
-      lbl.textContent = td + 'd';
-      lbl.style.pointerEvents = 'none';
+      lbl.textContent = td+'d';
+      lbl.style.pointerEvents='none';
       svg.appendChild(lbl);
     }
   });
 
+  // Re-show toolbar if an arrow is still selected
   if (selectedArrowId) showArrowToolbar(selectedArrowId);
 }
