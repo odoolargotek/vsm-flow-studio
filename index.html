@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VSM Flow Studio</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div id="app">
+
+    <!-- TOP BAR -->
+    <header class="topbar">
+      <div class="brand">
+        <span class="brand-icon">⬡</span>
+        <span class="brand-name">VSM <strong>Flow Studio</strong></span>
+      </div>
+      <div class="toolbar-actions">
+        <button onclick="newDiagram()" title="Nuevo diagrama">＋ Nuevo</button>
+        <button onclick="saveDiagram()" title="Guardar en LocalStorage">💾 Guardar</button>
+        <button onclick="loadDiagram()" title="Cargar guardado">📂 Cargar</button>
+        <button onclick="exportJSON()" title="Exportar JSON">⬇ JSON</button>
+        <button onclick="window.print()" title="Imprimir/PDF" class="btn-accent">🖨 PDF</button>
+      </div>
+    </header>
+
+    <div class="workspace">
+
+      <!-- TOOLBOX -->
+      <aside class="toolbox">
+        <div class="toolbox-title">Elementos VSM</div>
+
+        <div class="tool-group">
+          <div class="tool-label">FLUJO</div>
+          <div class="tool-item" draggable="true" data-type="supplier" title="Proveedor">
+            <div class="tool-icon supplier-icon">▣</div>
+            <span>Proveedor</span>
+          </div>
+          <div class="tool-item" draggable="true" data-type="customer" title="Cliente">
+            <div class="tool-icon customer-icon">▣</div>
+            <span>Cliente</span>
+          </div>
+          <div class="tool-item" draggable="true" data-type="process" title="Proceso">
+            <div class="tool-icon process-icon">▬</div>
+            <span>Proceso</span>
+          </div>
+          <div class="tool-item" draggable="true" data-type="inventory" title="Inventario / WIP">
+            <div class="tool-icon inventory-icon">▲</div>
+            <span>Inventario</span>
+          </div>
+        </div>
+
+        <div class="tool-group">
+          <div class="tool-label">CONEXIONES</div>
+          <div class="tool-item" id="btn-push-arrow" onclick="setArrowMode('push')">
+            <div class="tool-icon arrow-push">⟶</div>
+            <span>Flecha Push</span>
+          </div>
+          <div class="tool-item" id="btn-pull-arrow" onclick="setArrowMode('pull')">
+            <div class="tool-icon arrow-pull">⇢</div>
+            <span>Flecha Pull</span>
+          </div>
+          <div class="tool-item" id="btn-info-arrow" onclick="setArrowMode('info')">
+            <div class="tool-icon arrow-info">⤳</div>
+            <span>Flujo Info</span>
+          </div>
+        </div>
+
+        <div class="tool-group">
+          <div class="tool-label">MEJORA</div>
+          <div class="tool-item" draggable="true" data-type="kaizen">
+            <div class="tool-icon kaizen-icon">✸</div>
+            <span>Kaizen Burst</span>
+          </div>
+        </div>
+
+        <div class="tool-group">
+          <div class="tool-label">ACCIONES</div>
+          <div class="tool-item danger" onclick="deleteSelected()">
+            <div class="tool-icon">🗑</div>
+            <span>Eliminar</span>
+          </div>
+          <div class="tool-item" onclick="runSimulation()">
+            <div class="tool-icon sim-icon">▶</div>
+            <span>Simular</span>
+          </div>
+        </div>
+      </aside>
+
+      <!-- CANVAS -->
+      <main class="canvas-area">
+        <div class="canvas-hint" id="canvas-hint">Arrastra elementos al canvas para comenzar tu VSM</div>
+        <svg id="arrows-svg"></svg>
+        <div id="canvas" 
+          ondragover="event.preventDefault()" 
+          ondrop="onDrop(event)"
+          onclick="onCanvasClick(event)">
+        </div>
+        <!-- Timeline bar -->
+        <div class="timeline-bar" id="timeline-bar">
+          <div class="timeline-label">TIMELINE</div>
+          <div class="timeline-content" id="timeline-content"></div>
+        </div>
+      </main>
+
+      <!-- SIMULATION PANEL -->
+      <aside class="sim-panel">
+        <div class="sim-header">
+          <span>📊 Simulación</span>
+          <button class="btn-run" onclick="runSimulation()">▶ CALCULAR</button>
+        </div>
+
+        <div class="sim-section">
+          <div class="sim-section-title">PARÁMETROS GLOBALES</div>
+          <div class="sim-field">
+            <label>Demanda cliente</label>
+            <div class="sim-input-row">
+              <input type="number" id="demand" value="400" min="1">
+              <span class="sim-unit">u/día</span>
+            </div>
+          </div>
+          <div class="sim-field">
+            <label>Horas/turno</label>
+            <div class="sim-input-row">
+              <input type="number" id="hours-shift" value="8" min="1" max="24">
+              <span class="sim-unit">h</span>
+            </div>
+          </div>
+          <div class="sim-field">
+            <label>Turnos/día</label>
+            <div class="sim-input-row">
+              <input type="number" id="shifts" value="1" min="1" max="3">
+              <span class="sim-unit">#</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="sim-section kpi-section" id="kpi-section">
+          <div class="sim-section-title">KPIs VSM</div>
+          <div class="kpi-card" id="kpi-takt">
+            <div class="kpi-label">⏱ Takt Time</div>
+            <div class="kpi-value">—</div>
+            <div class="kpi-sub">seg/unidad</div>
+          </div>
+          <div class="kpi-card" id="kpi-lt">
+            <div class="kpi-label">📦 Lead Time</div>
+            <div class="kpi-value">—</div>
+            <div class="kpi-sub">días</div>
+          </div>
+          <div class="kpi-card" id="kpi-pt">
+            <div class="kpi-label">⚡ Process Time</div>
+            <div class="kpi-value">—</div>
+            <div class="kpi-sub">seg (VA)</div>
+          </div>
+          <div class="kpi-card highlight" id="kpi-pce">
+            <div class="kpi-label">📈 PCE Ratio</div>
+            <div class="kpi-value">—</div>
+            <div class="kpi-sub">% valor agregado</div>
+          </div>
+          <div class="kpi-card bottleneck" id="kpi-bn">
+            <div class="kpi-label">🔴 Cuello de Botella</div>
+            <div class="kpi-value">—</div>
+            <div class="kpi-sub"></div>
+          </div>
+          <div class="kpi-card" id="kpi-avail">
+            <div class="kpi-label">🏭 Tiempo Disponible</div>
+            <div class="kpi-value">—</div>
+            <div class="kpi-sub">seg/día</div>
+          </div>
+        </div>
+
+        <div class="sim-section" id="process-list-section">
+          <div class="sim-section-title">PROCESOS DETECTADOS</div>
+          <div id="process-list"></div>
+        </div>
+
+        <div class="sim-section">
+          <div class="sim-section-title">ESTADO</div>
+          <div id="sim-log" class="sim-log">Agrega procesos al canvas y presiona CALCULAR.</div>
+        </div>
+      </aside>
+
+    </div>
+  </div>
+
+  <!-- NODE PROPERTIES MODAL -->
+  <div id="modal-overlay" class="modal-overlay hidden" onclick="closeModal(event)">
+    <div class="modal" onclick="event.stopPropagation()">
+      <div class="modal-header">
+        <span id="modal-title">Propiedades</span>
+        <button class="modal-close" onclick="closeModal()">✕</button>
+      </div>
+      <div class="modal-body" id="modal-body"></div>
+      <div class="modal-footer">
+        <button onclick="saveNodeProps()" class="btn-accent">✔ Guardar</button>
+        <button onclick="closeModal()">Cancelar</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/nodes.js"></script>
+  <script src="js/simulation.js"></script>
+  <script src="js/canvas.js"></script>
+  <script src="js/ui.js"></script>
+</body>
+</html>
