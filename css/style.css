@@ -1,4 +1,4 @@
-/* ===== VSM FLOW STUDIO v4.4 ===== */
+/* ===== VSM FLOW STUDIO v4.5 ===== */
 :root {
   --bg-app:#0f1117; --bg-topbar:#161b22; --bg-panel:#161b22; --bg-canvas:#0d1117;
   --bg-node:#1c2128; --bg-node-hover:#21262d; --bg-modal:#1c2128;
@@ -108,18 +108,22 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg-app);color:
 .vsm-node:hover .node-edit-btn{opacity:1;}
 
 .anim-bar{flex-shrink:0;background:rgba(16,20,28,.97);border-top:1px solid var(--border);padding:6px 12px;z-index:6;}
-.anim-controls{display:flex;align-items:center;gap:8px;margin-bottom:4px;}
+.anim-controls{display:flex;align-items:center;gap:8px;margin-bottom:4px;flex-wrap:wrap;}
 .anim-btn{padding:4px 12px;border-radius:var(--radius);border:1px solid var(--border);cursor:pointer;font-size:11px;font-weight:600;transition:all .15s;}
 .anim-btn.start{background:var(--accent2);color:#000;border-color:var(--accent2);}
 .anim-btn.start:disabled{background:var(--border);color:var(--text-muted);cursor:not-allowed;}
 .anim-btn.stop{background:var(--danger);color:#fff;border-color:var(--danger);}
 .anim-btn.stop:disabled{background:var(--border);color:var(--text-muted);cursor:not-allowed;}
 .anim-btn.reset{background:var(--bg-node);color:var(--text);}
-.speed-group{display:flex;align-items:center;gap:4px;margin-left:8px;}
+.speed-group{display:flex;align-items:center;gap:4px;margin-left:8px;flex-wrap:wrap;}
 .speed-label{font-size:10px;color:var(--text-muted);}
 .speed-btn{padding:3px 8px;border-radius:var(--radius);border:1px solid var(--border);background:var(--bg-node);color:var(--text-muted);cursor:pointer;font-size:10px;font-weight:700;transition:all .15s;}
 .speed-btn:hover{border-color:var(--accent);color:var(--accent);}
 .speed-btn.active{background:var(--accent);color:#000;border-color:var(--accent);}
+/* — 480X turbo button — */
+.speed-btn-turbo{border-color:var(--warning)!important;color:var(--warning)!important;}
+.speed-btn-turbo:hover{background:rgba(210,153,34,.18)!important;color:var(--warning)!important;}
+.speed-btn-turbo.active{background:var(--warning)!important;color:#000!important;border-color:var(--warning)!important;}
 .anim-stats-row{display:flex;align-items:center;gap:12px;}
 .anim-stats{font-size:10px;color:var(--warning);font-weight:600;font-family:monospace;flex:1;}
 .anim-log{font-size:9px;color:var(--text-muted);font-family:monospace;}
