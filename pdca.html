@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PDCA — Lean Suite</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300..700&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{
+      --bg:#0d1117;--surface:#161b22;--surface2:#21262d;--border:#30363d;
+      --text:#e6edf3;--muted:#8b949e;--faint:#484f58;
+      --plan:#4f98a3;--do:#3fb950;--check:#d29922;--act:#bc8cff;
+      --danger:#f85149;--radius:12px;--radius-sm:8px;
+    }
+    body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+    .topnav{display:flex;align-items:center;justify-content:space-between;padding:0 32px;height:56px;background:var(--surface);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:100}
+    .brand{display:flex;align-items:center;gap:10px;font-size:15px;font-weight:600}
+    .brand-icon{font-family:'Instrument Serif',serif;font-size:22px;color:var(--plan)}
+    .nav-links{display:flex;gap:4px}
+    .nav-link{padding:6px 14px;border-radius:var(--radius-sm);font-size:13px;color:var(--muted);cursor:pointer;text-decoration:none;transition:all .18s}
+    .nav-link:hover,.nav-link.active{background:var(--surface2);color:var(--text)}
+    .page{max-width:1100px;margin:0 auto;padding:40px 32px 80px}
+    .page-header{margin-bottom:32px;display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:16px}
+    .page-header-text .page-eyebrow{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--plan);margin-bottom:8px;font-weight:600}
+    .page-title{font-family:'Instrument Serif',serif;font-size:clamp(1.6rem,3vw,2.4rem);margin-bottom:8px}
+    .page-desc{font-size:13px;color:var(--muted);max-width:500px;line-height:1.7}
+    .header-stats{display:flex;gap:12px;flex-wrap:wrap}
+    .stat-pill{background:var(--surface);border:1px solid var(--border);border-radius:99px;padding:8px 16px;font-size:12px;display:flex;align-items:center;gap:6px}
+    .stat-val{font-weight:700}
+    /* PDCA GRID */
+    .pdca-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+    .pdca-col{display:flex;flex-direction:column;gap:0}
+    .pdca-header{padding:16px 20px;border-radius:var(--radius) var(--radius) 0 0;display:flex;align-items:center;gap:10px}
+    .pdca-header-icon{font-size:22px}
+    .pdca-header-text .phase-name{font-size:16px;font-weight:800;letter-spacing:-.02em}
+    .pdca-header-text .phase-desc{font-size:11px;opacity:.7;margin-top:2px}
+    .pdca-body{background:var(--surface);border:1px solid var(--border);border-top:none;border-radius:0 0 var(--radius) var(--radius);padding:20px;flex:1}
+    .phase-context{font-size:12px;color:var(--muted);margin-bottom:16px;line-height:1.6;padding:10px;background:var(--surface2);border-radius:var(--radius-sm)}
+    /* TASK CARDS */
+    .tasks-list{display:flex;flex-direction:column;gap:8px;min-height:60px}
+    .task-card{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px 14px;display:flex;gap:10px;align-items:flex-start;transition:border-color .18s}
+    .task-card:hover{border-color:var(--faint)}
+    .task-check{width:18px;height:18px;border-radius:4px;border:2px solid var(--border);cursor:pointer;flex-shrink:0;margin-top:1px;display:flex;align-items:center;justify-content:center;transition:all .18s;}
+    .task-check.done{background:var(--phase-color);border-color:var(--phase-color)}
+    .task-check.done::after{content:'✓';color:#fff;font-size:10px;font-weight:700}
+    .task-content{flex:1;display:flex;flex-direction:column;gap:4px}
+    .task-title{font-size:13px;font-weight:500;line-height:1.4;word-break:break-word}
+    .task-title.done{text-decoration:line-through;color:var(--muted)}
+    .task-meta{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+    .task-owner{font-size:10px;color:var(--muted);background:var(--bg);padding:2px 7px;border-radius:99px;}
+    .task-date{font-size:10px;color:var(--muted)}
+    .task-date.overdue{color:var(--danger)}
+    .task-prio{font-size:9px;font-weight:700;padding:2px 6px;border-radius:99px;text-transform:uppercase;letter-spacing:.04em}
+    .prio-alta{background:rgba(248,81,73,.15);color:var(--danger)}
+    .prio-media{background:rgba(210,153,34,.15);color:var(--check)}
+    .prio-baja{background:rgba(139,148,158,.1);color:var(--muted)}
+    .task-del{background:none;border:none;color:var(--faint);cursor:pointer;font-size:11px;padding:2px;flex-shrink:0;margin-left:auto;}
+    .task-del:hover{color:var(--danger)}
+    /* ADD TASK FORM */
+    .add-task-form{margin-top:12px;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-sm);padding:14px;display:none}
+    .add-task-form.open{display:flex;flex-direction:column;gap:10px}
+    .form-row{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+    .form-row.cols-1{grid-template-columns:1fr}
+    .mini-input{background:var(--surface);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:'Inter',sans-serif;font-size:12px;padding:7px 10px;width:100%;}
+    .mini-input:focus{outline:none;border-color:var(--phase-color,var(--plan))}
+    .mini-select{background:var(--surface);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:12px;padding:7px 10px;width:100%;}
+    .add-btn-row{display:flex;gap:8px}
+    .mini-btn{padding:6px 14px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;border:none;transition:all .18s}
+    .mini-btn-primary{background:var(--phase-color,var(--plan));color:#fff}
+    .mini-btn-ghost{background:var(--surface);border:1px solid var(--border);color:var(--muted)}
+    .mini-btn-ghost:hover{color:var(--text)}
+    .open-form-btn{width:100%;margin-top:8px;padding:8px;border:1px dashed var(--border);border-radius:var(--radius-sm);background:none;color:var(--muted);font-size:12px;cursor:pointer;transition:all .18s;font-family:'Inter',sans-serif}
+    .open-form-btn:hover{border-color:var(--phase-color,var(--plan));color:var(--text)}
+    /* ACTIONS */
+    .actions{display:flex;gap:12px;margin-top:32px;flex-wrap:wrap}
+    .btn{padding:10px 24px;border-radius:var(--radius-sm);font-size:13px;font-weight:600;cursor:pointer;border:none;transition:all .18s;text-decoration:none;display:inline-flex;align-items:center;gap:6px}
+    .btn-primary{background:var(--plan);color:#fff;}
+    .btn-ghost{background:var(--surface);border:1px solid var(--border);color:var(--text);}
+    .btn-hub{background:rgba(79,152,163,.15);border:1px solid var(--plan);color:var(--plan)}
+    .toast{position:fixed;bottom:24px;right:24px;background:var(--do);color:#fff;padding:12px 20px;border-radius:var(--radius-sm);font-size:13px;font-weight:600;opacity:0;transform:translateY(8px);transition:all .3s;pointer-events:none;z-index:999}
+    .toast.show{opacity:1;transform:translateY(0)}
+    @media(max-width:700px){.pdca-grid{grid-template-columns:1fr}.form-row{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+<nav class="topnav">
+  <div class="brand"><span class="brand-icon">⧡</span><span>Lean Analysis <strong>Suite</strong></span></div>
+  <div class="nav-links">
+    <a class="nav-link" href="lean-hub.html">🏠 Hub</a>
+    <a class="nav-link" href="caso-negocio.html">📋 Caso</a>
+    <a class="nav-link" href="a3-report.html">📄 A3</a>
+    <a class="nav-link active" href="pdca.html">🔄 PDCA</a>
+    <a class="nav-link" href="index.html">🗺️ VSM</a>
+  </div>
+</nav>
+
+<div class="page">
+  <div class="page-header">
+    <div class="page-header-text">
+      <div class="page-eyebrow">Fase 3 — Mejorar</div>
+      <h1 class="page-title">🔄 Ciclo PDCA</h1>
+      <p class="page-desc">Gestiona las acciones de mejora con el ciclo de Deming: Plan → Do → Check → Act.</p>
+    </div>
+    <div class="header-stats">
+      <div class="stat-pill"><span class="stat-val" id="stat-total" style="color:var(--plan)">0</span><span style="color:var(--muted)">tareas</span></div>
+      <div class="stat-pill"><span class="stat-val" id="stat-done" style="color:var(--do)">0</span><span style="color:var(--muted)">completadas</span></div>
+      <div class="stat-pill"><span class="stat-val" id="stat-pct">0%</span><span style="color:var(--muted)">avance</span></div>
+    </div>
+  </div>
+
+  <div class="pdca-grid" id="pdca-grid">
+    <!-- PLAN -->
+    <div class="pdca-col">
+      <div class="pdca-header" style="background:rgba(79,152,163,.15);border:1px solid rgba(79,152,163,.3)">
+        <div class="pdca-header-icon">📋</div>
+        <div class="pdca-header-text">
+          <div class="phase-name" style="color:var(--plan)">PLAN</div>
+          <div class="phase-desc" style="color:var(--plan)">Planificar</div>
+        </div>
+      </div>
+      <div class="pdca-body" style="--phase-color:var(--plan)">
+        <div class="phase-context">Define QUÉ hacer, CÓMO hacerlo, QUIÉN lo hará y CUÁNDO. Establece las contramedidas del A3.</div>
+        <div class="tasks-list" id="tasks-plan"></div>
+        <button class="open-form-btn" style="--phase-color:var(--plan)" onclick="toggleForm('form-plan',this)">+ Agregar tarea</button>
+        <div class="add-task-form" id="form-plan">
+          <div class="form-row cols-1"><input class="mini-input" id="fp-title" placeholder="¿Qué hay que hacer?" style="--phase-color:var(--plan)"></div>
+          <div class="form-row">
+            <input class="mini-input" id="fp-owner" placeholder="Responsable" style="--phase-color:var(--plan)">
+            <input class="mini-input" type="date" id="fp-date" style="--phase-color:var(--plan)">
+          </div>
+          <div class="form-row">
+            <select class="mini-select" id="fp-prio"><option value="alta">🔴 Alta</option><option value="media" selected>🟡 Media</option><option value="baja">🟢 Baja</option></select>
+          </div>
+          <div class="add-btn-row">
+            <button class="mini-btn mini-btn-primary" style="background:var(--plan)" onclick="addTask('plan')">Agregar</button>
+            <button class="mini-btn mini-btn-ghost" onclick="toggleForm('form-plan',null,true)">Cancelar</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- DO -->
+    <div class="pdca-col">
+      <div class="pdca-header" style="background:rgba(63,185,80,.15);border:1px solid rgba(63,185,80,.3)">
+        <div class="pdca-header-icon">⚙️</div>
+        <div class="pdca-header-text">
+          <div class="phase-name" style="color:var(--do)">DO</div>
+          <div class="phase-desc" style="color:var(--do)">Hacer</div>
+        </div>
+      </div>
+      <div class="pdca-body" style="--phase-color:var(--do)">
+        <div class="phase-context">Ejecuta las acciones planificadas. Documenta lo que se hizo, problemas encontrados y resultados iniciales.</div>
+        <div class="tasks-list" id="tasks-do"></div>
+        <button class="open-form-btn" style="--phase-color:var(--do)" onclick="toggleForm('form-do',this)">+ Agregar tarea</button>
+        <div class="add-task-form" id="form-do">
+          <div class="form-row cols-1"><input class="mini-input" id="fd-title" placeholder="¿Qué se está ejecutando?" style="--phase-color:var(--do)"></div>
+          <div class="form-row">
+            <input class="mini-input" id="fd-owner" placeholder="Responsable" style="--phase-color:var(--do)">
+            <input class="mini-input" type="date" id="fd-date" style="--phase-color:var(--do)">
+          </div>
+          <div class="form-row">
+            <select class="mini-select" id="fd-prio"><option value="alta">🔴 Alta</option><option value="media" selected>🟡 Media</option><option value="baja">🟢 Baja</option></select>
+          </div>
+          <div class="add-btn-row">
+            <button class="mini-btn mini-btn-primary" style="background:var(--do)" onclick="addTask('do')">Agregar</button>
+            <button class="mini-btn mini-btn-ghost" onclick="toggleForm('form-do',null,true)">Cancelar</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- CHECK -->
+    <div class="pdca-col">
+      <div class="pdca-header" style="background:rgba(210,153,34,.15);border:1px solid rgba(210,153,34,.3)">
+        <div class="pdca-header-icon">📊</div>
+        <div class="pdca-header-text">
+          <div class="phase-name" style="color:var(--check)">CHECK</div>
+          <div class="phase-desc" style="color:var(--check)">Verificar</div>
+        </div>
+      </div>
+      <div class="pdca-body" style="--phase-color:var(--check)">
+        <div class="phase-context">Mide los resultados. ¿Se lograron las metas? Compara los KPIs actuales vs los objetivos del A3.</div>
+        <div class="tasks-list" id="tasks-check"></div>
+        <button class="open-form-btn" style="--phase-color:var(--check)" onclick="toggleForm('form-check',this)">+ Agregar tarea</button>
+        <div class="add-task-form" id="form-check">
+          <div class="form-row cols-1"><input class="mini-input" id="fch-title" placeholder="¿Qué se va a verificar?" style="--phase-color:var(--check)"></div>
+          <div class="form-row">
+            <input class="mini-input" id="fch-owner" placeholder="Responsable" style="--phase-color:var(--check)">
+            <input class="mini-input" type="date" id="fch-date" style="--phase-color:var(--check)">
+          </div>
+          <div class="form-row">
+            <select class="mini-select" id="fch-prio"><option value="alta">🔴 Alta</option><option value="media" selected>🟡 Media</option><option value="baja">🟢 Baja</option></select>
+          </div>
+          <div class="add-btn-row">
+            <button class="mini-btn mini-btn-primary" style="background:var(--check)" onclick="addTask('check')">Agregar</button>
+            <button class="mini-btn mini-btn-ghost" onclick="toggleForm('form-check',null,true)">Cancelar</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- ACT -->
+    <div class="pdca-col">
+      <div class="pdca-header" style="background:rgba(188,140,255,.15);border:1px solid rgba(188,140,255,.3)">
+        <div class="pdca-header-icon">🚀</div>
+        <div class="pdca-header-text">
+          <div class="phase-name" style="color:var(--act)">ACT</div>
+          <div class="phase-desc" style="color:var(--act)">Actuar / Estandarizar</div>
+        </div>
+      </div>
+      <div class="pdca-body" style="--phase-color:var(--act)">
+        <div class="phase-context">Estandariza lo que funcionó. Documenta lecciones aprendidas y planifica el siguiente ciclo PDCA.</div>
+        <div class="tasks-list" id="tasks-act"></div>
+        <button class="open-form-btn" style="--phase-color:var(--act)" onclick="toggleForm('form-act',this)">+ Agregar tarea</button>
+        <div class="add-task-form" id="form-act">
+          <div class="form-row cols-1"><input class="mini-input" id="fa-title" placeholder="¿Qué se va a estandarizar?" style="--phase-color:var(--act)"></div>
+          <div class="form-row">
+            <input class="mini-input" id="fa-owner" placeholder="Responsable" style="--phase-color:var(--act)">
+            <input class="mini-input" type="date" id="fa-date" style="--phase-color:var(--act)">
+          </div>
+          <div class="form-row">
+            <select class="mini-select" id="fa-prio"><option value="alta">🔴 Alta</option><option value="media" selected>🟡 Media</option><option value="baja">🟢 Baja</option></select>
+          </div>
+          <div class="add-btn-row">
+            <button class="mini-btn mini-btn-primary" style="background:var(--act)" onclick="addTask('act')">Agregar</button>
+            <button class="mini-btn mini-btn-ghost" onclick="toggleForm('form-act',null,true)">Cancelar</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="actions">
+    <button class="btn btn-primary" onclick="savePDCA()">💾 Guardar PDCA</button>
+    <button class="btn btn-ghost" onclick="clearPDCA()">🗑 Limpiar</button>
+    <a class="btn btn-hub" href="lean-hub.html">🏠 Volver al Hub</a>
+  </div>
+</div>
+
+<div class="toast" id="toast">✔ PDCA guardado</div>
+
+<script>
+const PHASES = ['plan','do','check','act'];
+const PHASE_COLORS = {plan:'var(--plan)',do:'var(--do)',check:'var(--check)',act:'var(--act)'};
+let tasks = {plan:[], do:[], check:[], act:[]};
+
+function toggleForm(id, btn, forceClose) {
+  const form = document.getElementById(id);
+  const isOpen = form.classList.contains('open');
+  if (forceClose || isOpen) { form.classList.remove('open'); return; }
+  form.classList.add('open');
+  form.querySelector('.mini-input').focus();
+}
+
+function addTask(phase) {
+  const prefixes = {plan:'fp',do:'fd',check:'fch',act:'fa'};
+  const p = prefixes[phase];
+  const title = document.getElementById(p+'-title').value.trim();
+  if (!title) { document.getElementById(p+'-title').focus(); return; }
+  tasks[phase].push({
+    id: Date.now(),
+    title,
+    owner: document.getElementById(p+'-owner').value.trim(),
+    date:  document.getElementById(p+'-date').value,
+    prio:  document.getElementById(p+'-prio').value,
+    done:  false
+  });
+  document.getElementById(p+'-title').value = '';
+  document.getElementById(p+'-owner').value = '';
+  document.getElementById(p+'-date').value  = '';
+  toggleForm('form-'+phase, null, true);
+  renderPhase(phase);
+  updateStats();
+  savePDCA();
+}
+
+function renderPhase(phase) {
+  const list = document.getElementById('tasks-'+phase);
+  list.innerHTML = '';
+  const color = PHASE_COLORS[phase];
+  tasks[phase].forEach(t => {
+    const today = new Date().toISOString().split('T')[0];
+    const overdue = t.date && t.date < today && !t.done;
+    const card = document.createElement('div');
+    card.className = 'task-card';
+    card.innerHTML = `
+      <div class="task-check${t.done?' done':''}" style="--phase-color:${color}" onclick="toggleTask('${phase}',${t.id})"></div>
+      <div class="task-content">
+        <div class="task-title${t.done?' done':''}">${t.title}</div>
+        <div class="task-meta">
+          ${t.owner ? `<span class="task-owner">👤 ${t.owner}</span>` : ''}
+          ${t.date  ? `<span class="task-date${overdue?' overdue':''}">📅 ${t.date}${overdue?' ⚠':''}</span>` : ''}
+          <span class="task-prio prio-${t.prio}">${t.prio}</span>
+        </div>
+      </div>
+      <button class="task-del" onclick="deleteTask('${phase}',${t.id})">✕</button>`;
+    list.appendChild(card);
+  });
+}
+
+function toggleTask(phase, id) {
+  const t = tasks[phase].find(x => x.id === id);
+  if (t) { t.done = !t.done; renderPhase(phase); updateStats(); savePDCA(); }
+}
+
+function deleteTask(phase, id) {
+  tasks[phase] = tasks[phase].filter(x => x.id !== id);
+  renderPhase(phase);
+  updateStats();
+  savePDCA();
+}
+
+function updateStats() {
+  const all  = PHASES.flatMap(p => tasks[p]);
+  const done = all.filter(t => t.done).length;
+  document.getElementById('stat-total').textContent = all.length;
+  document.getElementById('stat-done').textContent  = done;
+  document.getElementById('stat-pct').textContent   = all.length ? Math.round(done/all.length*100)+'%' : '0%';
+}
+
+function savePDCA() {
+  localStorage.setItem('lean-pdca', JSON.stringify(tasks));
+  showToast();
+}
+
+function clearPDCA() {
+  if (!confirm('¿Eliminar todas las tareas?')) return;
+  tasks = {plan:[],do:[],check:[],act:[]};
+  PHASES.forEach(renderPhase);
+  updateStats();
+  localStorage.removeItem('lean-pdca');
+}
+
+function loadPDCA() {
+  const raw = localStorage.getItem('lean-pdca');
+  if (raw) {
+    tasks = JSON.parse(raw);
+    // Ensure all phases exist
+    PHASES.forEach(p => { if (!tasks[p]) tasks[p] = []; });
+  }
+  // Pre-fill from A3 contramedidas if no tasks yet
+  const allEmpty = PHASES.every(p => tasks[p].length === 0);
+  if (allEmpty) {
+    const a3 = JSON.parse(localStorage.getItem('lean-a3') || 'null');
+    if (a3 && a3.cm) {
+      a3.cm.filter(c => c.action).forEach(c => {
+        tasks.plan.push({ id: Date.now() + Math.random(), title: c.action, owner: c.owner||'', date: c.date||'', prio: 'media', done: c.status==='Completado' });
+      });
+    }
+  }
+  PHASES.forEach(renderPhase);
+  updateStats();
+}
+
+function showToast() {
+  const t = document.getElementById('toast');
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2000);
+}
+
+loadPDCA();
+</script>
+</body>
+</html>

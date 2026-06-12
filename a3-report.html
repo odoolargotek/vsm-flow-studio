@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>A3 Report — Lean Suite</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300..700&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{
+      --bg:#0d1117;--surface:#161b22;--surface2:#21262d;--border:#30363d;
+      --text:#e6edf3;--muted:#8b949e;--faint:#484f58;
+      --accent:#3fb950;--accent2:#4f98a3;--warn:#d29922;--danger:#f85149;
+      --radius:12px;--radius-sm:8px;
+    }
+    body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+    .topnav{display:flex;align-items:center;justify-content:space-between;padding:0 32px;height:56px;background:var(--surface);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:100}
+    .brand{display:flex;align-items:center;gap:10px;font-size:15px;font-weight:600}
+    .brand-icon{font-family:'Instrument Serif',serif;font-size:22px;color:var(--accent)}
+    .nav-links{display:flex;gap:4px}
+    .nav-link{padding:6px 14px;border-radius:var(--radius-sm);font-size:13px;color:var(--muted);cursor:pointer;text-decoration:none;transition:all .18s}
+    .nav-link:hover,.nav-link.active{background:var(--surface2);color:var(--text)}
+    .page{max-width:1100px;margin:0 auto;padding:40px 32px 80px}
+    .page-header{margin-bottom:32px}
+    .page-eyebrow{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--accent);margin-bottom:8px;font-weight:600}
+    .page-title{font-family:'Instrument Serif',serif;font-size:clamp(1.6rem,3vw,2.4rem);margin-bottom:8px}
+    .page-desc{font-size:13px;color:var(--muted);max-width:600px;line-height:1.7}
+    /* A3 GRID */
+    .a3-meta{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px;margin-bottom:20px}
+    .a3-meta-field{display:flex;flex-direction:column;gap:4px}
+    .a3-meta-field label{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+    .a3-meta-field input{background:var(--surface2);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:'Inter',sans-serif;font-size:13px;padding:7px 10px;}
+    .a3-meta-field input:focus{outline:none;border-color:var(--accent)}
+    /* A3 SECTIONS */
+    .a3-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+    .a3-grid.full{grid-template-columns:1fr}
+    .a3-box{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
+    .a3-box-header{display:flex;align-items:center;gap:8px;padding:12px 16px;background:var(--surface2);border-bottom:1px solid var(--border)}
+    .a3-box-num{width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0}
+    .a3-box-title{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.06em}
+    .a3-box-body{padding:16px}
+    .a3-box textarea{width:100%;background:transparent;border:none;color:var(--text);font-family:'Inter',sans-serif;font-size:13px;line-height:1.7;resize:vertical;min-height:100px;}
+    .a3-box textarea:focus{outline:none}
+    /* CONTRAMEDIDAS TABLE */
+    .cm-table{width:100%;border-collapse:collapse}
+    .cm-table th{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;padding:6px 8px;text-align:left;border-bottom:1px solid var(--border)}
+    .cm-table td{padding:6px 8px;border-bottom:1px solid rgba(48,54,61,.5);font-size:12px}
+    .cm-table td input{background:transparent;border:none;color:var(--text);font-family:'Inter',sans-serif;font-size:12px;width:100%;}
+    .cm-table td input:focus{outline:none;border-bottom:1px solid var(--accent)}
+    .cm-table td select{background:var(--surface2);border:1px solid var(--border);color:var(--text);font-size:11px;border-radius:4px;padding:2px 4px;}
+    .add-row-btn{font-size:11px;color:var(--accent);background:none;border:1px dashed var(--border);border-radius:var(--radius-sm);padding:5px 12px;cursor:pointer;margin-top:8px;transition:all .18s;}
+    .add-row-btn:hover{border-color:var(--accent);background:rgba(63,185,80,.08)}
+    .del-btn{background:none;border:none;color:var(--faint);cursor:pointer;font-size:11px;padding:2px 4px;}
+    .del-btn:hover{color:var(--danger)}
+    .actions{display:flex;gap:12px;margin-top:32px;flex-wrap:wrap}
+    .btn{padding:10px 24px;border-radius:var(--radius-sm);font-size:13px;font-weight:600;cursor:pointer;border:none;transition:all .18s;text-decoration:none;display:inline-flex;align-items:center;gap:6px}
+    .btn-primary{background:var(--accent);color:#fff;}
+    .btn-primary:hover{filter:brightness(1.1)}
+    .btn-ghost{background:var(--surface);border:1px solid var(--border);color:var(--text);}
+    .btn-ghost:hover{border-color:var(--muted)}
+    .btn-next{background:rgba(188,140,255,.15);border:1px solid var(--purple,#bc8cff);color:var(--purple,#bc8cff)}
+    .toast{position:fixed;bottom:24px;right:24px;background:var(--accent);color:#fff;padding:12px 20px;border-radius:var(--radius-sm);font-size:13px;font-weight:600;opacity:0;transform:translateY(8px);transition:all .3s;pointer-events:none;z-index:999}
+    .toast.show{opacity:1;transform:translateY(0)}
+    @media(max-width:700px){.a3-grid{grid-template-columns:1fr}.a3-meta{grid-template-columns:1fr 1fr}}
+  </style>
+</head>
+<body>
+<nav class="topnav">
+  <div class="brand"><span class="brand-icon">⧡</span><span>Lean Analysis <strong>Suite</strong></span></div>
+  <div class="nav-links">
+    <a class="nav-link" href="lean-hub.html">🏠 Hub</a>
+    <a class="nav-link" href="caso-negocio.html">📋 Caso</a>
+    <a class="nav-link active" href="a3-report.html">📄 A3</a>
+    <a class="nav-link" href="pdca.html">🔄 PDCA</a>
+    <a class="nav-link" href="index.html">🗺️ VSM</a>
+  </div>
+</nav>
+
+<div class="page">
+  <div class="page-header">
+    <div class="page-eyebrow">Fase 3 — Mejorar</div>
+    <h1 class="page-title">📄 A3 Report</h1>
+    <p class="page-desc">Formato estándar Toyota de resolución de problemas. Estructura el pensamiento de causa-efecto en una sola hoja (A3) que cualquier persona puede entender.</p>
+  </div>
+
+  <!-- META -->
+  <div class="a3-meta">
+    <div class="a3-meta-field"><label>Título del A3</label><input type="text" id="a3-title" placeholder="Reducción Lead Time Línea A"></div>
+    <div class="a3-meta-field"><label>Autor / Líder</label><input type="text" id="a3-author" placeholder="Nombre"></div>
+    <div class="a3-meta-field"><label>Fecha</label><input type="date" id="a3-date"></div>
+    <div class="a3-meta-field"><label>Versión</label><input type="text" id="a3-version" placeholder="v1.0"></div>
+  </div>
+
+  <!-- ROW 1: Background + Current State -->
+  <div class="a3-grid" style="margin-bottom:16px">
+    <div class="a3-box">
+      <div class="a3-box-header">
+        <div class="a3-box-num" style="background:rgba(79,152,163,.2);color:#4f98a3">1</div>
+        <div class="a3-box-title" style="color:#4f98a3">Background / Contexto</div>
+      </div>
+      <div class="a3-box-body">
+        <textarea id="a3-background" placeholder="¿Por qué es importante este problema?&#10;¿Cuál es el contexto del negocio?&#10;¿Qué área / proceso está afectado?&#10;¿Cuál es el impacto en el cliente?"></textarea>
+      </div>
+    </div>
+    <div class="a3-box">
+      <div class="a3-box-header">
+        <div class="a3-box-num" style="background:rgba(210,153,34,.2);color:#d29922">2</div>
+        <div class="a3-box-title" style="color:#d29922">Estado Actual</div>
+      </div>
+      <div class="a3-box-body">
+        <textarea id="a3-current" placeholder="Describe el estado actual con DATOS:&#10;• Métricas actuales (Lead Time, PCE, defectos...)&#10;• Descripción del flujo actual&#10;• Dónde ocurren los desperdicios (MUDAS)&#10;Incluye: qué, cuánto, cuándo, dónde."></textarea>
+      </div>
+    </div>
+  </div>
+
+  <!-- ROW 2: Target + Analysis -->
+  <div class="a3-grid" style="margin-bottom:16px">
+    <div class="a3-box">
+      <div class="a3-box-header">
+        <div class="a3-box-num" style="background:rgba(63,185,80,.2);color:#3fb950">3</div>
+        <div class="a3-box-title" style="color:#3fb950">Estado Objetivo (Target)</div>
+      </div>
+      <div class="a3-box-body">
+        <textarea id="a3-target" placeholder="¿Cómo se verá el proceso mejorado?&#10;• KPIs objetivo con valores específicos&#10;• Descripción del flujo futuro deseado&#10;• Cambios concretos a implementar&#10;Sé ESPECÍFICO y MEDIBLE."></textarea>
+      </div>
+    </div>
+    <div class="a3-box">
+      <div class="a3-box-header">
+        <div class="a3-box-num" style="background:rgba(248,81,73,.2);color:#f85149">4</div>
+        <div class="a3-box-title" style="color:#f85149">Análisis de Causa Raíz</div>
+      </div>
+      <div class="a3-box-body">
+        <textarea id="a3-analysis" placeholder="Resultados del análisis de causa raíz:&#10;• 5 Porqués aplicados&#10;• Diagrama Ishikawa (resumen)&#10;• Causa raíz identificada&#10;¿POR QUÉ ocurre el problema?"></textarea>
+      </div>
+    </div>
+  </div>
+
+  <!-- ROW 3: Contramedidas -->
+  <div class="a3-grid full" style="margin-bottom:16px">
+    <div class="a3-box">
+      <div class="a3-box-header">
+        <div class="a3-box-num" style="background:rgba(188,140,255,.2);color:#bc8cff">5</div>
+        <div class="a3-box-title" style="color:#bc8cff">Contramedidas / Soluciones</div>
+      </div>
+      <div class="a3-box-body">
+        <table class="cm-table">
+          <thead><tr><th>#</th><th>Contramedida</th><th>Ataca causa</th><th>Responsable</th><th>Fecha</th><th>Estado</th><th></th></tr></thead>
+          <tbody id="cm-tbody">
+            <tr><td>1</td><td><input type="text" placeholder="Descripción de la acción"></td><td><input type="text" placeholder="Causa que ataca"></td><td><input type="text" placeholder="Nombre"></td><td><input type="date"></td><td><select><option>Pendiente</option><option>En proceso</option><option>Completado</option></select></td><td><button class="del-btn" onclick="delRow(this)">✕</button></td></tr>
+            <tr><td>2</td><td><input type="text" placeholder="Descripción de la acción"></td><td><input type="text" placeholder="Causa que ataca"></td><td><input type="text" placeholder="Nombre"></td><td><input type="date"></td><td><select><option>Pendiente</option><option>En proceso</option><option>Completado</option></select></td><td><button class="del-btn" onclick="delRow(this)">✕</button></td></tr>
+          </tbody>
+        </table>
+        <button class="add-row-btn" onclick="addCMRow()">+ Agregar contramedida</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ROW 4: Plan + Follow-up -->
+  <div class="a3-grid" style="margin-bottom:16px">
+    <div class="a3-box">
+      <div class="a3-box-header">
+        <div class="a3-box-num" style="background:rgba(255,166,87,.2);color:#ffa657">6</div>
+        <div class="a3-box-title" style="color:#ffa657">Plan de Implementación</div>
+      </div>
+      <div class="a3-box-body">
+        <textarea id="a3-plan" placeholder="Pasos de implementación con fechas:&#10;Semana 1: ...&#10;Semana 2: ...&#10;Semana 3: ...&#10;&#10;Recursos necesarios:&#10;Aprobaciones requeridas:"></textarea>
+      </div>
+    </div>
+    <div class="a3-box">
+      <div class="a3-box-header">
+        <div class="a3-box-num" style="background:rgba(63,185,80,.2);color:#3fb950">7</div>
+        <div class="a3-box-title" style="color:#3fb950">Seguimiento y Resultados</div>
+      </div>
+      <div class="a3-box-body">
+        <textarea id="a3-followup" placeholder="¿Funcionó? Compara antes vs después:&#10;• KPI antes: X → KPI después: Y&#10;• Beneficios logrados&#10;• Lecciones aprendidas&#10;• ¿Qué se estandarizó?"></textarea>
+      </div>
+    </div>
+  </div>
+
+  <div class="actions">
+    <button class="btn btn-primary" onclick="saveA3()">💾 Guardar A3</button>
+    <button class="btn btn-ghost" onclick="window.print()">🖨 Imprimir / PDF</button>
+    <a class="btn btn-next" href="pdca.html">→ Continuar al PDCA</a>
+  </div>
+</div>
+
+<div class="toast" id="toast">✔ A3 guardado</div>
+
+<script>
+function delRow(btn) { btn.closest('tr').remove(); }
+function addCMRow() {
+  const tbody = document.getElementById('cm-tbody');
+  const n = tbody.rows.length + 1;
+  const tr = document.createElement('tr');
+  tr.innerHTML = `<td>${n}</td><td><input type="text" placeholder="Descripción"></td><td><input type="text" placeholder="Causa"></td><td><input type="text" placeholder="Nombre"></td><td><input type="date"></td><td><select><option>Pendiente</option><option>En proceso</option><option>Completado</option></select></td><td><button class="del-btn" onclick="delRow(this)">✕</button></td>`;
+  tbody.appendChild(tr);
+}
+
+function collectCM() {
+  return Array.from(document.querySelectorAll('#cm-tbody tr')).map(tr => {
+    const inputs = tr.querySelectorAll('input');
+    const sel    = tr.querySelector('select');
+    return { action: inputs[0]?.value, cause: inputs[1]?.value, owner: inputs[2]?.value, date: inputs[3]?.value, status: sel?.value };
+  });
+}
+
+function saveA3() {
+  const d = {
+    title:      document.getElementById('a3-title').value,
+    author:     document.getElementById('a3-author').value,
+    date:       document.getElementById('a3-date').value,
+    version:    document.getElementById('a3-version').value,
+    background: document.getElementById('a3-background').value,
+    current:    document.getElementById('a3-current').value,
+    target:     document.getElementById('a3-target').value,
+    analysis:   document.getElementById('a3-analysis').value,
+    plan:       document.getElementById('a3-plan').value,
+    followup:   document.getElementById('a3-followup').value,
+    cm:         collectCM(),
+    savedAt:    new Date().toISOString()
+  };
+  localStorage.setItem('lean-a3', JSON.stringify(d));
+  showToast();
+}
+
+function showToast() {
+  const t = document.getElementById('toast');
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+function loadA3() {
+  const raw = localStorage.getItem('lean-a3');
+  // Pre-fill from caso if available
+  const caso = JSON.parse(localStorage.getItem('lean-caso') || 'null');
+  if (!raw && caso) {
+    document.getElementById('a3-title').value  = caso.projectName || '';
+    document.getElementById('a3-author').value = caso.leader || '';
+    document.getElementById('a3-date').value   = caso.startDate || '';
+    document.getElementById('a3-background').value = caso.problem || '';
+  }
+  if (!raw) return;
+  const d = JSON.parse(raw);
+  const set = (id, val) => { const el = document.getElementById(id); if(el && val) el.value = val; };
+  set('a3-title', d.title); set('a3-author', d.author);
+  set('a3-date', d.date); set('a3-version', d.version);
+  set('a3-background', d.background); set('a3-current', d.current);
+  set('a3-target', d.target); set('a3-analysis', d.analysis);
+  set('a3-plan', d.plan); set('a3-followup', d.followup);
+  if (d.cm && d.cm.length) {
+    const tbody = document.getElementById('cm-tbody');
+    tbody.innerHTML = '';
+    d.cm.forEach((c, i) => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `<td>${i+1}</td><td><input type="text" value="${c.action||''}"></td><td><input type="text" value="${c.cause||''}"></td><td><input type="text" value="${c.owner||''}"></td><td><input type="date" value="${c.date||''}"></td><td><select><option${c.status==='Pendiente'?' selected':''}>Pendiente</option><option${c.status==='En proceso'?' selected':''}>En proceso</option><option${c.status==='Completado'?' selected':''}>Completado</option></select></td><td><button class="del-btn" onclick="delRow(this)">✕</button></td>`;
+      tbody.appendChild(tr);
+    });
+  }
+}
+loadA3();
+</script>
+</body>
+</html>
