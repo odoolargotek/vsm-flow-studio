@@ -1,8 +1,7 @@
 // ===== VSM REPORT v1 — Full stats popup + CSV export =====
 
-let _lastReport = null; // saved after each runSimulation()
+let _lastReport = null;
 
-// Called by simulation.js after every run to store data
 function saveReportData(data) {
   _lastReport = data;
 }
@@ -21,14 +20,12 @@ function closeReport(e) {
   document.getElementById('report-overlay').classList.add('hidden');
 }
 
-// ─ BUILD HTML ────────────────────────────────────────────────────
 function buildReportHTML(d) {
-  const pct = v => v.toFixed(1) + '%';
-  const sec = v => fmtTime(v);
+  const pct  = v => v.toFixed(1) + '%';
+  const sec  = v => fmtTime(v);
   const days = v => v.toFixed(3) + ' d';
   const eff  = v => v >= 60 ? '★ Óptimo' : v >= 35 ? '✔ Moderado' : v >= 15 ? '⚠ Mejorar' : '⚠️ Crítico';
 
-  // ---- 1. FLUJO GLOBAL ----
   const global = `
   <div class="rpt-section">
     <div class="rpt-title">🌊 Flujo Global</div>
@@ -76,7 +73,6 @@ function buildReportHTML(d) {
     </div>
   </div>`;
 
-  // ---- 2. TRANSPORTE / NVA POR FLECHA ----
   const arrowRows = d.arrowStats.map(a => `
     <tr>
       <td>${a.from} → ${a.to}</td>
@@ -95,7 +91,6 @@ function buildReportHTML(d) {
     </table>
   </div>`;
 
-  // ---- 3. WIP / INVENTARIOS ----
   const wipRows = d.wipStats.map(w => `
     <tr>
       <td>${w.label}</td>
@@ -114,16 +109,15 @@ function buildReportHTML(d) {
     </table>
   </div>`;
 
-  // ---- 4. PROCESOS DETALLE ----
   const procRows = d.procResults.map(p => {
-    const saturation = (p.netCT / d.taktTime * 100);
-    const satClass   = saturation > 100 ? 'nva' : saturation > 80 ? 'wip' : 'va';
+    const sat = (p.netCT / d.taktTime * 100);
+    const satClass = sat > 100 ? 'nva' : sat > 80 ? 'wip' : 'va';
     return `
     <tr>
       <td>${p.label}${p.isBn ? ' 🔴' : ''}</td>
       <td>${p.ctMean.toFixed(1)} s${p.distType !== 'fixed' ? ` <em style="color:var(--text-muted);font-size:9px">(P90: ${p.ctP90.toFixed(1)}s)</em>` : ''}</td>
       <td>${p.netCT.toFixed(1)} s</td>
-      <td><span class="rpt-badge ${satClass}">${saturation.toFixed(0)}%</span></td>
+      <td><span class="rpt-badge ${satClass}">${sat.toFixed(0)}%</span></td>
       <td>${Math.floor(p.capacity)} u/d</td>
       <td>${p.uptime}%</td>
       <td>${p.operators}</td>
@@ -141,7 +135,6 @@ function buildReportHTML(d) {
     </table>
   </div>`;
 
-  // ---- 5. OPORTUNIDADES DE MEJORA ----
   const opps = [];
   if (d.pceMean < 15) opps.push({ icon:'🔴', text:`PCE crítico (${pct(d.pceMean)}). El ${pct(100-d.pceMean)} del tiempo es desperdicio.` });
   else if (d.pceMean < 35) opps.push({ icon:'⚠', text:`PCE bajo (${pct(d.pceMean)}). Objetivo recomendado: >35%.` });
@@ -170,7 +163,6 @@ function buildReportHTML(d) {
   return global + transport + wipSection + procSection + oppSection;
 }
 
-// ─ CSV EXPORT ────────────────────────────────────────────────────
 function exportReportCSV() {
   if (!_lastReport) return;
   const d = _lastReport;
@@ -178,8 +170,6 @@ function exportReportCSV() {
   const q = v => `"${String(v).replace(/"/g,'""')}"`;
 
   rows.push(['SECCION','INDICADOR','VALOR','UNIDAD','NOTAS']);
-
-  // Global
   rows.push(['Flujo Global','Lead Time Promedio', d.ltMean.toFixed(4), 'dias', '']);
   if (d.hasStoch) {
     rows.push(['Flujo Global','Lead Time P10', d.lt10.toFixed(4), 'dias', 'Monte Carlo']);
@@ -188,37 +178,34 @@ function exportReportCSV() {
   rows.push(['Flujo Global','Takt Time', d.taktTime.toFixed(4), 'seg', '']);
   rows.push(['Flujo Global','Tiempo VA Total', d.totalVASec.toFixed(2), 'seg', 'Suma CT procesos VA']);
   rows.push(['Flujo Global','Tiempo NVA Total', d.totalNVASec.toFixed(2), 'seg', 'Transporte + espera']);
-  rows.push(['Flujo Global','Tiempo WIP Total', (d.wipDays * d.availSec).toFixed(2), 'seg', '']);
-  rows.push(['Flujo Global','Tiempo WIP Total', d.wipDays.toFixed(4), 'dias', '']);
+  rows.push(['Flujo Global','Tiempo WIP Total (seg)', (d.wipDays * d.availSec).toFixed(2), 'seg', '']);
+  rows.push(['Flujo Global','Tiempo WIP Total (dias)', d.wipDays.toFixed(4), 'dias', '']);
   rows.push(['Flujo Global','PCE Ratio', d.pceMean.toFixed(2), '%', 'Process Cycle Efficiency']);
   rows.push(['Flujo Global','Tiempo Disponible', d.availSec.toFixed(0), 'seg/dia', '']);
   rows.push(['Flujo Global','Demanda', d.demand, 'u/dia', '']);
 
-  // Arrows / Transport
   d.arrowStats.forEach(a => {
-    rows.push(['Transporte NVA', `${a.from} -> ${a.to}`, a.days.toFixed(4), 'dias', a.type]);
-    rows.push(['Transporte NVA', `${a.from} -> ${a.to}`, a.sec.toFixed(2), 'seg', a.type]);
+    rows.push(['Transporte NVA', `${a.from} -> ${a.to} (dias)`, a.days.toFixed(4), 'dias', a.type]);
+    rows.push(['Transporte NVA', `${a.from} -> ${a.to} (seg)`,  a.sec.toFixed(2),  'seg',  a.type]);
   });
 
-  // WIP
   d.wipStats.forEach(w => {
-    rows.push(['WIP / Inventario', w.label + ' - Unidades', w.units, 'u', '']);
-    rows.push(['WIP / Inventario', w.label + ' - Dias',    w.days.toFixed(4), 'dias', '']);
-    rows.push(['WIP / Inventario', w.label + ' - Tiempo',  w.sec.toFixed(2), 'seg', '']);
+    rows.push(['WIP / Inventario', w.label + ' - Unidades', w.units,           'u',    '']);
+    rows.push(['WIP / Inventario', w.label + ' - Dias',     w.days.toFixed(4), 'dias', '']);
+    rows.push(['WIP / Inventario', w.label + ' - Tiempo',   w.sec.toFixed(2),  'seg',  '']);
   });
 
-  // Procesos
   d.procResults.forEach(p => {
     const pref = 'Proceso - ' + p.label;
-    rows.push(['Procesos', pref + ' - CT Medio',    p.ctMean.toFixed(4),    'seg', p.distType]);
-    rows.push(['Procesos', pref + ' - CT P90',      p.ctP90.toFixed(4),     'seg', p.distType !== 'fixed' ? 'MC' : 'N/A']);
-    rows.push(['Procesos', pref + ' - CT Neto',     p.netCT.toFixed(4),     'seg', 'ajustado uptime']);
-    rows.push(['Procesos', pref + ' - Capacidad',   Math.floor(p.capacity), 'u/dia', '']);
-    rows.push(['Procesos', pref + ' - Saturacion',  (p.netCT / d.taktTime * 100).toFixed(1), '%', p.netCT > d.taktTime ? 'SOBRECARGADO' : 'OK']);
-    rows.push(['Procesos', pref + ' - Uptime',      p.uptime,               '%', '']);
-    rows.push(['Procesos', pref + ' - Operadores',  p.operators,            '#', '']);
-    rows.push(['Procesos', pref + ' - Defectos',    p.defectRate,           '%', '']);
-    rows.push(['Procesos', pref + ' - Tipo',        p.isVA ? 'VA' : 'NVA',  '', p.isBn ? 'CUELLO DE BOTELLA' : '']);
+    rows.push(['Procesos', pref + ' - CT Medio',   p.ctMean.toFixed(4),                      'seg',   p.distType]);
+    rows.push(['Procesos', pref + ' - CT P90',     p.ctP90.toFixed(4),                       'seg',   p.distType !== 'fixed' ? 'MC' : 'N/A']);
+    rows.push(['Procesos', pref + ' - CT Neto',    p.netCT.toFixed(4),                       'seg',   'ajustado uptime']);
+    rows.push(['Procesos', pref + ' - Capacidad',  Math.floor(p.capacity),                   'u/dia', '']);
+    rows.push(['Procesos', pref + ' - Saturacion', (p.netCT/d.taktTime*100).toFixed(1),      '%',     p.netCT > d.taktTime ? 'SOBRECARGADO' : 'OK']);
+    rows.push(['Procesos', pref + ' - Uptime',     p.uptime,                                 '%',     '']);
+    rows.push(['Procesos', pref + ' - Operadores', p.operators,                              '#',     '']);
+    rows.push(['Procesos', pref + ' - Defectos',   p.defectRate,                             '%',     '']);
+    rows.push(['Procesos', pref + ' - Tipo',       p.isVA ? 'VA' : 'NVA',                   '',      p.isBn ? 'CUELLO DE BOTELLA' : '']);
   });
 
   const csv = rows.map(r => r.map(q).join(',')).join('\n');

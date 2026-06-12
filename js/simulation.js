@@ -41,7 +41,7 @@ function runSimulation() {
   for (let i = 0; i < iters; i++) {
     let totalVA=0, bnCT=0, bnId=null;
     processes.forEach(node => {
-      const ct   = sampleCT(node.props);
+      const ct    = sampleCT(node.props);
       procCTSamples[node.id].push(ct);
       const netCT = ct / ((node.props.uptime||90)/100);
       if (node.props.isVA !== false) totalVA += ct;
@@ -77,29 +77,20 @@ function runSimulation() {
 
   const totalVAFixed  = processes.reduce((s,n) => s+(n.props.isVA!==false ? n.props.ct : 0), 0);
   const totalNVAFixed = processes.reduce((s,n) => s+(n.props.isVA===false  ? n.props.ct : 0), 0)
-                      + arrows.reduce((s,a)  => s+(a.transportDays||0.5)*hoursShift*3600, 0);
+                      + arrows.reduce((s,a) => s+(a.transportDays||0.5)*hoursShift*3600, 0);
   const wipDaysMean   = inventories.reduce((s,inv) => s+(inv.props.units||0)/demand, 0);
 
-  // Arrow stats for report
   const arrowStats = arrows.map(a => {
-    const fn = getNode(a.fromId), tn = getNode(a.toId);
-    const days = a.transportDays || 0.5;
-    return {
-      from: fn?.props?.label || a.fromId,
-      to:   tn?.props?.label || a.toId,
-      type: a.type,
-      days,
-      sec: days * hoursShift * 3600
-    };
+    const fn=getNode(a.fromId), tn=getNode(a.toId);
+    const days = a.transportDays||0.5;
+    return { from:fn?.props?.label||a.fromId, to:tn?.props?.label||a.toId, type:a.type, days, sec:days*hoursShift*3600 };
   });
 
-  // WIP stats for report
   const wipStats = inventories.map(inv => {
-    const d = (inv.props.units||0)/demand;
+    const d=(inv.props.units||0)/demand;
     return { label:inv.props.label, units:inv.props.units||0, days:d, sec:d*availSec };
   });
 
-  // Save full report data
   saveReportData({
     ltMean, lt10, lt90, taktTime, pceMean, hasStoch, iters,
     totalVASec:  totalVAFixed,
@@ -169,8 +160,8 @@ function buildValueTimeline(processes, inventories, demand, availSec) {
   svg.innerHTML='';
   const sequence=buildFlowSequence();
   if(!sequence.length){ svg.innerHTML='<text x="10" y="20" fill="#6e7681" font-size="11">Conecta los nodos para ver el timeline</text>'; return; }
-  const BOX_H=36, BOX_GAP=6, Y_TOP=8, Y_ZIGZAG=Y_TOP+BOX_H+4, Y_LABEL=Y_ZIGZAG+18, TOTAL_H=Y_LABEL+18;
-  const MIN_W=60, MAX_W=160;
+  const BOX_H=36,BOX_GAP=6,Y_TOP=8,Y_ZIGZAG=Y_TOP+BOX_H+4,Y_LABEL=Y_ZIGZAG+18,TOTAL_H=Y_LABEL+18;
+  const MIN_W=60,MAX_W=160;
   const values=sequence.map(s=>s.valueSec||1);
   const maxVal=Math.max(...values);
   const widths=values.map(v=>Math.max(MIN_W,Math.round((v/maxVal)*MAX_W)));
@@ -179,7 +170,7 @@ function buildValueTimeline(processes, inventories, demand, availSec) {
   svg.setAttribute('width',totalW); svg.setAttribute('height',TOTAL_H);
   let x=10; const zigZagPoints=[];
   sequence.forEach((seg,i)=>{
-    const w=widths[i], cx=x+w/2;
+    const w=widths[i],cx=x+w/2;
     const colors={va:{fill:'rgba(63,185,80,.18)',stroke:'#3fb950',text:'#3fb950'},nva:{fill:'rgba(248,81,73,.18)',stroke:'#f85149',text:'#f85149'},wip:{fill:'rgba(210,153,34,.18)',stroke:'#d29922',text:'#d29922'}};
     const c=colors[seg.type]||colors.nva;
     const rect=document.createElementNS('http://www.w3.org/2000/svg','rect');
@@ -220,8 +211,8 @@ function buildFlowSequence() {
   if(!arrows.length||!nodes.length) return [];
   let startNode=nodes.find(n=>n.type==='supplier');
   if(!startNode) startNode=nodes.slice().sort((a,b)=>a.x-b.x)[0];
-  const sequence=[], visited=new Set();
-  let current=startNode, safety=0;
+  const sequence=[],visited=new Set();
+  let current=startNode,safety=0;
   while(current&&safety++<50){
     if(visited.has(current.id)) break;
     visited.add(current.id);
