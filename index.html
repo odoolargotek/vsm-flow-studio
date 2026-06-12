@@ -13,7 +13,7 @@
       <div class="brand">
         <span class="brand-icon">⬡</span>
         <span class="brand-name">VSM <strong>Flow Studio</strong></span>
-        <span class="brand-version">v3</span>
+        <span class="brand-version">v4</span>
       </div>
       <div class="toolbar-actions">
         <button onclick="newDiagram()">＋ Nuevo</button>
@@ -89,15 +89,21 @@
           </div>
           <div class="anim-stats-row">
             <div id="anim-stats" class="anim-stats"></div>
-            <div id="anim-log"   class="anim-log">Presiona ▶ para iniciar la simulación animada.</div>
+            <div id="anim-log"   class="anim-log">Presiona ▶ para iniciar.</div>
           </div>
         </div>
 
-        <!-- TIMELINE (above anim bar) -->
-        <div class="timeline-bar" id="timeline-bar">
-          <div class="timeline-label">TIMELINE</div>
-          <div class="timeline-content" id="timeline-content"></div>
+        <!-- VALUE STREAM TIMELINE (classic VSM sawtooth) -->
+        <div class="vt-bar" id="vt-bar">
+          <div class="vt-header">
+            <span class="vt-title">VALUE STREAM TIMELINE</span>
+            <div id="vt-summary" class="vt-summary"></div>
+          </div>
+          <div class="vt-scroll">
+            <svg id="vt-svg" xmlns="http://www.w3.org/2000/svg"></svg>
+          </div>
         </div>
+
       </main>
 
       <!-- SIM PANEL -->
@@ -128,7 +134,7 @@
         </div>
         <div class="sim-section">
           <div class="sim-section-title">LOG</div>
-          <div id="sim-log" class="sim-log">Agrega procesos al canvas y presiona CALCULAR.</div>
+          <div id="sim-log" class="sim-log">Agrega procesos y presiona CALCULAR.</div>
         </div>
       </aside>
 
