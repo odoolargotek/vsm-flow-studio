@@ -1,7 +1,4 @@
-// ===== CANVAS ENGINE v4.3 — VSM Flow Studio =====
-// Root-cause fix: removed capture-phase canvas click listener that was
-// completing the connection AND letting the event bubble to onPortClick.
-// Now ONLY ports handle connection logic. Canvas click only deselects/cancels.
+// ===== CANVAS ENGINE v4.4 — Gate node + Resource display =====
 
 let arrowMode      = null;
 let connectingFrom = null;
@@ -36,7 +33,6 @@ function renderNode(node) {
   el.innerHTML  = getNodeHTML(node);
   el.addEventListener('mousedown', e => startDrag(e, node));
   el.addEventListener('dblclick',  e => { e.stopPropagation(); openModal(node.id); });
-  // When in connect mode, clicking the node body also works as destination
   el.addEventListener('click', e => {
     if (!connectingFrom) return;
     e.stopPropagation();
@@ -55,8 +51,6 @@ function bindPorts(el, nodeId) {
     port.addEventListener('mousedown', e => e.stopPropagation());
     port.addEventListener('click', e => {
       e.stopPropagation();
-      // The node's own click handler also fires — we must skip it.
-      // We do this by setting a flag BEFORE it can execute.
       onPortClick(nodeId);
     });
   });
@@ -77,10 +71,27 @@ function getNodeHTML(node) {
     const ops = Array.from({length:Math.max(p.operators||1,1)}).map(()=>'<div class="node-op active"></div>').join('');
     const ctDisplay = p.distType==='normal' ? `${p.ct}s ±${p.ctStd||0}s`
       : p.distType==='triangular' ? `[${p.ctMin||p.ct},${p.ct},${p.ctMax||p.ct}]s` : `${p.ct}s`;
+    const resBadge = p.resourceName
+      ? `<div class="node-resource-badge" title="Recurso: ${p.resourceName}">👤 ${p.resourceName}${p.resourceCT ? ' · '+p.resourceCT+'s' : ''}</div>` : '';
     html += `<div class="node-body">
       <div class="node-title">${p.label}${distBadge}</div>
       <div class="node-stats">CT: <span>${ctDisplay}</span><br>C/O: <span>${p.co}min</span><br>Uptime: <span>${p.uptime}%</span></div>
+      ${resBadge}
       <div class="node-ops">${ops}</div>
+    </div>`;
+  } else if (node.type === 'gate') {
+    // Show split percentages for outgoing arrows
+    const outs = arrows.filter(a => a.fromId === node.id);
+    const splitLines = outs.length
+      ? outs.map(a => {
+          const toLbl = getNode(a.toId)?.props?.label || a.toId;
+          return `<div class="gate-split-line">→ ${toLbl}: <b>${a.splitPct||0}%</b></div>`;
+        }).join('')
+      : '<div class="gate-split-hint">Conecta salidas</div>';
+    html += `<div class="node-body gate-body">
+      <div class="gate-icon">🔀</div>
+      <div class="node-title">${p.label}</div>
+      <div class="gate-splits">${splitLines}</div>
     </div>`;
   } else if (node.type === 'supplier') {
     html += `<div class="node-body"><div class="node-entity-icon">🏭</div><div class="node-entity-name">${p.label}</div></div>`;
@@ -100,6 +111,11 @@ function refreshNodeElement(nodeId) {
   el.innerHTML = getNodeHTML(node);
   bindPorts(el, nodeId);
   renderAllArrows();
+}
+
+// Refresh all gate nodes (needed when arrows change)
+function refreshAllGates() {
+  nodes.filter(n => n.type === 'gate').forEach(n => refreshNodeElement(n.id));
 }
 
 // ─ DRAG TO MOVE ──────────────────────────────────────────────────
@@ -143,7 +159,6 @@ function selectNode(id) {
   selectedNodeId = id;
 }
 
-// Canvas background click: deselect everything / cancel arrow mode
 function onCanvasClick(e) {
   if (e.target === document.getElementById('canvas')) {
     document.querySelectorAll('.vsm-node').forEach(el => el.classList.remove('selected'));
@@ -188,12 +203,11 @@ function showConnectHint(active, fromLabel) {
   hint.style.display = active ? 'block' : 'none';
 }
 
-// ─ PORT CLICK — sole owner of connection logic ───────────────────────────────
+// ─ PORT CLICK ───────────────────────────────────────────────────────────
 function onPortClick(nodeId) {
   if (!arrowMode) setArrowMode('push');
 
   if (!connectingFrom) {
-    // Step 1: set source
     connectingFrom = nodeId;
     selectNode(nodeId);
     showConnectHint(true, getNode(nodeId)?.props.label || nodeId);
@@ -201,15 +215,14 @@ function onPortClick(nodeId) {
   }
 
   if (connectingFrom === nodeId) {
-    // Clicked source port again — cancel
     cancelArrowMode();
     return;
   }
 
-  // Step 2: create connection, then fully stop
   addArrow(connectingFrom, nodeId, arrowMode);
   renderAllArrows();
-  cancelArrowMode();   // resets arrowMode, connectingFrom, cursor, hint
+  refreshAllGates();
+  cancelArrowMode();
 }
 
 // ─ ARROW SELECTION & EDITING ──────────────────────────────────────────
@@ -231,14 +244,17 @@ function showArrowToolbar(arrowId) {
   document.getElementById('arrow-toolbar')?.remove();
   const arrow = getArrow(arrowId); if (!arrow) return;
   const mid   = getArrowMidpoint(arrow.fromId, arrow.toId); if (!mid) return;
+  const fromNode = getNode(arrow.fromId);
+  const isGateOut = fromNode && fromNode.type === 'gate';
 
   const tb = document.createElement('div');
   tb.id = 'arrow-toolbar';
   tb.className = 'arrow-toolbar';
   tb.style.left = (mid.x - 60) + 'px';
   tb.style.top  = (mid.y - 40) + 'px';
+  const pctLabel = isGateOut ? ` · ${arrow.splitPct||0}%` : '';
   tb.innerHTML = `
-    <span class="arrow-tb-label">${arrowTypeLabel(arrow.type)} • ${arrow.transportDays||0.5}d</span>
+    <span class="arrow-tb-label">${arrowTypeLabel(arrow.type)} • ${arrow.transportDays||0.5}d${pctLabel}</span>
     <button onclick="openArrowModal('${arrowId}')" title="Editar">✎</button>
     <button class="danger" onclick="confirmDeleteArrow('${arrowId}')" title="Eliminar">🗑</button>`;
   tb.addEventListener('mousedown', e => e.stopPropagation());
@@ -267,6 +283,34 @@ function openArrowModal(arrowId) {
   const arrow=getArrow(arrowId); if(!arrow) return;
   const fromLbl=getNode(arrow.fromId)?.props?.label||arrow.fromId;
   const toLbl  =getNode(arrow.toId)?.props?.label  ||arrow.toId;
+  const fromNode = getNode(arrow.fromId);
+  const isGateOut = fromNode && fromNode.type === 'gate';
+
+  // For gate outputs, collect sibling arrows to show all pcts
+  const gateOutsHtml = isGateOut ? (() => {
+    const siblings = arrows.filter(a => a.fromId === arrow.fromId);
+    return `
+      <hr class="prop-divider">
+      <div class="prop-section-title">🔀 % Distribución del Gate</div>
+      <div style="font-size:10px;color:var(--text-muted);margin-bottom:8px">La suma de todos los % debe ser 100. Ajusta manualmente.</div>
+      ${siblings.map(s => {
+        const sLbl = getNode(s.toId)?.props?.label || s.toId;
+        const isThis = s.id === arrowId;
+        return `<div class="prop-row" style="align-items:center;gap:8px">
+          <div class="prop-group" style="flex:2">
+            <label style="font-weight:${isThis?700:400};color:${isThis?'var(--accent)':'inherit'}">
+              → ${sLbl}${isThis?' (esta)':''}
+            </label>
+          </div>
+          <div class="prop-group" style="flex:1">
+            <input type="number" id="gate-pct-${s.id}" value="${s.splitPct||0}" min="0" max="100"
+              oninput="updateGatePctPreview()">
+          </div>
+          <span style="color:var(--text-muted);font-size:11px">%</span>
+        </div>`;
+      }).join('')}
+      <div id="gate-pct-total" style="font-size:11px;margin-top:4px;"></div>`;
+  })() : '';
 
   document.getElementById('modal-title').textContent=`Flecha: ${fromLbl} → ${toLbl}`;
   document.getElementById('modal-body').innerHTML=`
@@ -284,24 +328,48 @@ function openArrowModal(arrowId) {
         <input type="number" id="arrow-edit-days" value="${arrow.transportDays||0.5}" min="0" step="0.1" style="width:100%">
         <span class="sim-unit">días</span>
       </div>
-      <small style="color:var(--text-muted);font-size:9px;margin-top:4px;display:block">
-        Aparece como caja NVA (roja) en el Value Stream Timeline.
-      </small>
     </div>
+    ${gateOutsHtml}
     <div class="prop-group" style="margin-top:12px">
       <button onclick="confirmDeleteArrow('${arrowId}')" style="background:rgba(248,81,73,.15);border:1px solid var(--danger);color:var(--danger);padding:6px 14px;border-radius:6px;cursor:pointer;font-size:11px;width:100%">
         🗑 Eliminar esta flecha
       </button>
     </div>`;
 
-  document.querySelector('.modal-footer .btn-accent').onclick = () => saveArrowProps(arrowId);
+  if (isGateOut) setTimeout(updateGatePctPreview, 50);
+  document.querySelector('.modal-footer .btn-accent').onclick = () => saveArrowProps(arrowId, isGateOut);
   document.getElementById('modal-overlay').classList.remove('hidden');
 }
 
-function saveArrowProps(arrowId) {
+function updateGatePctPreview() {
+  const total = arrows
+    .filter(a => {
+      const inp = document.getElementById('gate-pct-'+a.id);
+      return inp !== null;
+    })
+    .reduce((sum, a) => {
+      const inp = document.getElementById('gate-pct-'+a.id);
+      return sum + (parseFloat(inp?.value)||0);
+    }, 0);
+  const el = document.getElementById('gate-pct-total');
+  if (el) {
+    el.textContent = `Total: ${total.toFixed(0)}%`;
+    el.style.color = Math.abs(total - 100) < 0.01 ? 'var(--success,#3fb950)' : 'var(--danger,#f85149)';
+  }
+}
+
+function saveArrowProps(arrowId, isGateOut) {
   const arrow=getArrow(arrowId); if(!arrow) return;
   arrow.type          = document.getElementById('arrow-edit-type').value;
   arrow.transportDays = parseFloat(document.getElementById('arrow-edit-days').value)||0.5;
+  if (isGateOut) {
+    // Save all sibling gate % values
+    arrows.filter(a => a.fromId === arrow.fromId).forEach(a => {
+      const inp = document.getElementById('gate-pct-'+a.id);
+      if (inp) a.splitPct = parseFloat(inp.value)||0;
+    });
+    refreshAllGates();
+  }
   closeModal();
   renderAllArrows();
 }
@@ -311,7 +379,9 @@ function confirmDeleteArrow(arrowId) {
   const from=getNode(arrow.fromId)?.props?.label||'?';
   const to  =getNode(arrow.toId)?.props?.label  ||'?';
   if(confirm(`¿Eliminar flecha ${from} → ${to}?`)) {
+    const fromId = arrow.fromId;
     deleteArrow(arrowId); closeModal(); renderAllArrows();
+    if (getNode(fromId)?.type === 'gate') { autoBalanceGate(fromId); refreshAllGates(); renderAllArrows(); }
   }
 }
 
@@ -332,9 +402,11 @@ function renderAllArrows() {
       <marker id="arr-push"     markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0,10 3.5,0 7" fill="#58a6ff"/></marker>
       <marker id="arr-pull"     markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0,10 3.5,0 7" fill="#3fb950"/></marker>
       <marker id="arr-info"     markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0,10 3.5,0 7" fill="#d29922"/></marker>
+      <marker id="arr-gate"     markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0,10 3.5,0 7" fill="#bc8cff"/></marker>
       <marker id="arr-push-sel" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0,10 3.5,0 7" fill="#ffffff"/></marker>
       <marker id="arr-pull-sel" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0,10 3.5,0 7" fill="#ffffff"/></marker>
       <marker id="arr-info-sel" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0,10 3.5,0 7" fill="#ffffff"/></marker>
+      <marker id="arr-gate-sel" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0,10 3.5,0 7" fill="#ffffff"/></marker>
     </defs>`;
 
   arrows.forEach(arrow => {
@@ -346,44 +418,47 @@ function renderAllArrows() {
     const dx=Math.abs(x2-x1), cx1=x1+dx*0.45, cx2=x2-dx*0.45;
     const d=`M ${x1} ${y1} C ${cx1} ${y1} ${cx2} ${y2} ${x2} ${y2}`;
 
+    const isGateOut = fn.type === 'gate';
     const isSel  = arrow.id===selectedArrowId;
-    const stroke = isSel?'#ffffff':arrow.type==='push'?'#58a6ff':arrow.type==='pull'?'#3fb950':'#d29922';
+    const baseColor = isGateOut ? '#bc8cff' : arrow.type==='push'?'#58a6ff':arrow.type==='pull'?'#3fb950':'#d29922';
+    const stroke = isSel ? '#ffffff' : baseColor;
     const dash   = arrow.type==='push'?'':arrow.type==='pull'?'8,4':'4,4';
+    const markerKey = isGateOut ? 'gate' : arrow.type;
     const mkSfx  = isSel?'-sel':'';
 
     const hit = document.createElementNS('http://www.w3.org/2000/svg','path');
-    hit.setAttribute('d', d);
-    hit.setAttribute('stroke','rgba(255,255,255,0.01)');
-    hit.setAttribute('stroke-width','18');
-    hit.setAttribute('fill','none');
-    hit.style.cursor = 'pointer';
-    hit.style.pointerEvents = 'stroke';
+    hit.setAttribute('d', d); hit.setAttribute('stroke','rgba(255,255,255,0.01)');
+    hit.setAttribute('stroke-width','18'); hit.setAttribute('fill','none');
+    hit.style.cursor = 'pointer'; hit.style.pointerEvents = 'stroke';
     hit.addEventListener('click',    ev => { ev.stopPropagation(); if (!connectingFrom) selectArrow(arrow.id); });
     hit.addEventListener('dblclick', ev => { ev.stopPropagation(); if (!connectingFrom) openArrowModal(arrow.id); });
     svg.appendChild(hit);
 
     const path = document.createElementNS('http://www.w3.org/2000/svg','path');
     path.setAttribute('id','arrow-path-'+arrow.id);
-    path.setAttribute('d', d);
-    path.setAttribute('stroke', stroke);
-    path.setAttribute('stroke-width', isSel?3:2);
-    path.setAttribute('fill','none');
+    path.setAttribute('d', d); path.setAttribute('stroke', stroke);
+    path.setAttribute('stroke-width', isSel?3:2); path.setAttribute('fill','none');
     path.setAttribute('stroke-dasharray', dash);
-    path.setAttribute('marker-end',`url(#arr-${arrow.type}${mkSfx})`);
+    path.setAttribute('marker-end',`url(#arr-${markerKey}${mkSfx})`);
     path.style.pointerEvents = 'none';
     svg.appendChild(path);
 
-    const td = arrow.transportDays;
-    if (td && td !== 0.5) {
+    // Label: transport days OR gate %
+    let labelText = null;
+    if (isGateOut && arrow.splitPct != null) {
+      labelText = arrow.splitPct + '%';
+    } else if (arrow.transportDays && arrow.transportDays !== 0.5) {
+      labelText = arrow.transportDays + 'd';
+    }
+    if (labelText) {
       const mx=0.125*x1+0.375*cx1+0.375*cx2+0.125*x2;
       const my=0.125*y1+0.375*y1 +0.375*y2 +0.125*y2;
       const lbl=document.createElementNS('http://www.w3.org/2000/svg','text');
       lbl.setAttribute('x',mx); lbl.setAttribute('y',my-8);
-      lbl.setAttribute('fill',stroke); lbl.setAttribute('font-size','9');
-      lbl.setAttribute('text-anchor','middle'); lbl.setAttribute('font-family','monospace');
-      lbl.setAttribute('font-weight','700');
-      lbl.textContent = td+'d';
-      lbl.style.pointerEvents='none';
+      lbl.setAttribute('fill', isGateOut ? '#bc8cff' : stroke);
+      lbl.setAttribute('font-size','10'); lbl.setAttribute('text-anchor','middle');
+      lbl.setAttribute('font-family','monospace'); lbl.setAttribute('font-weight','700');
+      lbl.textContent = labelText; lbl.style.pointerEvents='none';
       svg.appendChild(lbl);
     }
   });
