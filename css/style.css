@@ -188,113 +188,220 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg-app);color:
 .prop-calc{background:var(--bg-app);border:1px solid var(--border-light);border-radius:var(--radius);padding:8px 10px;font-size:10px;color:var(--text-muted);line-height:2;}
 .prop-calc span{color:var(--accent);font-weight:600;}
 
-/* — REPORT MODAL (base) — */
-.report-modal{width:900px;max-width:97vw;max-height:92vh;}
+/* — REPORT MODAL — */
+.report-modal{width:920px;max-width:97vw;max-height:92vh;}
 .btn-csv{background:rgba(63,185,80,.15);border:1px solid var(--accent2);color:var(--accent2);padding:4px 12px;border-radius:var(--radius);cursor:pointer;font-size:11px;font-weight:600;}
 .btn-csv:hover{background:rgba(63,185,80,.3);}
-.rpt-section{margin-bottom:20px;}
-.rpt-title{font-size:11px;font-weight:700;color:var(--accent);letter-spacing:1px;margin-bottom:10px;padding-bottom:4px;border-bottom:1px solid var(--border);}
-.rpt-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:8px;}
-.rpt-card{background:var(--bg-app);border:1px solid var(--border);border-radius:var(--radius);padding:10px 12px;}
-.rpt-card.va{border-color:rgba(63,185,80,.4);background:rgba(63,185,80,.06);}
-.rpt-card.nva{border-color:rgba(248,81,73,.4);background:rgba(248,81,73,.06);}
-.rpt-card.wip{border-color:rgba(210,153,34,.4);background:rgba(210,153,34,.06);}
-.rpt-card-label{font-size:9px;color:var(--text-muted);margin-bottom:4px;font-weight:600;letter-spacing:.5px;}
-.rpt-card-value{font-size:20px;font-weight:700;color:var(--text-bright);line-height:1.1;}
-.rpt-card-sub{font-size:9px;color:var(--text-muted);margin-top:3px;}
-.rpt-table{width:100%;border-collapse:collapse;font-size:11px;}
-.rpt-table th{background:var(--bg-app);color:var(--text-muted);font-size:9px;letter-spacing:.5px;font-weight:700;padding:6px 8px;text-align:left;border-bottom:1px solid var(--border);}
-.rpt-table td{padding:6px 8px;border-bottom:1px solid var(--border-light);color:var(--text);}
-.rpt-table tr:hover td{background:rgba(255,255,255,.02);}
-.rpt-badge{font-size:9px;font-weight:700;padding:1px 6px;border-radius:4px;}
-.rpt-badge.push{background:rgba(88,166,255,.2);color:#58a6ff;}
-.rpt-badge.pull{background:rgba(63,185,80,.2);color:#3fb950;}
-.rpt-badge.info{background:rgba(210,153,34,.2);color:#d29922;}
-.rpt-badge.va{background:rgba(63,185,80,.2);color:#3fb950;}
-.rpt-badge.nva{background:rgba(248,81,73,.2);color:#f85149;}
-.rpt-badge.wip{background:rgba(210,153,34,.2);color:#d29922;}
-.rpt-opps{list-style:none;display:flex;flex-direction:column;gap:6px;}
-.rpt-opps li{display:flex;align-items:flex-start;gap:8px;background:var(--bg-app);border:1px solid var(--border);border-radius:var(--radius);padding:8px 10px;font-size:11px;color:var(--text);}
-.rpt-opp-icon{font-size:14px;flex-shrink:0;}
 
-/* =====================================================
-   PROCESS SIMULATOR — STYLE DASHBOARD
-   Scoreboard · Entity States · Activity States
-   Resource States · WIP Buffer States
-   ===================================================== */
+/* ==============================================================
+   DASHBOARD — clases usadas por report.js
+   db-root, db-panel, db-bar-*, seg-*, db-table, db-opps
+   ============================================================== */
 
-/* Tabs para escenarios */
-.ps-tabs{display:flex;gap:4px;margin-bottom:12px;border-bottom:1px solid var(--border);padding-bottom:8px;flex-wrap:wrap;}
-.ps-tab{padding:4px 12px;border-radius:var(--radius) var(--radius) 0 0;font-size:10px;font-weight:600;cursor:pointer;border:1px solid var(--border);border-bottom:none;color:var(--text-muted);background:var(--bg-node);transition:all .15s;}
-.ps-tab:hover{color:var(--text-bright);}
-.ps-tab.active{background:var(--accent);color:#000;border-color:var(--accent);}
-.ps-tab.baseline{background:rgba(63,185,80,.15);color:var(--accent2);border-color:var(--accent2);}
-.ps-tab.baseline.active{background:var(--accent2);color:#000;}
+.db-root{
+  display:flex;
+  flex-direction:column;
+  gap:16px;
+  padding:4px 2px;
+}
 
-/* Scoreboard */
-.ps-scoreboard{width:100%;border-collapse:collapse;font-size:11px;margin-bottom:4px;}
-.ps-scoreboard thead tr{background:rgba(88,166,255,.08);}
-.ps-scoreboard th{padding:7px 10px;font-size:9px;letter-spacing:.5px;color:var(--accent);font-weight:700;text-align:left;border-bottom:2px solid var(--accent);white-space:nowrap;}
-.ps-scoreboard td{padding:7px 10px;border-bottom:1px solid var(--border-light);color:var(--text);white-space:nowrap;}
-.ps-scoreboard tr:hover td{background:rgba(255,255,255,.02);}
-.ps-scoreboard .scenario-name{font-weight:700;color:var(--text-bright);}
-.ps-scoreboard .baseline-row td{background:rgba(63,185,80,.04);}
-.ps-scoreboard .val-better{color:var(--accent2);font-weight:700;}
-.ps-scoreboard .val-worse{color:var(--danger);font-weight:700;}
-.ps-scoreboard .val-neutral{color:var(--text-muted);}
+/* Panel contenedor */
+.db-panel{
+  background:var(--bg-app);
+  border:1px solid var(--border);
+  border-radius:var(--radius-lg);
+  padding:14px 16px;
+}
+.db-panel-title{
+  font-size:11px;
+  font-weight:700;
+  color:var(--text-bright);
+  letter-spacing:.5px;
+  margin-bottom:12px;
+  padding-bottom:6px;
+  border-bottom:1px solid var(--border);
+}
 
-/* Barra de estado horizontal estilo PS */
-.ps-chart-wrap{margin-bottom:6px;}
-.ps-chart-label{font-size:10px;color:var(--text-muted);margin-bottom:3px;min-width:160px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.ps-bar-track{height:22px;background:var(--bg-app);border-radius:3px;overflow:hidden;display:flex;position:relative;border:1px solid var(--border-light);}
-.ps-bar-seg{height:100%;transition:width .4s ease;display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:700;overflow:hidden;white-space:nowrap;}
-.ps-bar-seg:first-child{border-radius:2px 0 0 2px;}
-.ps-bar-seg:last-child{border-radius:0 2px 2px 0;}
-/* Segmentos de entidad */
-.seg-va   {background:#238636;color:#aff5b4;} /* verde VA */
-.seg-nva  {background:#b0006a;color:#ffd6ec;} /* magenta NVA/espera */
-.seg-move {background:#4d6599;color:#cdd9ff;} /* azul gris transporte */
-.seg-wip  {background:#9e6a03;color:#ffd680;} /* ámbar WIP */
-/* Segmentos de actividad */
-.seg-oper {background:#1f6feb;color:#cae8ff;} /* azul operando */
-.seg-setup{background:#8957e5;color:#e5d4ff;} /* morado setup */
-.seg-idle {background:#238636;color:#aff5b4;} /* verde idle */
-.seg-wait {background:#d29922;color:#fff8c5;} /* amarillo waiting */
-.seg-block{background:#bc4c00;color:#ffddb0;} /* naranja blocked */
-.seg-down {background:#6e7681;color:#f0f6fc;} /* gris down */
-/* Segmentos de buffer */
-.seg-empty{background:#1f6feb;color:#cae8ff;} /* azul vacío */
-.seg-part {background:#3fb950;color:#000;} /* cian ocupado parcial */
-.seg-full {background:#f85149;color:#fff;} /* rojo lleno */
+/* Nota informativa */
+.db-note{
+  font-size:10px;
+  color:var(--text-muted);
+  margin-top:8px;
+  padding:6px 8px;
+  background:rgba(88,166,255,.06);
+  border-radius:var(--radius);
+  border-left:3px solid var(--accent);
+}
 
-/* Leyenda */
-.ps-legend{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px;}
-.ps-legend-item{display:flex;align-items:center;gap:4px;font-size:9px;color:var(--text-muted);}
-.ps-legend-dot{width:10px;height:10px;border-radius:2px;flex-shrink:0;}
+/* ── Scoreboard ─────────────────────────────────────────────── */
+.sc-table{ margin-top:0; }
+.sc-table th{
+  background:rgba(88,166,255,.08);
+  color:var(--accent);
+  font-size:9px;
+  letter-spacing:.5px;
+  font-weight:700;
+  padding:7px 10px;
+  text-align:left;
+  border-bottom:2px solid rgba(88,166,255,.3);
+  white-space:nowrap;
+}
+.sc-table td{
+  padding:7px 10px;
+  border-bottom:1px solid var(--border-light);
+  color:var(--text);
+  white-space:nowrap;
+  font-size:11px;
+}
+.sc-table tr:hover td{ background:rgba(255,255,255,.02); }
+.sc-table .sc-num{ font-family:monospace; }
+.sc-baseline td{ background:rgba(63,185,80,.04); }
+.sc-scenario td{ background:rgba(88,166,255,.03); }
+.sc-ok  { color:var(--accent2)!important; font-weight:700; }
+.sc-warn{ color:var(--warning)!important; font-weight:700; }
+.sc-warn80{ color:#e3b341!important; }
+.sc-tag { color:var(--text-muted); font-size:9px; }
 
-/* Layout de 2 columnas para paneles */
-.ps-panels-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
-@media(max-width:700px){.ps-panels-grid{grid-template-columns:1fr;}}
+/* ── Barras de estado ───────────────────────────────────────── */
+.db-bar-row{
+  margin-bottom:8px;
+}
+.db-bar-row.db-bar-bn .db-bar-label{
+  color:var(--danger);
+}
+.db-bar-label{
+  font-size:10px;
+  color:var(--text-muted);
+  margin-bottom:3px;
+  display:flex;
+  align-items:center;
+  gap:6px;
+  flex-wrap:wrap;
+}
+.db-bar-track{
+  height:24px;
+  background:var(--bg-node);
+  border-radius:4px;
+  overflow:hidden;
+  display:flex;
+  border:1px solid var(--border-light);
+}
+.db-bar-seg{
+  height:100%;
+  transition:width .5s ease;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:8px;
+  font-weight:700;
+  overflow:hidden;
+  white-space:nowrap;
+  min-width:0;
+}
+.db-bar-pct{
+  font-size:10px;
+  color:var(--text-muted);
+  text-align:right;
+  margin-top:2px;
+  font-family:monospace;
+}
 
-/* Panel individual estilo Output Viewer */
-.ps-panel{background:var(--bg-app);border:1px solid var(--border);border-radius:var(--radius);padding:12px 14px;}
-.ps-panel-title{font-size:10px;font-weight:700;color:var(--text-bright);letter-spacing:.5px;margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:6px;}
-.ps-panel-icon{font-size:13px;}
+/* ── Colores de segmentos ───────────────────────────────────── */
+/* Entity states */
+.seg-va  { background:#238636; color:#aff5b4; }
+.seg-nva { background:#b0006a; color:#ffd6ec; }
+.seg-wip { background:#9e6a03; color:#ffd680; }
 
-/* Etiqueta de delta (mejora/empeora vs baseline) */
-.ps-delta{font-size:9px;font-weight:700;padding:1px 5px;border-radius:3px;margin-left:6px;}
-.ps-delta.better{background:rgba(63,185,80,.2);color:var(--accent2);}
-.ps-delta.worse{background:rgba(248,81,73,.2);color:var(--danger);}
-.ps-delta.neutral{background:rgba(110,118,129,.2);color:var(--text-muted);}
+/* Activity states */
+.seg-op   { background:#1f6feb; color:#cae8ff; }
+.seg-idle { background:#238636; color:#aff5b4; }
+.seg-wait { background:#d29922; color:#fff8c5; }
+.seg-setup{ background:#8957e5; color:#e5d4ff; }
+.seg-block{ background:#bc4c00; color:#ffddb0; }
+.seg-down { background:#484f58; color:#c9d1d9; }
 
-/* No data */
-.ps-nodata{font-size:11px;color:var(--text-muted);text-align:center;padding:24px 0;font-style:italic;}
+/* Leyenda — textos de color */
+.seg-va-txt  { color:#4ac26b; font-size:10px; }
+.seg-nva-txt { color:#db61a2; font-size:10px; }
+.seg-wip-txt { color:#d29922; font-size:10px; }
+.seg-op-txt  { color:#58a6ff; font-size:10px; }
+.seg-idle-txt{ color:#4ac26b; font-size:10px; }
+.seg-wait-txt{ color:#d29922; font-size:10px; }
+.seg-down-txt{ color:#8b949e; font-size:10px; }
 
-/* Oportunidades */
-.ps-opps{list-style:none;display:flex;flex-direction:column;gap:5px;}
-.ps-opp{display:flex;align-items:flex-start;gap:8px;background:var(--bg-node);border:1px solid var(--border);border-radius:var(--radius);padding:8px 10px;font-size:11px;color:var(--text);}
-.ps-opp-icon{font-size:13px;flex-shrink:0;margin-top:1px;}
-.ps-opp strong{color:var(--text-bright);}
+/* Leyenda container */
+.db-legend{
+  display:flex;
+  flex-wrap:wrap;
+  gap:12px;
+  margin-bottom:10px;
+  padding:6px 0;
+}
+
+/* Números bajo barras */
+.db-bar-nums{
+  display:flex;
+  gap:14px;
+  margin-top:3px;
+  flex-wrap:wrap;
+}
+
+/* ── Badges ─────────────────────────────────────────────────── */
+.db-badge{
+  font-size:9px;
+  font-weight:700;
+  padding:1px 6px;
+  border-radius:4px;
+  display:inline-block;
+}
+.db-badge-red { background:rgba(248,81,73,.2); color:var(--danger); }
+.db-badge-blue{ background:rgba(88,166,255,.2); color:var(--accent); }
+
+/* ── Tabla de detalle ───────────────────────────────────────── */
+.db-table{
+  width:100%;
+  border-collapse:collapse;
+  font-size:11px;
+}
+.db-table th{
+  background:var(--bg-node);
+  color:var(--text-muted);
+  font-size:9px;
+  letter-spacing:.5px;
+  font-weight:700;
+  padding:6px 8px;
+  text-align:left;
+  border-bottom:1px solid var(--border);
+  white-space:nowrap;
+}
+.db-table td{
+  padding:6px 8px;
+  border-bottom:1px solid var(--border-light);
+  color:var(--text);
+  font-family:monospace;
+  font-size:11px;
+}
+.db-table tr:hover td{ background:rgba(255,255,255,.02); }
+
+/* ── Oportunidades ──────────────────────────────────────────── */
+.db-opps{
+  display:flex;
+  flex-direction:column;
+  gap:5px;
+}
+.db-opp{
+  display:flex;
+  align-items:flex-start;
+  gap:8px;
+  border-radius:var(--radius);
+  padding:8px 10px;
+  font-size:11px;
+  border:1px solid var(--border-light);
+}
+.db-opp-icon{ font-size:14px; flex-shrink:0; margin-top:1px; }
+.opp-critical{ background:rgba(248,81,73,.08);  border-color:rgba(248,81,73,.3);  color:var(--text); }
+.opp-warn    { background:rgba(210,153,34,.08); border-color:rgba(210,153,34,.3); color:var(--text); }
+.opp-ok      { background:rgba(63,185,80,.08);  border-color:rgba(63,185,80,.3);  color:var(--text); }
 
 @media print{
   .toolbox,.sim-panel,.topbar,.vt-bar,.anim-bar,.node-port,.node-edit-btn,.connect-hint{display:none!important;}
