@@ -13,10 +13,10 @@
       <div class="brand">
         <span class="brand-icon">⧡</span>
         <span class="brand-name">VSM <strong>Flow Studio</strong></span>
-        <span class="brand-version">v4.4</span>
+        <span class="brand-version">v4.5</span>
       </div>
       <div class="toolbar-actions">
-        <button onclick="newDiagram()">＋ Nuevo</button>
+        <button onclick="newDiagram()">&#xFF0B; Nuevo</button>
         <button onclick="saveDiagram()">💾 Guardar</button>
         <button onclick="loadDiagram()">📂 Cargar</button>
         <button onclick="exportJSON()">⬇ JSON</button>
@@ -73,11 +73,14 @@
             <button class="anim-btn reset" onclick="resetAnimation()">&#8635; Reset</button>
             <div class="speed-group">
               <span class="speed-label">Velocidad:</span>
-              <button class="speed-btn active" data-speed="1"  onclick="setAnimSpeed(1)">1X</button>
-              <button class="speed-btn" data-speed="5"  onclick="setAnimSpeed(5)">5X</button>
-              <button class="speed-btn" data-speed="10" onclick="setAnimSpeed(10)">10X</button>
-              <button class="speed-btn" data-speed="20" onclick="setAnimSpeed(20)">20X</button>
-              <button class="speed-btn" data-speed="30" onclick="setAnimSpeed(30)">30X</button>
+              <button class="speed-btn active" data-speed="1"   onclick="setAnimSpeed(1)">1X</button>
+              <button class="speed-btn" data-speed="5"   onclick="setAnimSpeed(5)">5X</button>
+              <button class="speed-btn" data-speed="10"  onclick="setAnimSpeed(10)">10X</button>
+              <button class="speed-btn" data-speed="20"  onclick="setAnimSpeed(20)">20X</button>
+              <button class="speed-btn" data-speed="30"  onclick="setAnimSpeed(30)">30X</button>
+              <button class="speed-btn" data-speed="60"  onclick="setAnimSpeed(60)">60X</button>
+              <button class="speed-btn" data-speed="120" onclick="setAnimSpeed(120)">120X</button>
+              <button class="speed-btn speed-btn-turbo" data-speed="480" onclick="setAnimSpeed(480)">480X ⏩</button>
             </div>
           </div>
           <div class="anim-stats-row">
