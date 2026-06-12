@@ -120,7 +120,6 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg-app);color:
 .speed-btn{padding:3px 8px;border-radius:var(--radius);border:1px solid var(--border);background:var(--bg-node);color:var(--text-muted);cursor:pointer;font-size:10px;font-weight:700;transition:all .15s;}
 .speed-btn:hover{border-color:var(--accent);color:var(--accent);}
 .speed-btn.active{background:var(--accent);color:#000;border-color:var(--accent);}
-/* — 480X turbo button — */
 .speed-btn-turbo{border-color:var(--warning)!important;color:var(--warning)!important;}
 .speed-btn-turbo:hover{background:rgba(210,153,34,.18)!important;color:var(--warning)!important;}
 .speed-btn-turbo.active{background:var(--warning)!important;color:#000!important;border-color:var(--warning)!important;}
@@ -189,8 +188,8 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg-app);color:
 .prop-calc{background:var(--bg-app);border:1px solid var(--border-light);border-radius:var(--radius);padding:8px 10px;font-size:10px;color:var(--text-muted);line-height:2;}
 .prop-calc span{color:var(--accent);font-weight:600;}
 
-/* — REPORT MODAL — */
-.report-modal{width:860px;max-width:96vw;max-height:90vh;}
+/* — REPORT MODAL (base) — */
+.report-modal{width:900px;max-width:97vw;max-height:92vh;}
 .btn-csv{background:rgba(63,185,80,.15);border:1px solid var(--accent2);color:var(--accent2);padding:4px 12px;border-radius:var(--radius);cursor:pointer;font-size:11px;font-weight:600;}
 .btn-csv:hover{background:rgba(63,185,80,.3);}
 .rpt-section{margin-bottom:20px;}
@@ -217,6 +216,85 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg-app);color:
 .rpt-opps{list-style:none;display:flex;flex-direction:column;gap:6px;}
 .rpt-opps li{display:flex;align-items:flex-start;gap:8px;background:var(--bg-app);border:1px solid var(--border);border-radius:var(--radius);padding:8px 10px;font-size:11px;color:var(--text);}
 .rpt-opp-icon{font-size:14px;flex-shrink:0;}
+
+/* =====================================================
+   PROCESS SIMULATOR — STYLE DASHBOARD
+   Scoreboard · Entity States · Activity States
+   Resource States · WIP Buffer States
+   ===================================================== */
+
+/* Tabs para escenarios */
+.ps-tabs{display:flex;gap:4px;margin-bottom:12px;border-bottom:1px solid var(--border);padding-bottom:8px;flex-wrap:wrap;}
+.ps-tab{padding:4px 12px;border-radius:var(--radius) var(--radius) 0 0;font-size:10px;font-weight:600;cursor:pointer;border:1px solid var(--border);border-bottom:none;color:var(--text-muted);background:var(--bg-node);transition:all .15s;}
+.ps-tab:hover{color:var(--text-bright);}
+.ps-tab.active{background:var(--accent);color:#000;border-color:var(--accent);}
+.ps-tab.baseline{background:rgba(63,185,80,.15);color:var(--accent2);border-color:var(--accent2);}
+.ps-tab.baseline.active{background:var(--accent2);color:#000;}
+
+/* Scoreboard */
+.ps-scoreboard{width:100%;border-collapse:collapse;font-size:11px;margin-bottom:4px;}
+.ps-scoreboard thead tr{background:rgba(88,166,255,.08);}
+.ps-scoreboard th{padding:7px 10px;font-size:9px;letter-spacing:.5px;color:var(--accent);font-weight:700;text-align:left;border-bottom:2px solid var(--accent);white-space:nowrap;}
+.ps-scoreboard td{padding:7px 10px;border-bottom:1px solid var(--border-light);color:var(--text);white-space:nowrap;}
+.ps-scoreboard tr:hover td{background:rgba(255,255,255,.02);}
+.ps-scoreboard .scenario-name{font-weight:700;color:var(--text-bright);}
+.ps-scoreboard .baseline-row td{background:rgba(63,185,80,.04);}
+.ps-scoreboard .val-better{color:var(--accent2);font-weight:700;}
+.ps-scoreboard .val-worse{color:var(--danger);font-weight:700;}
+.ps-scoreboard .val-neutral{color:var(--text-muted);}
+
+/* Barra de estado horizontal estilo PS */
+.ps-chart-wrap{margin-bottom:6px;}
+.ps-chart-label{font-size:10px;color:var(--text-muted);margin-bottom:3px;min-width:160px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.ps-bar-track{height:22px;background:var(--bg-app);border-radius:3px;overflow:hidden;display:flex;position:relative;border:1px solid var(--border-light);}
+.ps-bar-seg{height:100%;transition:width .4s ease;display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:700;overflow:hidden;white-space:nowrap;}
+.ps-bar-seg:first-child{border-radius:2px 0 0 2px;}
+.ps-bar-seg:last-child{border-radius:0 2px 2px 0;}
+/* Segmentos de entidad */
+.seg-va   {background:#238636;color:#aff5b4;} /* verde VA */
+.seg-nva  {background:#b0006a;color:#ffd6ec;} /* magenta NVA/espera */
+.seg-move {background:#4d6599;color:#cdd9ff;} /* azul gris transporte */
+.seg-wip  {background:#9e6a03;color:#ffd680;} /* ámbar WIP */
+/* Segmentos de actividad */
+.seg-oper {background:#1f6feb;color:#cae8ff;} /* azul operando */
+.seg-setup{background:#8957e5;color:#e5d4ff;} /* morado setup */
+.seg-idle {background:#238636;color:#aff5b4;} /* verde idle */
+.seg-wait {background:#d29922;color:#fff8c5;} /* amarillo waiting */
+.seg-block{background:#bc4c00;color:#ffddb0;} /* naranja blocked */
+.seg-down {background:#6e7681;color:#f0f6fc;} /* gris down */
+/* Segmentos de buffer */
+.seg-empty{background:#1f6feb;color:#cae8ff;} /* azul vacío */
+.seg-part {background:#3fb950;color:#000;} /* cian ocupado parcial */
+.seg-full {background:#f85149;color:#fff;} /* rojo lleno */
+
+/* Leyenda */
+.ps-legend{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px;}
+.ps-legend-item{display:flex;align-items:center;gap:4px;font-size:9px;color:var(--text-muted);}
+.ps-legend-dot{width:10px;height:10px;border-radius:2px;flex-shrink:0;}
+
+/* Layout de 2 columnas para paneles */
+.ps-panels-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+@media(max-width:700px){.ps-panels-grid{grid-template-columns:1fr;}}
+
+/* Panel individual estilo Output Viewer */
+.ps-panel{background:var(--bg-app);border:1px solid var(--border);border-radius:var(--radius);padding:12px 14px;}
+.ps-panel-title{font-size:10px;font-weight:700;color:var(--text-bright);letter-spacing:.5px;margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:6px;}
+.ps-panel-icon{font-size:13px;}
+
+/* Etiqueta de delta (mejora/empeora vs baseline) */
+.ps-delta{font-size:9px;font-weight:700;padding:1px 5px;border-radius:3px;margin-left:6px;}
+.ps-delta.better{background:rgba(63,185,80,.2);color:var(--accent2);}
+.ps-delta.worse{background:rgba(248,81,73,.2);color:var(--danger);}
+.ps-delta.neutral{background:rgba(110,118,129,.2);color:var(--text-muted);}
+
+/* No data */
+.ps-nodata{font-size:11px;color:var(--text-muted);text-align:center;padding:24px 0;font-style:italic;}
+
+/* Oportunidades */
+.ps-opps{list-style:none;display:flex;flex-direction:column;gap:5px;}
+.ps-opp{display:flex;align-items:flex-start;gap:8px;background:var(--bg-node);border:1px solid var(--border);border-radius:var(--radius);padding:8px 10px;font-size:11px;color:var(--text);}
+.ps-opp-icon{font-size:13px;flex-shrink:0;margin-top:1px;}
+.ps-opp strong{color:var(--text-bright);}
 
 @media print{
   .toolbox,.sim-panel,.topbar,.vt-bar,.anim-bar,.node-port,.node-edit-btn,.connect-hint{display:none!important;}
