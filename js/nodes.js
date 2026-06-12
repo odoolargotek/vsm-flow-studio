@@ -1,7 +1,7 @@
 // ===== NODES DEFINITIONS v4 — VSM Flow Studio =====
 
 const NODE_DEFAULTS = {
-  process:   { label:'Proceso', ct:30, co:0, uptime:90, operators:1, shifts:1, hoursShift:8, defectRate:0, isVA:true, batchSize:1 },
+  process:   { label:'Proceso', ct:480, co:0, uptime:90, operators:1, shifts:1, hoursShift:8, defectRate:0, isVA:true, batchSize:1 },
   inventory: { label:'WIP', units:100 },
   supplier:  { label:'Proveedor' },
   customer:  { label:'Cliente' },
