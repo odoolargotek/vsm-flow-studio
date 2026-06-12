@@ -13,7 +13,7 @@
       <div class="brand">
         <span class="brand-icon">⬡</span>
         <span class="brand-name">VSM <strong>Flow Studio</strong></span>
-        <span class="brand-version">v2</span>
+        <span class="brand-version">v3</span>
       </div>
       <div class="toolbar-actions">
         <button onclick="newDiagram()">＋ Nuevo</button>
@@ -29,53 +29,28 @@
       <!-- TOOLBOX -->
       <aside class="toolbox">
         <div class="toolbox-title">Elementos</div>
-
         <div class="tool-group">
           <div class="tool-label">FLUJO</div>
-          <div class="tool-item" draggable="true" data-type="supplier">
-            <div class="tool-icon supplier-icon">▣</div><span>Proveedor</span>
-          </div>
-          <div class="tool-item" draggable="true" data-type="customer">
-            <div class="tool-icon customer-icon">▣</div><span>Cliente</span>
-          </div>
-          <div class="tool-item" draggable="true" data-type="process">
-            <div class="tool-icon process-icon">▬</div><span>Proceso</span>
-          </div>
-          <div class="tool-item" draggable="true" data-type="inventory">
-            <div class="tool-icon inventory-icon">▲</div><span>Inventario</span>
-          </div>
+          <div class="tool-item" draggable="true" data-type="supplier"><div class="tool-icon supplier-icon">▣</div><span>Proveedor</span></div>
+          <div class="tool-item" draggable="true" data-type="customer"><div class="tool-icon customer-icon">▣</div><span>Cliente</span></div>
+          <div class="tool-item" draggable="true" data-type="process"><div class="tool-icon process-icon">▬</div><span>Proceso</span></div>
+          <div class="tool-item" draggable="true" data-type="inventory"><div class="tool-icon inventory-icon">▲</div><span>Inventario</span></div>
         </div>
-
         <div class="tool-group">
           <div class="tool-label">CONECTAR</div>
-          <div class="tool-item" id="btn-push-arrow" onclick="setArrowMode('push')" title="Push: click en origen, luego en destino">
-            <div class="tool-icon arrow-push">⟶</div><span>Push</span>
-          </div>
-          <div class="tool-item" id="btn-pull-arrow" onclick="setArrowMode('pull')" title="Pull: click en origen, luego en destino">
-            <div class="tool-icon arrow-pull">⇢</div><span>Pull</span>
-          </div>
-          <div class="tool-item" id="btn-info-arrow" onclick="setArrowMode('info')" title="Flujo de información">
-            <div class="tool-icon arrow-info">⤳</div><span>Info</span>
-          </div>
+          <div class="tool-item" id="btn-push-arrow" onclick="setArrowMode('push')" title="Push"><div class="tool-icon arrow-push">⟶</div><span>Push</span></div>
+          <div class="tool-item" id="btn-pull-arrow" onclick="setArrowMode('pull')" title="Pull"><div class="tool-icon arrow-pull">⇢</div><span>Pull</span></div>
+          <div class="tool-item" id="btn-info-arrow" onclick="setArrowMode('info')" title="Info"><div class="tool-icon arrow-info">⤳</div><span>Info</span></div>
         </div>
-
         <div class="tool-group">
           <div class="tool-label">MEJORA</div>
-          <div class="tool-item" draggable="true" data-type="kaizen">
-            <div class="tool-icon kaizen-icon">✸</div><span>Kaizen</span>
-          </div>
+          <div class="tool-item" draggable="true" data-type="kaizen"><div class="tool-icon kaizen-icon">✸</div><span>Kaizen</span></div>
         </div>
-
         <div class="tool-group">
           <div class="tool-label">ACCIONES</div>
-          <div class="tool-item danger" onclick="deleteSelected()">
-            <div class="tool-icon">🗑</div><span>Eliminar</span>
-          </div>
-          <div class="tool-item" onclick="runSimulation()">
-            <div class="tool-icon sim-icon">▶</div><span>Simular</span>
-          </div>
+          <div class="tool-item danger" onclick="deleteSelected()"><div class="tool-icon">🗑</div><span>Eliminar</span></div>
+          <div class="tool-item" onclick="runSimulation()"><div class="tool-icon sim-icon">▶</div><span>Calcular</span></div>
         </div>
-
         <div class="tool-group">
           <div class="tool-label">CONEXIÓN</div>
           <div class="connect-guide">
@@ -96,6 +71,29 @@
           ondrop="onDrop(event)"
           onclick="onCanvasClick(event)">
         </div>
+
+        <!-- ANIMATION CONTROL BAR -->
+        <div class="anim-bar" id="anim-bar">
+          <div class="anim-controls">
+            <button id="btn-anim-start" class="anim-btn start" onclick="startAnimation()">&#9654; Animar</button>
+            <button id="btn-anim-stop"  class="anim-btn stop"  onclick="stopAnimation()"  disabled>&#9646;&#9646; Stop</button>
+            <button class="anim-btn reset" onclick="resetAnimation()">&#8635; Reset</button>
+            <div class="speed-group">
+              <span class="speed-label">Velocidad:</span>
+              <button class="speed-btn active" data-speed="1"  onclick="setAnimSpeed(1)">1X</button>
+              <button class="speed-btn"        data-speed="5"  onclick="setAnimSpeed(5)">5X</button>
+              <button class="speed-btn"        data-speed="10" onclick="setAnimSpeed(10)">10X</button>
+              <button class="speed-btn"        data-speed="20" onclick="setAnimSpeed(20)">20X</button>
+              <button class="speed-btn"        data-speed="30" onclick="setAnimSpeed(30)">30X</button>
+            </div>
+          </div>
+          <div class="anim-stats-row">
+            <div id="anim-stats" class="anim-stats"></div>
+            <div id="anim-log"   class="anim-log">Presiona ▶ para iniciar la simulación animada.</div>
+          </div>
+        </div>
+
+        <!-- TIMELINE (above anim bar) -->
         <div class="timeline-bar" id="timeline-bar">
           <div class="timeline-label">TIMELINE</div>
           <div class="timeline-content" id="timeline-content"></div>
@@ -108,78 +106,26 @@
           <span>📊 Simulación</span>
           <button class="btn-run" onclick="runSimulation()">▶ CALCULAR</button>
         </div>
-
         <div class="sim-section">
           <div class="sim-section-title">PARÁMETROS GLOBALES</div>
-          <div class="sim-field">
-            <label>Demanda cliente</label>
-            <div class="sim-input-row">
-              <input type="number" id="demand" value="400" min="1">
-              <span class="sim-unit">u/día</span>
-            </div>
-          </div>
-          <div class="sim-field">
-            <label>Horas/turno</label>
-            <div class="sim-input-row">
-              <input type="number" id="hours-shift" value="8" min="1" max="24">
-              <span class="sim-unit">h</span>
-            </div>
-          </div>
-          <div class="sim-field">
-            <label>Turnos/día</label>
-            <div class="sim-input-row">
-              <input type="number" id="shifts" value="1" min="1" max="3">
-              <span class="sim-unit">#</span>
-            </div>
-          </div>
-          <div class="sim-field">
-            <label>Iteraciones MC</label>
-            <div class="sim-input-row">
-              <input type="number" id="mc-runs" value="500" min="100" max="5000" step="100">
-              <span class="sim-unit">#</span>
-            </div>
-          </div>
+          <div class="sim-field"><label>Demanda cliente</label><div class="sim-input-row"><input type="number" id="demand" value="400" min="1"><span class="sim-unit">u/día</span></div></div>
+          <div class="sim-field"><label>Horas/turno</label><div class="sim-input-row"><input type="number" id="hours-shift" value="8" min="1" max="24"><span class="sim-unit">h</span></div></div>
+          <div class="sim-field"><label>Turnos/día</label><div class="sim-input-row"><input type="number" id="shifts" value="1" min="1" max="3"><span class="sim-unit">#</span></div></div>
+          <div class="sim-field"><label>Iteraciones MC</label><div class="sim-input-row"><input type="number" id="mc-runs" value="500" min="100" max="5000" step="100"><span class="sim-unit">#</span></div></div>
         </div>
-
         <div class="sim-section kpi-section" id="kpi-section">
           <div class="sim-section-title">KPIs VSM</div>
-          <div class="kpi-card" id="kpi-takt">
-            <div class="kpi-label">⏱ Takt Time</div>
-            <div class="kpi-value">—</div>
-            <div class="kpi-sub">seg/unidad</div>
-          </div>
-          <div class="kpi-card" id="kpi-lt">
-            <div class="kpi-label">📦 Lead Time</div>
-            <div class="kpi-value">—</div>
-            <div class="kpi-sub">días</div>
-          </div>
-          <div class="kpi-card" id="kpi-pt">
-            <div class="kpi-label">⚡ Process Time</div>
-            <div class="kpi-value">—</div>
-            <div class="kpi-sub">seg (VA)</div>
-          </div>
-          <div class="kpi-card highlight" id="kpi-pce">
-            <div class="kpi-label">📈 PCE Ratio</div>
-            <div class="kpi-value">—</div>
-            <div class="kpi-sub">% valor agregado</div>
-          </div>
-          <div class="kpi-card bottleneck" id="kpi-bn">
-            <div class="kpi-label">🔴 Cuello de Botella</div>
-            <div class="kpi-value">—</div>
-            <div class="kpi-sub"></div>
-          </div>
-          <div class="kpi-card" id="kpi-avail">
-            <div class="kpi-label">🏭 Tiempo Disponible</div>
-            <div class="kpi-value">—</div>
-            <div class="kpi-sub">seg/día</div>
-          </div>
+          <div class="kpi-card" id="kpi-takt"><div class="kpi-label">⏱ Takt Time</div><div class="kpi-value">—</div><div class="kpi-sub">seg/unidad</div></div>
+          <div class="kpi-card" id="kpi-lt"><div class="kpi-label">📦 Lead Time</div><div class="kpi-value">—</div><div class="kpi-sub">días</div></div>
+          <div class="kpi-card" id="kpi-pt"><div class="kpi-label">⚡ Process Time</div><div class="kpi-value">—</div><div class="kpi-sub">seg (VA)</div></div>
+          <div class="kpi-card highlight" id="kpi-pce"><div class="kpi-label">📈 PCE Ratio</div><div class="kpi-value">—</div><div class="kpi-sub">% valor agregado</div></div>
+          <div class="kpi-card bottleneck" id="kpi-bn"><div class="kpi-label">🔴 Cuello de Botella</div><div class="kpi-value">—</div><div class="kpi-sub"></div></div>
+          <div class="kpi-card" id="kpi-avail"><div class="kpi-label">🏭 Tiempo Disponible</div><div class="kpi-value">—</div><div class="kpi-sub">seg/día</div></div>
         </div>
-
         <div class="sim-section" id="process-list-section">
-          <div class="sim-section-title">PROCESOS DETECTADOS</div>
+          <div class="sim-section-title">PROCESOS</div>
           <div id="process-list"></div>
         </div>
-
         <div class="sim-section">
           <div class="sim-section-title">LOG</div>
           <div id="sim-log" class="sim-log">Agrega procesos al canvas y presiona CALCULAR.</div>
@@ -192,10 +138,7 @@
   <!-- MODAL -->
   <div id="modal-overlay" class="modal-overlay hidden" onclick="closeModal(event)">
     <div class="modal" onclick="event.stopPropagation()">
-      <div class="modal-header">
-        <span id="modal-title">Propiedades</span>
-        <button class="modal-close" onclick="closeModal()">✕</button>
-      </div>
+      <div class="modal-header"><span id="modal-title">Propiedades</span><button class="modal-close" onclick="closeModal()">✕</button></div>
       <div class="modal-body" id="modal-body"></div>
       <div class="modal-footer">
         <button onclick="saveNodeProps()" class="btn-accent">✔ Guardar</button>
@@ -208,5 +151,6 @@
   <script src="js/simulation.js"></script>
   <script src="js/canvas.js"></script>
   <script src="js/ui.js"></script>
+  <script src="js/animator.js"></script>
 </body>
 </html>
