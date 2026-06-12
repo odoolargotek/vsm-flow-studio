@@ -1,9 +1,19 @@
-// ===== VSM REPORT v1 — Full stats popup + CSV export =====
+// ===== VSM REPORT v2 — Process Simulator-style Dashboard =====
 
 let _lastReport = null;
+let _scenarios  = {};
+let _baselineKey = null;
 
 function saveReportData(data) {
   _lastReport = data;
+  if (!_baselineKey) {
+    _baselineKey = 'Baseline';
+    _scenarios['Baseline'] = JSON.parse(JSON.stringify(data));
+  } else {
+    const n = Object.keys(_scenarios).length;
+    const key = 'Scenario' + n;
+    _scenarios[key] = JSON.parse(JSON.stringify(data));
+  }
 }
 
 function openReport() {
@@ -11,7 +21,7 @@ function openReport() {
     alert('⚠ Primero presiona ▶ CALCULAR para generar los datos.');
     return;
   }
-  document.getElementById('report-body').innerHTML = buildReportHTML(_lastReport);
+  document.getElementById('report-body').innerHTML = buildDashboardHTML(_lastReport);
   document.getElementById('report-overlay').classList.remove('hidden');
 }
 
@@ -20,198 +30,300 @@ function closeReport(e) {
   document.getElementById('report-overlay').classList.add('hidden');
 }
 
-function buildReportHTML(d) {
-  const pct  = v => v.toFixed(1) + '%';
-  const sec  = v => fmtTime(v);
-  const days = v => v.toFixed(3) + ' d';
-  const eff  = v => v >= 60 ? '★ Óptimo' : v >= 35 ? '✔ Moderado' : v >= 15 ? '⚠ Mejorar' : '⚠️ Crítico';
+// ─ MAIN ────────────────────────────────────────────────────────────
+function buildDashboardHTML(d) {
+  return `<div class="db-root">
+    ${buildScoreboard(d)}
+    ${buildEntityStates()}
+    ${buildActivityStates(d)}
+    ${buildResourceStates(d)}
+    ${buildWIPStates(d)}
+    ${buildProcessDetail(d)}
+    ${buildOpportunities(d)}
+  </div>`;
+}
 
-  const global = `
-  <div class="rpt-section">
-    <div class="rpt-title">🌊 Flujo Global</div>
-    <div class="rpt-grid">
-      <div class="rpt-card va">
-        <div class="rpt-card-label">Lead Time Promedio</div>
-        <div class="rpt-card-value">${days(d.ltMean)}</div>
-        ${d.hasStoch ? `<div class="rpt-card-sub">P10: ${days(d.lt10)} | P90: ${days(d.lt90)}</div>` : ''}
+// ─ 1. SCOREBOARD ────────────────────────────────────────────────────
+function buildScoreboard(d) {
+  const scRows = Object.entries(_scenarios).map(([name, sd]) => `
+    <tr class="${name===_baselineKey?'sc-baseline':'sc-scenario'}">
+      <td>${name===_baselineKey?'🟦':'🟩'} ${name}</td>
+      <td class="sc-num">${sd.ltMean.toFixed(3)} d</td>
+      <td class="sc-num">${sd.taktTime.toFixed(1)} s</td>
+      <td class="sc-num">${sd.pceMean.toFixed(1)}%</td>
+      <td class="sc-num">${fmtTime(sd.totalVASec)}</td>
+      <td class="sc-num">${sd.demand} u/d</td>
+      <td class="sc-num ${sd.pceMean>=35?'sc-ok':'sc-warn'}">${sd.pceMean>=60?'★ Óptimo':sd.pceMean>=35?'✔ Moderado':sd.pceMean>=15?'⚠ Mejorar':'🔴 Crítico'}</td>
+    </tr>`).join('');
+
+  return `
+  <div class="db-panel" id="db-scoreboard">
+    <div class="db-panel-title">🏆 Scoreboard — Comparativo de Escenarios</div>
+    <table class="db-table sc-table">
+      <thead><tr>
+        <th>Escenario</th><th>Lead Time</th><th>Takt Time</th>
+        <th>PCE %</th><th>Tiempo VA</th><th>Demanda</th><th>Estado</th>
+      </tr></thead>
+      <tbody>${scRows}</tbody>
+    </table>
+    <div class="db-note">ℹ️ Cada CALCULAR guarda un nuevo escenario automáticamente para comparar.</div>
+  </div>`;
+}
+
+// ─ 2. ENTITY STATES ────────────────────────────────────────────────
+function buildEntityStates() {
+  const rows = Object.entries(_scenarios).map(([name, sd]) => {
+    const wipSec = sd.wipDays * sd.availSec;
+    const tot    = sd.totalVASec + sd.totalNVASec + wipSec;
+    const va     = tot>0 ? sd.totalVASec/tot*100 : 0;
+    const nva    = tot>0 ? sd.totalNVASec/tot*100 : 0;
+    const wip    = tot>0 ? wipSec/tot*100 : 0;
+    return `
+    <div class="db-bar-row">
+      <div class="db-bar-label">Work Unit <span class="sc-tag">(${name})</span></div>
+      <div class="db-bar-track">
+        <div class="db-bar-seg seg-va"  style="width:${va.toFixed(1)}%"  title="VA ${va.toFixed(1)}%"></div>
+        <div class="db-bar-seg seg-nva" style="width:${nva.toFixed(1)}%" title="NVA ${nva.toFixed(1)}%"></div>
+        <div class="db-bar-seg seg-wip" style="width:${wip.toFixed(1)}%" title="WIP ${wip.toFixed(1)}%"></div>
       </div>
-      <div class="rpt-card">
-        <div class="rpt-card-label">Takt Time</div>
-        <div class="rpt-card-value">${d.taktTime.toFixed(1)} s</div>
-        <div class="rpt-card-sub">Ritmo de demanda</div>
+      <div class="db-bar-nums">
+        <span class="seg-va-txt">■ VA ${va.toFixed(1)}%</span>
+        <span class="seg-nva-txt">■ NVA ${nva.toFixed(1)}%</span>
+        <span class="seg-wip-txt">■ WIP ${wip.toFixed(1)}%</span>
       </div>
-      <div class="rpt-card va">
-        <div class="rpt-card-label">Tiempo VA Total</div>
-        <div class="rpt-card-value">${sec(d.totalVASec)}</div>
-        <div class="rpt-card-sub">Suma CT procesos VA</div>
-      </div>
-      <div class="rpt-card nva">
-        <div class="rpt-card-label">Tiempo NVA Total</div>
-        <div class="rpt-card-value">${sec(d.totalNVASec)}</div>
-        <div class="rpt-card-sub">Transporte + espera</div>
-      </div>
-      <div class="rpt-card wip">
-        <div class="rpt-card-label">Tiempo en WIP</div>
-        <div class="rpt-card-value">${days(d.wipDays)}</div>
-        <div class="rpt-card-sub">Inventario acumulado</div>
-      </div>
-      <div class="rpt-card ${d.pceMean >= 35 ? 'va' : 'nva'}">
-        <div class="rpt-card-label">PCE Ratio</div>
-        <div class="rpt-card-value">${pct(d.pceMean)}</div>
-        <div class="rpt-card-sub">${eff(d.pceMean)}</div>
-      </div>
-      <div class="rpt-card">
-        <div class="rpt-card-label">Tiempo Disponible</div>
-        <div class="rpt-card-value">${d.availSec.toLocaleString()} s</div>
-        <div class="rpt-card-sub">${(d.availSec/3600).toFixed(1)} h/día</div>
-      </div>
-      <div class="rpt-card">
-        <div class="rpt-card-label">Demanda Cliente</div>
-        <div class="rpt-card-value">${d.demand} u/d</div>
-        <div class="rpt-card-sub">Unidades por día</div>
-      </div>
+    </div>`;
+  }).join('');
+
+  return `
+  <div class="db-panel">
+    <div class="db-panel-title">📦 Entity States — Distribución de Tiempo (Work Unit)</div>
+    <div class="db-legend">
+      <span class="seg-va-txt">■ Valor Agregado (VA)</span>
+      <span class="seg-nva-txt">■ No VA (Transporte/Espera)</span>
+      <span class="seg-wip-txt">■ WIP (Inventario en espera)</span>
     </div>
+    ${rows}
   </div>`;
+}
 
-  const arrowRows = d.arrowStats.map(a => `
-    <tr>
-      <td>${a.from} → ${a.to}</td>
-      <td><span class="rpt-badge ${a.type}">${a.type.toUpperCase()}</span></td>
-      <td>${a.days.toFixed(2)} d</td>
-      <td>${sec(a.sec)}</td>
-      <td>${d.ltMean > 0 ? pct(a.sec / (d.ltMean * d.availSec) * 100) : '—'}</td>
-    </tr>`).join('');
+// ─ 3. SINGLE CAPACITY ACTIVITY STATES ─────────────────────────────
+function buildActivityStates(d) {
+  const allLabels = d.procResults.map(p => p.label);
+  const allSc     = Object.entries(_scenarios);
 
-  const transport = `
-  <div class="rpt-section">
-    <div class="rpt-title">🚚 Transporte & Espera entre Nodos (NVA)</div>
-    <table class="rpt-table">
-      <thead><tr><th>Tramo</th><th>Tipo</th><th>Tiempo (días)</th><th>Tiempo</th><th>% del LT</th></tr></thead>
-      <tbody>${arrowRows || '<tr><td colspan="5" style="color:var(--text-muted)">Sin flechas configuradas</td></tr>'}</tbody>
-    </table>
+  const rows = allLabels.map(lbl => {
+    return allSc.map(([name, sd]) => {
+      const p = sd.procResults.find(x => x.label === lbl);
+      if (!p) return '';
+      const opPct   = p.uptime;
+      const downPct = 100 - p.uptime;
+      const sat     = p.netCT / sd.taktTime * 100;
+      const waitPct = Math.max(0, Math.min(sat - opPct, 30));
+      const idlePct = Math.max(0, 100 - opPct - downPct - waitPct);
+      const adjOp   = Math.min(opPct, 100 - downPct - waitPct);
+      const isBn    = p.isBn ? ' db-bar-bn' : '';
+      return `
+      <div class="db-bar-row${isBn}">
+        <div class="db-bar-label">${lbl} <span class="sc-tag">(${name})</span>${p.isBn?' <span class="db-badge db-badge-red">CUELLO</span>':''}</div>
+        <div class="db-bar-track">
+          <div class="db-bar-seg seg-op"   style="width:${adjOp.toFixed(1)}%"   title="Operando ${adjOp.toFixed(1)}%"></div>
+          <div class="db-bar-seg seg-idle" style="width:${idlePct.toFixed(1)}%" title="Idle ${idlePct.toFixed(1)}%"></div>
+          <div class="db-bar-seg seg-wait" style="width:${waitPct.toFixed(1)}%" title="Waiting ${waitPct.toFixed(1)}%"></div>
+          <div class="db-bar-seg seg-down" style="width:${downPct.toFixed(1)}%" title="Down ${downPct.toFixed(1)}%"></div>
+        </div>
+        <div class="db-bar-pct ${sat>100?'sc-warn':''}">${sat.toFixed(0)}% sat.</div>
+      </div>`;
+    }).join('');
+  }).join('');
+
+  return `
+  <div class="db-panel">
+    <div class="db-panel-title">⚙️ Single Capacity Activity States — Uso por Proceso</div>
+    <div class="db-legend">
+      <span class="seg-op-txt">■ % Operando</span>
+      <span class="seg-idle-txt">■ % Idle</span>
+      <span class="seg-wait-txt">■ % Waiting</span>
+      <span class="seg-down-txt">■ % Down</span>
+    </div>
+    ${rows}
   </div>`;
+}
 
-  const wipRows = d.wipStats.map(w => `
-    <tr>
-      <td>${w.label}</td>
-      <td>${w.units.toLocaleString()} u</td>
-      <td>${w.days.toFixed(3)} d</td>
-      <td>${sec(w.sec)}</td>
-      <td>${d.ltMean > 0 ? pct(w.sec / (d.ltMean * d.availSec) * 100) : '—'}</td>
-    </tr>`).join('');
+// ─ 4. RESOURCE STATES ──────────────────────────────────────────────
+function buildResourceStates(d) {
+  const totalOps = d.procResults.reduce((s, p) => s + (p.operators||1), 0);
+  if (!totalOps) return '';
 
-  const wipSection = `
-  <div class="rpt-section">
-    <div class="rpt-title">📦 Inventario en Proceso (WIP)</div>
-    <table class="rpt-table">
-      <thead><tr><th>Inventario</th><th>Unidades</th><th>Días</th><th>Tiempo</th><th>% del LT</th></tr></thead>
-      <tbody>${wipRows || '<tr><td colspan="5" style="color:var(--text-muted)">Sin inventarios</td></tr>'}</tbody>
-    </table>
+  const rows = d.procResults.map(p => {
+    const util = Math.min(100, p.netCT / d.taktTime * 100);
+    const idle = Math.max(0, 100 - util);
+    return `
+    <div class="db-bar-row">
+      <div class="db-bar-label">${p.label} <span class="sc-tag">(${p.operators} op.)</span></div>
+      <div class="db-bar-track">
+        <div class="db-bar-seg seg-op"   style="width:${util.toFixed(1)}%" title="Utilización ${util.toFixed(1)}%"></div>
+        <div class="db-bar-seg seg-idle" style="width:${idle.toFixed(1)}%" title="Libre ${idle.toFixed(1)}%"></div>
+      </div>
+      <div class="db-bar-pct">${util.toFixed(0)}%</div>
+    </div>`;
+  }).join('');
+
+  return `
+  <div class="db-panel">
+    <div class="db-panel-title">👷 Resource States — Utilización de Operadores</div>
+    <div class="db-legend">
+      <span class="seg-op-txt">■ % Utilizando</span>
+      <span class="seg-idle-txt">■ % Libre</span>
+    </div>
+    ${rows}
   </div>`;
+}
 
-  const procRows = d.procResults.map(p => {
-    const sat = (p.netCT / d.taktTime * 100);
-    const satClass = sat > 100 ? 'nva' : sat > 80 ? 'wip' : 'va';
+// ─ 5. WIP BUFFER STATES ────────────────────────────────────────────
+function buildWIPStates(d) {
+  if (!d.wipStats.length) return '';
+  const allSc = Object.entries(_scenarios);
+
+  const rows = d.wipStats.map(w => {
+    return allSc.map(([name, sd]) => {
+      const wsd = sd.wipStats.find(x => x.label === w.label);
+      if (!wsd) return '';
+      const allUnits = allSc.map(([,s]) => (s.wipStats.find(x=>x.label===w.label)||{units:0}).units);
+      const maxU     = Math.max(...allUnits, 1);
+      const fullPct  = wsd.units / maxU * 100;
+      const emptyPct = 100 - fullPct;
+      return `
+      <div class="db-bar-row">
+        <div class="db-bar-label">${w.label} Input Buffer <span class="sc-tag">(${name})</span></div>
+        <div class="db-bar-track">
+          <div class="db-bar-seg seg-idle" style="width:${emptyPct.toFixed(1)}%" title="Vacío ${emptyPct.toFixed(1)}%"></div>
+          <div class="db-bar-seg seg-wip"  style="width:${fullPct.toFixed(1)}%"  title="Ocupado ${fullPct.toFixed(1)}%"></div>
+        </div>
+        <div class="db-bar-pct">${wsd.units} u / ${wsd.days.toFixed(2)}d</div>
+      </div>`;
+    }).join('');
+  }).join('');
+
+  return `
+  <div class="db-panel">
+    <div class="db-panel-title">📊 Multiple Capacity Activity States — Buffers WIP</div>
+    <div class="db-legend">
+      <span class="seg-idle-txt">■ Vacío</span>
+      <span class="seg-wip-txt">■ Ocupado (WIP)</span>
+    </div>
+    ${rows}
+  </div>`;
+}
+
+// ─ 6. PROCESS DETAIL ───────────────────────────────────────────────
+function buildProcessDetail(d) {
+  const rows = d.procResults.map(p => {
+    const sat      = p.netCT / d.taktTime * 100;
+    const satClass = sat > 100 ? 'sc-warn' : sat > 80 ? 'sc-warn80' : 'sc-ok';
+    const batchBadge = p.batchSize > 1 ? `<span class="db-badge db-badge-blue">×${p.batchSize} lote</span>` : '';
+    const bnBadge    = p.isBn ? '<span class="db-badge db-badge-red">🔴 CUELLO</span>' : '';
     return `
     <tr>
-      <td>${p.label}${p.isBn ? ' 🔴' : ''}</td>
-      <td>${p.ctMean.toFixed(1)} s${p.distType !== 'fixed' ? ` <em style="color:var(--text-muted);font-size:9px">(P90: ${p.ctP90.toFixed(1)}s)</em>` : ''}</td>
-      <td>${p.netCT.toFixed(1)} s</td>
-      <td><span class="rpt-badge ${satClass}">${sat.toFixed(0)}%</span></td>
-      <td>${Math.floor(p.capacity)} u/d</td>
-      <td>${p.uptime}%</td>
-      <td>${p.operators}</td>
-      <td>${p.defectRate}%</td>
-      <td>${p.isVA ? '✅ VA' : '❌ NVA'}</td>
+      <td>${p.label} ${bnBadge}${batchBadge}</td>
+      <td class="sc-num">${p.ctMean.toFixed(1)} s${p.distType!=='fixed'?`<br><small style="color:var(--text-muted)">P90: ${p.ctP90.toFixed(1)}s</small>`:''}</td>
+      <td class="sc-num">${p.netCT.toFixed(1)} s</td>
+      <td class="sc-num"><span class="${satClass}" style="font-weight:700">${sat.toFixed(0)}%</span></td>
+      <td class="sc-num">${Math.floor(p.capacity)} u/d</td>
+      <td class="sc-num">${p.uptime}%</td>
+      <td class="sc-num">${p.operators}</td>
+      <td class="sc-num">${p.defectRate}%</td>
+      <td class="sc-num">${p.isVA ? '<span class="sc-ok">✅ VA</span>' : '<span class="sc-warn">❌ NVA</span>'}</td>
     </tr>`;
   }).join('');
 
-  const procSection = `
-  <div class="rpt-section">
-    <div class="rpt-title">⚙️ Procesos — Detalle</div>
-    <table class="rpt-table">
-      <thead><tr><th>Proceso</th><th>CT Medio</th><th>CT Neto</th><th>Saturación</th><th>Capacidad</th><th>Uptime</th><th>Ops</th><th>Defectos</th><th>Tipo</th></tr></thead>
-      <tbody>${procRows}</tbody>
+  return `
+  <div class="db-panel">
+    <div class="db-panel-title">📄 Detalle de Procesos</div>
+    <table class="db-table">
+      <thead><tr>
+        <th>Proceso</th><th>CT Medio</th><th>CT Neto</th><th>Saturación</th>
+        <th>Capacidad</th><th>Uptime</th><th>Ops.</th><th>Defectos</th><th>Tipo</th>
+      </tr></thead>
+      <tbody>${rows}</tbody>
     </table>
   </div>`;
-
-  const opps = [];
-  if (d.pceMean < 15) opps.push({ icon:'🔴', text:`PCE crítico (${pct(d.pceMean)}). El ${pct(100-d.pceMean)} del tiempo es desperdicio.` });
-  else if (d.pceMean < 35) opps.push({ icon:'⚠', text:`PCE bajo (${pct(d.pceMean)}). Objetivo recomendado: >35%.` });
-  d.arrowStats.filter(a => a.days >= 1).forEach(a =>
-    opps.push({ icon:'⏳', text:`Transporte largo: ${a.from}→${a.to} tarda ${a.days.toFixed(1)} días (NVA).` })
-  );
-  d.wipStats.filter(w => w.days >= 2).forEach(w =>
-    opps.push({ icon:'📦', text:`WIP alto en "${w.label}": ${w.units} u = ${w.days.toFixed(1)} días acumulados.` })
-  );
-  d.procResults.filter(p => p.netCT > d.taktTime).forEach(p =>
-    opps.push({ icon:'🔴', text:`Sobrecarga en "${p.label}": CT neto ${p.netCT.toFixed(1)}s > Takt ${d.taktTime.toFixed(1)}s.` })
-  );
-  d.procResults.filter(p => p.defectRate > 2).forEach(p =>
-    opps.push({ icon:'⚠️', text:`Tasa de defectos alta en "${p.label}": ${p.defectRate}%.` })
-  );
-  if (!opps.length) opps.push({ icon:'✅', text:'No se detectaron desperdicios críticos. ¡Excelente VSM!' });
-
-  const oppSection = `
-  <div class="rpt-section">
-    <div class="rpt-title">💡 Oportunidades de Mejora</div>
-    <ul class="rpt-opps">
-      ${opps.map(o => `<li><span class="rpt-opp-icon">${o.icon}</span>${o.text}</li>`).join('')}
-    </ul>
-  </div>`;
-
-  return global + transport + wipSection + procSection + oppSection;
 }
 
+// ─ 7. OPPORTUNITIES ────────────────────────────────────────────────
+function buildOpportunities(d) {
+  const fp  = v => v.toFixed(1) + '%';
+  const opps = [];
+
+  if (d.pceMean < 15)       opps.push({ icon:'🔴', cls:'opp-critical', text:`PCE crítico (${fp(d.pceMean)}). El ${fp(100-d.pceMean)} del tiempo es desperdicio puro.` });
+  else if (d.pceMean < 35)  opps.push({ icon:'⚠️', cls:'opp-warn',     text:`PCE bajo (${fp(d.pceMean)}). Objetivo recomendado: >35%.` });
+  else                       opps.push({ icon:'✅', cls:'opp-ok',       text:`PCE aceptable (${fp(d.pceMean)}). Busca mejoras incrementales.` });
+
+  d.procResults.filter(p => p.netCT > d.taktTime).forEach(p =>
+    opps.push({ icon:'🔴', cls:'opp-critical', text:`Sobrecarga: "${p.label}" CT neto ${p.netCT.toFixed(1)}s > Takt ${d.taktTime.toFixed(1)}s.` })
+  );
+  d.arrowStats.filter(a => a.days >= 1).forEach(a =>
+    opps.push({ icon:'⏳', cls:'opp-warn', text:`Transporte largo: ${a.from}→${a.to} tarda ${a.days.toFixed(1)} días (NVA).` })
+  );
+  d.wipStats.filter(w => w.days >= 2).forEach(w =>
+    opps.push({ icon:'📦', cls:'opp-warn', text:`WIP alto en "${w.label}": ${w.units} u = ${w.days.toFixed(1)} días.` })
+  );
+  d.procResults.filter(p => p.defectRate > 2).forEach(p =>
+    opps.push({ icon:'⚠️', cls:'opp-warn', text:`Defectos en "${p.label}": ${p.defectRate}%.` })
+  );
+  if (opps.every(o => o.cls === 'opp-ok'))
+    opps.push({ icon:'⭐', cls:'opp-ok', text:'¡No se detectaron desperdicios críticos! Excelente VSM.' });
+
+  return `
+  <div class="db-panel">
+    <div class="db-panel-title">💡 Oportunidades de Mejora Lean</div>
+    <div class="db-opps">
+      ${opps.map(o => `<div class="db-opp ${o.cls}"><span class="db-opp-icon">${o.icon}</span><span>${o.text}</span></div>`).join('')}
+    </div>
+  </div>`;
+}
+
+// ─ CSV EXPORT ──────────────────────────────────────────────────────
 function exportReportCSV() {
   if (!_lastReport) return;
-  const d = _lastReport;
   const rows = [];
   const q = v => `"${String(v).replace(/"/g,'""')}"`;
 
-  rows.push(['SECCION','INDICADOR','VALOR','UNIDAD','NOTAS']);
-  rows.push(['Flujo Global','Lead Time Promedio', d.ltMean.toFixed(4), 'dias', '']);
-  if (d.hasStoch) {
-    rows.push(['Flujo Global','Lead Time P10', d.lt10.toFixed(4), 'dias', 'Monte Carlo']);
-    rows.push(['Flujo Global','Lead Time P90', d.lt90.toFixed(4), 'dias', 'Monte Carlo']);
-  }
-  rows.push(['Flujo Global','Takt Time', d.taktTime.toFixed(4), 'seg', '']);
-  rows.push(['Flujo Global','Tiempo VA Total', d.totalVASec.toFixed(2), 'seg', 'Suma CT procesos VA']);
-  rows.push(['Flujo Global','Tiempo NVA Total', d.totalNVASec.toFixed(2), 'seg', 'Transporte + espera']);
-  rows.push(['Flujo Global','Tiempo WIP Total (seg)', (d.wipDays * d.availSec).toFixed(2), 'seg', '']);
-  rows.push(['Flujo Global','Tiempo WIP Total (dias)', d.wipDays.toFixed(4), 'dias', '']);
-  rows.push(['Flujo Global','PCE Ratio', d.pceMean.toFixed(2), '%', 'Process Cycle Efficiency']);
-  rows.push(['Flujo Global','Tiempo Disponible', d.availSec.toFixed(0), 'seg/dia', '']);
-  rows.push(['Flujo Global','Demanda', d.demand, 'u/dia', '']);
+  rows.push(['SECCION','ESCENARIO','INDICADOR','VALOR','UNIDAD','NOTAS']);
 
-  d.arrowStats.forEach(a => {
-    rows.push(['Transporte NVA', `${a.from} -> ${a.to} (dias)`, a.days.toFixed(4), 'dias', a.type]);
-    rows.push(['Transporte NVA', `${a.from} -> ${a.to} (seg)`,  a.sec.toFixed(2),  'seg',  a.type]);
+  Object.entries(_scenarios).forEach(([name, sd]) => {
+    rows.push(['Flujo Global', name, 'Lead Time Promedio', sd.ltMean.toFixed(4),   'dias', '']);
+    if (sd.hasStoch) {
+      rows.push(['Flujo Global', name, 'Lead Time P10', sd.lt10.toFixed(4), 'dias', 'MC']);
+      rows.push(['Flujo Global', name, 'Lead Time P90', sd.lt90.toFixed(4), 'dias', 'MC']);
+    }
+    rows.push(['Flujo Global', name, 'Takt Time',        sd.taktTime.toFixed(4),  'seg',   '']);
+    rows.push(['Flujo Global', name, 'Tiempo VA Total',  sd.totalVASec.toFixed(2),'seg',   '']);
+    rows.push(['Flujo Global', name, 'Tiempo NVA Total', sd.totalNVASec.toFixed(2),'seg',  '']);
+    rows.push(['Flujo Global', name, 'PCE Ratio',        sd.pceMean.toFixed(2),   '%',     '']);
+    rows.push(['Flujo Global', name, 'Demanda',          sd.demand,               'u/dia', '']);
+
+    sd.procResults.forEach(p => {
+      const sat = (p.netCT/sd.taktTime*100).toFixed(1);
+      rows.push(['Proceso', name, `${p.label} - CT Medio`,   p.ctMean.toFixed(4),    'seg',   p.distType]);
+      rows.push(['Proceso', name, `${p.label} - CT Neto`,    p.netCT.toFixed(4),     'seg',   '']);
+      rows.push(['Proceso', name, `${p.label} - Saturacion`, sat,                    '%',     p.netCT>sd.taktTime?'SOBRECARGADO':'OK']);
+      rows.push(['Proceso', name, `${p.label} - Capacidad`,  Math.floor(p.capacity), 'u/dia', '']);
+      rows.push(['Proceso', name, `${p.label} - Uptime`,     p.uptime,               '%',     '']);
+      rows.push(['Proceso', name, `${p.label} - Operadores`, p.operators,            '#',     '']);
+      rows.push(['Proceso', name, `${p.label} - Defectos`,   p.defectRate,           '%',     '']);
+      rows.push(['Proceso', name, `${p.label} - Tipo`,       p.isVA?'VA':'NVA',      '',      p.isBn?'CUELLO':'']);
+    });
+
+    sd.wipStats.forEach(w => {
+      rows.push(['WIP', name, `${w.label} - Unidades`, w.units,            'u',    '']);
+      rows.push(['WIP', name, `${w.label} - Dias`,     w.days.toFixed(4), 'dias', '']);
+    });
   });
 
-  d.wipStats.forEach(w => {
-    rows.push(['WIP / Inventario', w.label + ' - Unidades', w.units,           'u',    '']);
-    rows.push(['WIP / Inventario', w.label + ' - Dias',     w.days.toFixed(4), 'dias', '']);
-    rows.push(['WIP / Inventario', w.label + ' - Tiempo',   w.sec.toFixed(2),  'seg',  '']);
-  });
-
-  d.procResults.forEach(p => {
-    const pref = 'Proceso - ' + p.label;
-    rows.push(['Procesos', pref + ' - CT Medio',   p.ctMean.toFixed(4),                      'seg',   p.distType]);
-    rows.push(['Procesos', pref + ' - CT P90',     p.ctP90.toFixed(4),                       'seg',   p.distType !== 'fixed' ? 'MC' : 'N/A']);
-    rows.push(['Procesos', pref + ' - CT Neto',    p.netCT.toFixed(4),                       'seg',   'ajustado uptime']);
-    rows.push(['Procesos', pref + ' - Capacidad',  Math.floor(p.capacity),                   'u/dia', '']);
-    rows.push(['Procesos', pref + ' - Saturacion', (p.netCT/d.taktTime*100).toFixed(1),      '%',     p.netCT > d.taktTime ? 'SOBRECARGADO' : 'OK']);
-    rows.push(['Procesos', pref + ' - Uptime',     p.uptime,                                 '%',     '']);
-    rows.push(['Procesos', pref + ' - Operadores', p.operators,                              '#',     '']);
-    rows.push(['Procesos', pref + ' - Defectos',   p.defectRate,                             '%',     '']);
-    rows.push(['Procesos', pref + ' - Tipo',       p.isVA ? 'VA' : 'NVA',                   '',      p.isBn ? 'CUELLO DE BOTELLA' : '']);
-  });
-
-  const csv = rows.map(r => r.map(q).join(',')).join('\n');
+  const csv  = rows.map(r => r.map(q).join(',')).join('\n');
   const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = `vsm-report-${new Date().toISOString().slice(0,10)}.csv`;
+  const a    = document.createElement('a');
+  a.href     = URL.createObjectURL(blob);
+  a.download = `vsm-dashboard-${new Date().toISOString().slice(0,10)}.csv`;
   a.click();
 }
