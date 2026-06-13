@@ -21,7 +21,7 @@
     .topnav{display:flex;align-items:center;justify-content:space-between;padding:0 32px;height:56px;background:var(--surface);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:100}
     .brand{display:flex;align-items:center;gap:10px;font-size:15px;font-weight:600;text-decoration:none;color:var(--text)}
     .brand-icon{font-family:'Instrument Serif',serif;font-size:22px;color:var(--accent)}
-    .nav-links{display:flex;gap:4px}
+    .nav-links{display:flex;gap:4px;flex-wrap:wrap}
     .nav-link{padding:6px 14px;border-radius:var(--radius-sm);font-size:13px;color:var(--muted);cursor:pointer;text-decoration:none;transition:all .18s}
     .nav-link:hover,.nav-link.active{background:var(--surface2);color:var(--text)}
     .hero{padding:72px 32px 52px;max-width:900px;margin:0 auto;text-align:center}
@@ -45,14 +45,12 @@
     .tool-card::after{content:'';position:absolute;inset:0;opacity:0;transition:opacity .22s;background:var(--card-accent,var(--accent));border-radius:var(--radius)}
     .tool-card:hover{border-color:var(--card-accent,var(--accent));transform:translateY(-3px);box-shadow:0 10px 28px rgba(0,0,0,.35)}
     .tool-card:hover::after{opacity:.04}
-    .tool-card.locked{opacity:.45;cursor:not-allowed;pointer-events:none}
     .tool-card .card-content{position:relative;z-index:1;display:flex;flex-direction:column;gap:12px;height:100%}
     .card-top{display:flex;align-items:flex-start;justify-content:space-between;gap:8px}
     .card-icon{font-size:30px;line-height:1}
     .card-badge{font-size:10px;font-weight:700;letter-spacing:.06em;padding:3px 9px;border-radius:99px;text-transform:uppercase;white-space:nowrap}
     .badge-active{background:rgba(79,152,163,.18);color:var(--accent)}
     .badge-new{background:rgba(63,185,80,.18);color:var(--accent2)}
-    .badge-soon{background:rgba(72,79,88,.3);color:var(--faint)}
     .card-title{font-size:15px;font-weight:700;line-height:1.3}
     .card-desc{font-size:12px;color:var(--muted);line-height:1.65;flex:1}
     .card-footer{display:flex;align-items:center;justify-content:space-between;margin-top:auto}
@@ -65,7 +63,7 @@
 </head>
 <body>
 <nav class="topnav">
-  <a class="brand" href="index.html"><span class="brand-icon">⧡</span><span>Lean <strong>Suite</strong></span></a>
+  <a class="brand" href="index.html"><span class="brand-icon">⬡</span><span>Lean <strong>Suite</strong></span></a>
   <div class="nav-links">
     <a class="nav-link active" href="index.html">🏠 Inicio</a>
     <a class="nav-link" href="vsm.html">🗺️ VSM</a>
@@ -73,7 +71,8 @@
     <a class="nav-link" href="ishikawa.html">🐟 Ishikawa</a>
     <a class="nav-link" href="5-porques.html">❓ 5 Porqués</a>
     <a class="nav-link" href="pareto.html">📊 Pareto</a>
-    <a class="nav-link" href="pdca.html">🔄 PDCA</a>
+    <a class="nav-link" href="oee.html">⚙️ OEE</a>
+    <a class="nav-link" href="spc.html">📉 SPC</a>
   </div>
 </nav>
 
@@ -85,10 +84,10 @@
 </section>
 
 <div class="stats-bar">
-  <div class="stat"><div class="stat-val">9</div><div class="stat-lbl">Herramientas</div></div>
+  <div class="stat"><div class="stat-val">11</div><div class="stat-lbl">Herramientas</div></div>
   <div class="stat"><div class="stat-val">4</div><div class="stat-lbl">Fases Lean</div></div>
   <div class="stat"><div class="stat-val">DMAIC</div><div class="stat-lbl">Metodología</div></div>
-  <div class="stat"><div class="stat-val">v5.3</div><div class="stat-lbl">Versión</div></div>
+  <div class="stat"><div class="stat-val">v5.4</div><div class="stat-lbl">Versión</div></div>
 </div>
 
 <div class="phases">
@@ -107,12 +106,12 @@
         <div class="card-footer"><span class="card-tag">Project Charter</span><span class="card-arrow">→</span></div>
       </div>
     </a>
-    <a class="tool-card locked" style="--card-accent:#4f98a3">
+    <a class="tool-card" href="a3-report.html" style="--card-accent:#4f98a3">
       <div class="card-content">
-        <div class="card-top"><div class="card-icon">🗣</div><div class="card-badge badge-soon">Próximamente</div></div>
-        <div class="card-title">VOC / CTQ Tree</div>
-        <div class="card-desc">Voz del Cliente → Requisitos Críticos de Calidad. Conecta necesidades del cliente con métricas medibles.</div>
-        <div class="card-footer"><span class="card-tag">Voice of Customer</span><span class="card-arrow">→</span></div>
+        <div class="card-top"><div class="card-icon">📄</div><div class="card-badge badge-active">Disponible</div></div>
+        <div class="card-title">A3 Report</div>
+        <div class="card-desc">Formato Toyota A3: Background → Estado Actual → Objetivo → Análisis → Contramedidas → Plan → Seguimiento.</div>
+        <div class="card-footer"><span class="card-tag">Toyota A3</span><span class="card-arrow">→</span></div>
       </div>
     </a>
   </div>
@@ -149,7 +148,7 @@
     </a>
     <a class="tool-card" href="pareto.html" style="--card-accent:#ffa657">
       <div class="card-content">
-        <div class="card-top"><div class="card-icon">📊</div><div class="card-badge badge-new">¡Nuevo!</div></div>
+        <div class="card-top"><div class="card-icon">📊</div><div class="card-badge badge-active">Disponible</div></div>
         <div class="card-title">Pareto 80/20</div>
         <div class="card-desc">Identifica el 20% de causas que generan el 80% del impacto. Gráfica interactiva, umbral ajustable, tabla vital/trivial.</div>
         <div class="card-footer"><span class="card-tag">Priorización</span><span class="card-arrow">→</span></div>
@@ -171,14 +170,6 @@
         <div class="card-footer"><span class="card-tag">5S Lean</span><span class="card-arrow">→</span></div>
       </div>
     </a>
-    <a class="tool-card" href="a3-report.html" style="--card-accent:#3fb950">
-      <div class="card-content">
-        <div class="card-top"><div class="card-icon">📄</div><div class="card-badge badge-active">Disponible</div></div>
-        <div class="card-title">A3 Report</div>
-        <div class="card-desc">Formato Toyota A3: Background → Estado Actual → Objetivo → Análisis → Contramedidas → Plan → Seguimiento.</div>
-        <div class="card-footer"><span class="card-tag">Toyota A3</span><span class="card-arrow">→</span></div>
-      </div>
-    </a>
     <a class="tool-card" href="pdca.html" style="--card-accent:#bc8cff">
       <div class="card-content">
         <div class="card-top"><div class="card-icon">🔄</div><div class="card-badge badge-active">Disponible</div></div>
@@ -195,19 +186,19 @@
     <div class="phase-line"></div>
   </div>
   <div class="tools-grid">
-    <a class="tool-card locked" style="--card-accent:#ffa657">
+    <a class="tool-card" href="oee.html" style="--card-accent:#ffa657">
       <div class="card-content">
-        <div class="card-top"><div class="card-icon">⚙️</div><div class="card-badge badge-soon">Próximamente</div></div>
+        <div class="card-top"><div class="card-icon">⚙️</div><div class="card-badge badge-new">¡Nuevo!</div></div>
         <div class="card-title">OEE Calculator</div>
-        <div class="card-desc">Overall Equipment Effectiveness = Disponibilidad × Rendimiento × Calidad. Benchmark y tendencia histórica.</div>
+        <div class="card-desc">Overall Equipment Effectiveness = Disponibilidad × Rendimiento × Calidad. Historial de turnos, benchmark y exportar CSV.</div>
         <div class="card-footer"><span class="card-tag">OEE</span><span class="card-arrow">→</span></div>
       </div>
     </a>
-    <a class="tool-card locked" style="--card-accent:#f85149">
+    <a class="tool-card" href="spc.html" style="--card-accent:#f85149">
       <div class="card-content">
-        <div class="card-top"><div class="card-icon">📉</div><div class="card-badge badge-soon">Próximamente</div></div>
+        <div class="card-top"><div class="card-icon">📉</div><div class="card-badge badge-new">¡Nuevo!</div></div>
         <div class="card-title">Gráfica de Control SPC</div>
-        <div class="card-desc">Control estadístico de proceso. UCL / LCL calculados automáticamente. Detecta causas especiales.</div>
+        <div class="card-desc">Control estadístico de proceso. UCL / LCL calculados automáticamente. Detecta señales fuera de control con índice Cp.</div>
         <div class="card-footer"><span class="card-tag">SPC · Control Chart</span><span class="card-arrow">→</span></div>
       </div>
     </a>
@@ -215,6 +206,6 @@
 
 </div>
 
-<footer>Lean Analysis Suite · VSM Flow Studio · v5.3 · 2026</footer>
+<footer>Lean Analysis Suite · VSM Flow Studio · v5.4 · 2026</footer>
 </body>
 </html>

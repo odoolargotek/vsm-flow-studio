@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OEE Calculator — Lean Suite</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300..700&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{
+      --bg:#0d1117;--surface:#161b22;--surface2:#21262d;--border:#30363d;
+      --text:#e6edf3;--muted:#8b949e;--faint:#484f58;
+      --accent:#4f98a3;--green:#3fb950;--warn:#d29922;--danger:#f85149;
+      --purple:#bc8cff;--orange:#ffa657;
+      --radius:12px;--radius-sm:8px;
+      --trans:180ms cubic-bezier(.16,1,.3,1);
+    }
+    body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+    .topnav{display:flex;align-items:center;justify-content:space-between;padding:0 28px;height:54px;background:var(--surface);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:100}
+    .brand{display:flex;align-items:center;gap:10px;font-size:15px;font-weight:600;text-decoration:none;color:var(--text)}
+    .brand-icon{font-family:'Instrument Serif',serif;font-size:22px;color:var(--accent)}
+    .nav-links{display:flex;gap:4px}
+    .nav-link{padding:6px 13px;border-radius:var(--radius-sm);font-size:13px;color:var(--muted);text-decoration:none;transition:all var(--trans)}
+    .nav-link:hover,.nav-link.active{background:var(--surface2);color:var(--text)}
+    .nav-actions{display:flex;gap:8px}
+    .btn{padding:7px 16px;border-radius:var(--radius-sm);font-size:13px;font-weight:600;cursor:pointer;border:none;transition:all var(--trans);font-family:inherit}
+    .btn-primary{background:var(--orange);color:#fff}.btn-primary:hover{background:#e88a3a}
+    .btn-ghost{background:transparent;color:var(--muted);border:1px solid var(--border)}.btn-ghost:hover{background:var(--surface2);color:var(--text)}
+
+    .page{max-width:1100px;margin:0 auto;padding:32px 28px 80px}
+    h1.page-title{font-family:'Instrument Serif',serif;font-size:clamp(1.6rem,3vw,2.2rem);margin-bottom:4px}
+    .page-sub{font-size:13px;color:var(--muted);margin-bottom:32px}
+
+    /* INPUTS GRID */
+    .inputs-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px;margin-bottom:32px}
+    .input-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px 22px}
+    .ic-header{display:flex;align-items:center;gap:10px;margin-bottom:16px}
+    .ic-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+    .ic-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
+    .ic-formula{font-size:10px;color:var(--faint);margin-left:auto}
+    .field{display:flex;flex-direction:column;gap:5px;margin-bottom:12px}
+    .field:last-child{margin-bottom:0}
+    .field label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--faint)}
+    .field input{background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:8px 12px;border-radius:var(--radius-sm);font-size:13px;font-family:inherit;outline:none;transition:border-color var(--trans)}
+    .field input:focus{border-color:var(--accent)}
+    .field .hint{font-size:10px;color:var(--faint)}
+
+    /* OEE RESULT */
+    .oee-result{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:28px 32px;margin-bottom:24px;display:flex;flex-wrap:wrap;gap:32px;align-items:center}
+    .oee-big{text-align:center;flex-shrink:0}
+    .oee-val{font-size:64px;font-weight:800;line-height:1;font-variant-numeric:tabular-nums}
+    .oee-lbl{font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-top:4px}
+    .oee-grade{font-size:12px;font-weight:700;padding:4px 12px;border-radius:99px;margin-top:10px;display:inline-block}
+    .oee-breakdown{flex:1;display:flex;flex-direction:column;gap:14px;min-width:220px}
+    .oee-component{display:flex;flex-direction:column;gap:6px}
+    .oee-comp-header{display:flex;justify-content:space-between;align-items:center}
+    .oee-comp-name{font-size:12px;font-weight:700}
+    .oee-comp-val{font-size:13px;font-weight:800;font-variant-numeric:tabular-nums}
+    .bar-track{background:var(--surface2);border-radius:99px;height:8px;overflow:hidden}
+    .bar-fill{height:100%;border-radius:99px;transition:width .6s cubic-bezier(.16,1,.3,1)}
+    .oee-formula{flex:1;min-width:200px;background:var(--surface2);border-radius:var(--radius-sm);padding:14px 18px;font-size:12px;line-height:2;color:var(--muted)}
+    .oee-formula strong{color:var(--text)}
+
+    /* BENCHMARK */
+    .bench{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px 24px;margin-bottom:24px}
+    .bench-title{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:14px}
+    .bench-row{display:flex;align-items:center;gap:10px;margin-bottom:8px;font-size:12px}
+    .bench-bar-wrap{flex:1;background:var(--surface2);border-radius:99px;height:8px;overflow:hidden}
+    .bench-bar{height:100%;border-radius:99px}
+    .bench-name{width:120px;color:var(--muted)}
+    .bench-pct{width:48px;text-align:right;font-weight:700;font-variant-numeric:tabular-nums}
+    .bench-arrow{width:16px;text-align:center;font-size:14px}
+
+    /* HISTORY */
+    .history-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
+    .history-head{display:flex;align-items:center;justify-content:space-between;padding:14px 20px;border-bottom:1px solid var(--border)}
+    .history-title{font-size:13px;font-weight:700}
+    table{width:100%;border-collapse:collapse}
+    thead th{padding:10px 16px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);text-align:left;border-bottom:1px solid var(--border)}
+    tbody tr{border-bottom:1px solid var(--border);transition:background var(--trans)}
+    tbody tr:last-child{border-bottom:none}
+    tbody tr:hover{background:var(--surface2)}
+    tbody td{padding:10px 16px;font-size:12px}
+    .grade-chip{display:inline-block;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700}
+  </style>
+</head>
+<body>
+<nav class="topnav">
+  <a class="brand" href="index.html"><span class="brand-icon">⬡</span><span>Lean <strong>Suite</strong></span></a>
+  <div class="nav-links">
+    <a class="nav-link" href="index.html">🏠 Inicio</a>
+    <a class="nav-link" href="vsm.html">🗺️ VSM</a>
+    <a class="nav-link" href="pareto.html">📊 Pareto</a>
+    <a class="nav-link" href="5-porques.html">❓ 5 Porqués</a>
+    <a class="nav-link active" href="oee.html">⚙️ OEE</a>
+    <a class="nav-link" href="spc.html">📉 SPC</a>
+  </div>
+  <div class="nav-actions">
+    <button class="btn btn-ghost" onclick="loadDemo()">🧪 Demo</button>
+    <button class="btn btn-ghost" onclick="exportCSV()">⬇ CSV</button>
+    <button class="btn btn-primary" onclick="addToHistory()">+ Guardar Turno</button>
+  </div>
+</nav>
+
+<div class="page">
+  <h1 class="page-title">⚙️ OEE Calculator</h1>
+  <p class="page-sub">Overall Equipment Effectiveness = Disponibilidad × Rendimiento × Calidad</p>
+
+  <div class="inputs-grid">
+    <!-- DISPONIBILIDAD -->
+    <div class="input-card">
+      <div class="ic-header">
+        <div class="ic-dot" style="background:#4f98a3"></div>
+        <span class="ic-label">Disponibilidad</span>
+        <span class="ic-formula">Tiempo Operativo / Tiempo Planeado</span>
+      </div>
+      <div class="field"><label>Tiempo Planeado (min)</label><input id="t-plan" type="number" min="0" value="480" oninput="calc()"><span class="hint">Ej: turno de 8 h = 480 min</span></div>
+      <div class="field"><label>Paros No Planeados (min)</label><input id="t-down" type="number" min="0" value="45" oninput="calc()"></div>
+    </div>
+    <!-- RENDIMIENTO -->
+    <div class="input-card">
+      <div class="ic-header">
+        <div class="ic-dot" style="background:#d29922"></div>
+        <span class="ic-label">Rendimiento</span>
+        <span class="ic-formula">Piezas Reales / Piezas Ideales</span>
+      </div>
+      <div class="field"><label>Velocidad Ideal (pzas/min)</label><input id="r-ideal" type="number" min="0" step="0.1" value="10" oninput="calc()"></div>
+      <div class="field"><label>Piezas Producidas</label><input id="r-actual" type="number" min="0" value="3600" oninput="calc()"></div>
+    </div>
+    <!-- CALIDAD -->
+    <div class="input-card">
+      <div class="ic-header">
+        <div class="ic-dot" style="background:#3fb950"></div>
+        <span class="ic-label">Calidad</span>
+        <span class="ic-formula">Piezas Buenas / Piezas Producidas</span>
+      </div>
+      <div class="field"><label>Piezas Producidas</label><input id="q-total" type="number" min="0" value="3600" oninput="calc()"></div>
+      <div class="field"><label>Piezas Defectuosas</label><input id="q-bad" type="number" min="0" value="72" oninput="calc()"></div>
+    </div>
+    <!-- TURNO -->
+    <div class="input-card">
+      <div class="ic-header">
+        <div class="ic-dot" style="background:#bc8cff"></div>
+        <span class="ic-label">Identificación del Turno</span>
+      </div>
+      <div class="field"><label>Máquina / Línea</label><input id="m-name" value="Línea A" oninput="calc()"></div>
+      <div class="field"><label>Turno</label><input id="m-shift" value="Turno 1" oninput="calc()"></div>
+      <div class="field"><label>Fecha</label><input id="m-date" type="date"></div>
+    </div>
+  </div>
+
+  <!-- RESULTADO -->
+  <div class="oee-result" id="oee-result">
+    <div class="oee-big">
+      <div class="oee-val" id="oee-val">—</div>
+      <div class="oee-lbl">OEE</div>
+      <div class="oee-grade" id="oee-grade"></div>
+    </div>
+    <div class="oee-breakdown">
+      <div class="oee-component">
+        <div class="oee-comp-header"><span class="oee-comp-name" style="color:#4f98a3">Disponibilidad</span><span class="oee-comp-val" id="av-val" style="color:#4f98a3">—</span></div>
+        <div class="bar-track"><div class="bar-fill" id="av-bar" style="background:#4f98a3;width:0%"></div></div>
+      </div>
+      <div class="oee-component">
+        <div class="oee-comp-header"><span class="oee-comp-name" style="color:#d29922">Rendimiento</span><span class="oee-comp-val" id="pe-val" style="color:#d29922">—</span></div>
+        <div class="bar-track"><div class="bar-fill" id="pe-bar" style="background:#d29922;width:0%"></div></div>
+      </div>
+      <div class="oee-component">
+        <div class="oee-comp-header"><span class="oee-comp-name" style="color:#3fb950">Calidad</span><span class="oee-comp-val" id="qu-val" style="color:#3fb950">—</span></div>
+        <div class="bar-track"><div class="bar-fill" id="qu-bar" style="background:#3fb950;width:0%"></div></div>
+      </div>
+    </div>
+    <div class="oee-formula" id="oee-formula"></div>
+  </div>
+
+  <!-- BENCHMARK -->
+  <div class="bench">
+    <div class="bench-title">📐 Benchmark Industrial</div>
+    <div class="bench-row"><span class="bench-name" style="color:#d29922">World Class</span><div class="bench-bar-wrap"><div class="bench-bar" style="background:#d29922;width:85%"></div></div><span class="bench-pct">85%</span><span class="bench-arrow" id="wc-arrow"></span></div>
+    <div class="bench-row"><span class="bench-name" style="color:#4f98a3">Promedio industria</span><div class="bench-bar-wrap"><div class="bench-bar" style="background:#4f98a3;width:60%"></div></div><span class="bench-pct">60%</span><span class="bench-arrow" id="ind-arrow"></span></div>
+    <div class="bench-row" id="my-bench-row" style="display:none">
+      <span class="bench-name" style="color:#bc8cff">Tu OEE</span>
+      <div class="bench-bar-wrap"><div class="bench-bar" id="my-bench-bar" style="background:#bc8cff"></div></div>
+      <span class="bench-pct" id="my-bench-val"></span>
+      <span class="bench-arrow"></span>
+    </div>
+  </div>
+
+  <!-- HISTORIAL -->
+  <div class="history-card">
+    <div class="history-head">
+      <span class="history-title">📋 Historial de Turnos</span>
+      <button class="btn btn-ghost" style="font-size:11px;padding:5px 10px" onclick="clearHistory()">🗑 Limpiar</button>
+    </div>
+    <table><thead><tr>
+      <th>Fecha</th><th>Máquina</th><th>Turno</th>
+      <th>Disponib.</th><th>Rendim.</th><th>Calidad</th><th>OEE</th><th>Grado</th>
+    </tr></thead><tbody id="history-body"><tr><td colspan="8" style="text-align:center;color:var(--faint);padding:24px">Guarda un turno para ver el historial</td></tr></tbody></table>
+  </div>
+</div>
+
+<script>
+let history = [];
+
+function pct(v){ return Math.min(100,Math.max(0,v*100)); }
+
+function gradeInfo(oee){
+  if(oee>=0.85) return {label:'World Class 🏆',bg:'rgba(210,153,34,.18)',color:'#d29922'};
+  if(oee>=0.70) return {label:'Bueno ✅',bg:'rgba(63,185,80,.18)',color:'#3fb950'};
+  if(oee>=0.50) return {label:'Regular ⚠️',bg:'rgba(255,166,87,.18)',color:'#ffa657'};
+  return {label:'Crítico 🔴',bg:'rgba(248,81,73,.18)',color:'#f85149'};
+}
+
+function calc(){
+  const tPlan = +document.getElementById('t-plan').value||0;
+  const tDown = +document.getElementById('t-down').value||0;
+  const rIdeal = +document.getElementById('r-ideal').value||0;
+  const rActual = +document.getElementById('r-actual').value||0;
+  const qTotal = +document.getElementById('q-total').value||0;
+  const qBad = +document.getElementById('q-bad').value||0;
+
+  const tOp = Math.max(0, tPlan - tDown);
+  const av = tPlan > 0 ? tOp / tPlan : 0;
+  const peIdeal = tOp * rIdeal;
+  const pe = peIdeal > 0 ? rActual / peIdeal : 0;
+  const qGood = Math.max(0, qTotal - qBad);
+  const qu = qTotal > 0 ? qGood / qTotal : 0;
+  const oee = av * pe * qu;
+
+  const oeeEl = document.getElementById('oee-val');
+  const g = gradeInfo(oee);
+  const oeeP = pct(oee);
+
+  oeeEl.textContent = oeeP.toFixed(1)+'%';
+  oeeEl.style.color = g.color;
+  const gradeEl = document.getElementById('oee-grade');
+  gradeEl.textContent = g.label;
+  gradeEl.style.background = g.bg;
+  gradeEl.style.color = g.color;
+
+  document.getElementById('av-val').textContent = pct(av).toFixed(1)+'%';
+  document.getElementById('pe-val').textContent = pct(pe).toFixed(1)+'%';
+  document.getElementById('qu-val').textContent = pct(qu).toFixed(1)+'%';
+  document.getElementById('av-bar').style.width = pct(av)+'%';
+  document.getElementById('pe-bar').style.width = pct(pe)+'%';
+  document.getElementById('qu-bar').style.width = pct(qu)+'%';
+
+  document.getElementById('oee-formula').innerHTML =
+    `<strong>OEE</strong> = Disponib. × Rendim. × Calidad<br>
+     = ${pct(av).toFixed(1)}% × ${pct(pe).toFixed(1)}% × ${pct(qu).toFixed(1)}%<br>
+     = <strong style="color:${g.color}">${oeeP.toFixed(2)}%</strong><br><br>
+     Tiempo Operativo: <strong>${tOp} min</strong><br>
+     Piezas Buenas: <strong>${qGood.toLocaleString()}</strong><br>
+     Pérdida OEE: <strong style="color:var(--danger)">${(100-oeeP).toFixed(1)}%</strong>`;
+
+  // benchmark arrows
+  document.getElementById('wc-arrow').textContent  = oeeP >= 85 ? '✅' : (oeeP >= 70 ? '⬇️' : '❌');
+  document.getElementById('ind-arrow').textContent = oeeP >= 60 ? '✅' : '❌';
+  const mb = document.getElementById('my-bench-row');
+  mb.style.display = 'flex';
+  document.getElementById('my-bench-bar').style.width = Math.min(100,oeeP)+'%';
+  document.getElementById('my-bench-val').textContent = oeeP.toFixed(1)+'%';
+
+  window._lastOEE = {av,pe,qu,oee,tOp,tPlan,tDown,rIdeal,rActual,qTotal,qBad,qGood,g};
+}
+
+function addToHistory(){
+  const d = window._lastOEE;
+  if(!d){ alert('Calcula primero.'); return; }
+  const date = document.getElementById('m-date').value || new Date().toISOString().slice(0,10);
+  const name = document.getElementById('m-name').value||'—';
+  const shift = document.getElementById('m-shift').value||'—';
+  history.unshift({date,name,shift,av:d.av,pe:d.pe,qu:d.qu,oee:d.oee,g:d.g});
+  renderHistory();
+}
+
+function renderHistory(){
+  const tbody = document.getElementById('history-body');
+  if(!history.length){ tbody.innerHTML='<tr><td colspan="8" style="text-align:center;color:var(--faint);padding:24px">Sin registros</td></tr>'; return; }
+  tbody.innerHTML = history.map(r=>`
+    <tr>
+      <td>${r.date}</td><td>${r.name}</td><td>${r.shift}</td>
+      <td style="color:#4f98a3;font-weight:700">${pct(r.av).toFixed(1)}%</td>
+      <td style="color:#d29922;font-weight:700">${pct(r.pe).toFixed(1)}%</td>
+      <td style="color:#3fb950;font-weight:700">${pct(r.qu).toFixed(1)}%</td>
+      <td style="color:${r.g.color};font-weight:800;font-size:14px">${pct(r.oee).toFixed(1)}%</td>
+      <td><span class="grade-chip" style="background:${r.g.bg};color:${r.g.color}">${r.g.label.split(' ')[0]}</span></td>
+    </tr>
+  `).join('');
+}
+
+function clearHistory(){ if(confirm('¿Limpiar historial?')){ history=[]; renderHistory(); } }
+
+function loadDemo(){
+  document.getElementById('t-plan').value=480;
+  document.getElementById('t-down').value=45;
+  document.getElementById('r-ideal').value=10;
+  document.getElementById('r-actual').value=3600;
+  document.getElementById('q-total').value=3600;
+  document.getElementById('q-bad').value=72;
+  document.getElementById('m-name').value='Línea A';
+  document.getElementById('m-shift').value='Turno 1';
+  calc();
+}
+
+function exportCSV(){
+  if(!history.length){ alert('Guarda al menos un turno.'); return; }
+  let csv='Fecha,Máquina,Turno,Disponibilidad,Rendimiento,Calidad,OEE,Grado\n';
+  history.forEach(r=>{
+    csv+=`${r.date},"${r.name}","${r.shift}",${pct(r.av).toFixed(2)}%,${pct(r.pe).toFixed(2)}%,${pct(r.qu).toFixed(2)}%,${pct(r.oee).toFixed(2)}%,"${r.g.label}"\n`;
+  });
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));a.download='OEE_Historial.csv';a.click();
+}
+
+document.getElementById('m-date').value=new Date().toISOString().slice(0,10);
+loadDemo();
+</script>
+</body>
+</html>
