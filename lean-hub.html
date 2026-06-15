@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lean Analysis Suite — Hub</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300..700&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{
+      --bg:#0d1117;--surface:#161b22;--surface2:#21262d;--border:#30363d;
+      --text:#e6edf3;--muted:#8b949e;--faint:#484f58;
+      --accent:#4f98a3;--accent2:#3fb950;--warn:#d29922;--danger:#f85149;
+      --purple:#bc8cff;--orange:#ffa657;
+      --radius:12px;--radius-sm:8px;
+    }
+    html{scroll-behavior:smooth}
+    body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+
+    /* TOP NAV */
+    .topnav{display:flex;align-items:center;justify-content:space-between;padding:0 32px;height:56px;background:var(--surface);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:100}
+    .brand{display:flex;align-items:center;gap:10px;font-size:15px;font-weight:600}
+    .brand-icon{font-family:'Instrument Serif',serif;font-size:22px;color:var(--accent)}
+    .nav-links{display:flex;gap:4px}
+    .nav-link{padding:6px 14px;border-radius:var(--radius-sm);font-size:13px;color:var(--muted);cursor:pointer;text-decoration:none;transition:all .18s}
+    .nav-link:hover,.nav-link.active{background:var(--surface2);color:var(--text)}
+
+    /* HERO */
+    .hero{padding:64px 32px 48px;max-width:960px;margin:0 auto;text-align:center}
+    .hero-eyebrow{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--accent);margin-bottom:16px;font-weight:600}
+    .hero-title{font-family:'Instrument Serif',serif;font-size:clamp(2rem,4vw,3.2rem);line-height:1.15;margin-bottom:16px}
+    .hero-title em{color:var(--accent);font-style:italic}
+    .hero-sub{font-size:15px;color:var(--muted);max-width:560px;margin:0 auto 32px;line-height:1.7}
+    .hero-progress{display:flex;align-items:center;gap:12px;justify-content:center;font-size:13px;color:var(--muted)}
+    .progress-bar{width:200px;height:6px;background:var(--surface2);border-radius:99px;overflow:hidden}
+    .progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));border-radius:99px;transition:width .6s ease}
+    .progress-label{font-weight:600;color:var(--text)}
+
+    /* PHASES */
+    .phases{max-width:960px;margin:0 auto;padding:0 32px 80px}
+    .phase-header{display:flex;align-items:center;gap:12px;margin:40px 0 16px}
+    .phase-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+    .phase-label{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+    .phase-line{flex:1;height:1px;background:var(--border)}
+
+    /* TOOL CARDS GRID */
+    .tools-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px}
+    .tool-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:24px;cursor:pointer;text-decoration:none;color:inherit;display:flex;flex-direction:column;gap:12px;transition:all .2s;position:relative;overflow:hidden}
+    .tool-card::before{content:'';position:absolute;inset:0;opacity:0;transition:opacity .2s;border-radius:var(--radius)}
+    .tool-card:hover{border-color:var(--card-accent,var(--accent));transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,0,0,.3)}
+    .tool-card:hover::before{opacity:.04;background:var(--card-accent,var(--accent))}
+    .tool-card.locked{opacity:.5;cursor:not-allowed}
+    .tool-card.locked:hover{transform:none;box-shadow:none}
+
+    .card-top{display:flex;align-items:flex-start;justify-content:space-between;gap:8px}
+    .card-icon{font-size:28px;line-height:1}
+    .card-status{font-size:10px;font-weight:700;letter-spacing:.06em;padding:3px 8px;border-radius:99px;text-transform:uppercase}
+    .status-pending{background:rgba(139,148,158,.12);color:var(--muted)}
+    .status-active{background:rgba(79,152,163,.15);color:var(--accent)}
+    .status-done{background:rgba(63,185,80,.15);color:var(--accent2)}
+    .status-locked{background:rgba(72,79,88,.3);color:var(--faint)}
+
+    .card-title{font-size:15px;font-weight:700;line-height:1.3}
+    .card-desc{font-size:12px;color:var(--muted);line-height:1.6;flex:1}
+    .card-footer{display:flex;align-items:center;justify-content:space-between;margin-top:4px}
+    .card-tag{font-size:10px;font-weight:600;padding:2px 8px;border-radius:99px;background:var(--surface2);color:var(--muted)}
+    .card-arrow{font-size:16px;color:var(--muted);transition:transform .2s}
+    .tool-card:hover .card-arrow{transform:translateX(4px);color:var(--card-accent,var(--accent))}
+
+    /* QUICK STATS */
+    .stats-row{display:flex;gap:16px;max-width:960px;margin:0 auto 40px;padding:0 32px;flex-wrap:wrap}
+    .stat-pill{background:var(--surface);border:1px solid var(--border);border-radius:99px;padding:8px 20px;font-size:13px;display:flex;align-items:center;gap:8px}
+    .stat-val{font-weight:700;color:var(--text)}
+    .stat-lbl{color:var(--muted)}
+
+    /* FOOTER */
+    footer{border-top:1px solid var(--border);padding:24px 32px;text-align:center;color:var(--faint);font-size:11px}
+  </style>
+</head>
+<body>
+
+<nav class="topnav">
+  <div class="brand">
+    <span class="brand-icon">⧡</span>
+    <span>Lean Analysis <strong>Suite</strong></span>
+  </div>
+  <div class="nav-links">
+    <a class="nav-link active" href="lean-hub.html">🏠 Hub</a>
+    <a class="nav-link" href="caso-negocio.html">📋 Caso</a>
+    <a class="nav-link" href="a3-report.html">📄 A3</a>
+    <a class="nav-link" href="pdca.html">🔄 PDCA</a>
+    <a class="nav-link" href="index.html">🗺️ VSM</a>
+  </div>
+</nav>
+
+<section class="hero">
+  <div class="hero-eyebrow">Lean Manufacturing · Mejora Continua</div>
+  <h1 class="hero-title">Análisis Lean <em>Completo</em></h1>
+  <p class="hero-sub">Plataforma integrada para definir, medir, analizar y mejorar procesos usando herramientas Lean estándar de la industria.</p>
+  <div class="hero-progress">
+    <span class="progress-label" id="prog-label">0 / 4 completos</span>
+    <div class="progress-bar"><div class="progress-fill" id="prog-fill" style="width:0%"></div></div>
+  </div>
+</section>
+
+<div class="stats-row" id="stats-row">
+  <div class="stat-pill"><span class="stat-val" id="stat-proj">—</span><span class="stat-lbl">Proyecto</span></div>
+  <div class="stat-pill"><span class="stat-val" id="stat-scope">—</span><span class="stat-lbl">Alcance</span></div>
+  <div class="stat-pill"><span class="stat-val" id="stat-owner">—</span><span class="stat-lbl">Responsable</span></div>
+  <div class="stat-pill"><span class="stat-val" id="stat-date">—</span><span class="stat-lbl">Fecha inicio</span></div>
+</div>
+
+<div class="phases">
+
+  <!-- FASE 1: DEFINIR -->
+  <div class="phase-header">
+    <div class="phase-dot" style="background:#4f98a3"></div>
+    <div class="phase-label">Fase 1 — Definir el Problema</div>
+    <div class="phase-line"></div>
+  </div>
+  <div class="tools-grid">
+    <a class="tool-card" href="caso-negocio.html" style="--card-accent:#4f98a3" id="card-caso">
+      <div class="card-top">
+        <div class="card-icon">📋</div>
+        <div class="card-status status-pending" id="status-caso">Pendiente</div>
+      </div>
+      <div class="card-title">Caso de Negocio</div>
+      <div class="card-desc">Define el problema, impacto económico, alcance del proyecto, KPIs meta y equipo responsable.</div>
+      <div class="card-footer">
+        <span class="card-tag">Project Charter</span>
+        <span class="card-arrow">→</span>
+      </div>
+    </a>
+    <a class="tool-card locked" href="#" style="--card-accent:#4f98a3" onclick="return false">
+      <div class="card-top">
+        <div class="card-icon">🗣</div>
+        <div class="card-status status-locked">Próximamente</div>
+      </div>
+      <div class="card-title">VOC / CTQ Tree</div>
+      <div class="card-desc">Voz del Cliente → Requisitos Críticos de Calidad. Conecta la necesidad del cliente con métricas medibles.</div>
+      <div class="card-footer">
+        <span class="card-tag">Voice of Customer</span>
+        <span class="card-arrow">→</span>
+      </div>
+    </a>
+  </div>
+
+  <!-- FASE 2: MEDIR/ANALIZAR -->
+  <div class="phase-header">
+    <div class="phase-dot" style="background:#d29922"></div>
+    <div class="phase-label">Fase 2 — Medir y Analizar</div>
+    <div class="phase-line"></div>
+  </div>
+  <div class="tools-grid">
+    <a class="tool-card" href="index.html" style="--card-accent:#d29922" id="card-vsm">
+      <div class="card-top">
+        <div class="card-icon">🗺️</div>
+        <div class="card-status status-active" id="status-vsm">Disponible</div>
+      </div>
+      <div class="card-title">VSM Flow Studio</div>
+      <div class="card-desc">Value Stream Map con simulación Monte Carlo, animación de flujo, análisis de cuellos de botella y PCE.</div>
+      <div class="card-footer">
+        <span class="card-tag">Value Stream Map</span>
+        <span class="card-arrow">→</span>
+      </div>
+    </a>
+    <a class="tool-card locked" href="#" style="--card-accent:#d29922" onclick="return false">
+      <div class="card-top">
+        <div class="card-icon">🐟</div>
+        <div class="card-status status-locked">Próximamente</div>
+      </div>
+      <div class="card-title">Diagrama Ishikawa</div>
+      <div class="card-desc">Diagrama de espina de pescado (6M) para análisis visual de causas raíz. Categorías: Máquina, Mano de Obra, Método, Material, Medio, Medición.</div>
+      <div class="card-footer">
+        <span class="card-tag">Causa-Raíz</span>
+        <span class="card-arrow">→</span>
+      </div>
+    </a>
+    <a class="tool-card locked" href="#" style="--card-accent:#d29922" onclick="return false">
+      <div class="card-top">
+        <div class="card-icon">❓</div>
+        <div class="card-status status-locked">Próximamente</div>
+      </div>
+      <div class="card-title">5 Porqués</div>
+      <div class="card-desc">Drill-down iterativo de causa raíz. Parte del síntoma y pregunta "¿por qué?" cinco veces hasta llegar a la causa fundamental.</div>
+      <div class="card-footer">
+        <span class="card-tag">Root Cause</span>
+        <span class="card-arrow">→</span>
+      </div>
+    </a>
+    <a class="tool-card locked" href="#" style="--card-accent:#ffa657" onclick="return false">
+      <div class="card-top">
+        <div class="card-icon">📊</div>
+        <div class="card-status status-locked">Próximamente</div>
+      </div>
+      <div class="card-title">Pareto 80/20</div>
+      <div class="card-desc">Identifica el 20% de causas que generan el 80% de los problemas. Gráfica de barras + curva acumulada.</div>
+      <div class="card-footer">
+        <span class="card-tag">Priorización</span>
+        <span class="card-arrow">→</span>
+      </div>
+    </a>
+  </div>
+
+  <!-- FASE 3: MEJORAR -->
+  <div class="phase-header">
+    <div class="phase-dot" style="background:#3fb950"></div>
+    <div class="phase-label">Fase 3 — Mejorar</div>
+    <div class="phase-line"></div>
+  </div>
+  <div class="tools-grid">
+    <a class="tool-card" href="a3-report.html" style="--card-accent:#3fb950" id="card-a3">
+      <div class="card-top">
+        <div class="card-icon">📄</div>
+        <div class="card-status status-pending" id="status-a3">Pendiente</div>
+      </div>
+      <div class="card-title">A3 Report</div>
+      <div class="card-desc">Formato Toyota A3: Background → Estado Actual → Estado Objetivo → Análisis → Contramedidas → Plan → Seguimiento.</div>
+      <div class="card-footer">
+        <span class="card-tag">Toyota A3</span>
+        <span class="card-arrow">→</span>
+      </div>
+    </a>
+    <a class="tool-card" href="pdca.html" style="--card-accent:#bc8cff" id="card-pdca">
+      <div class="card-top">
+        <div class="card-icon">🔄</div>
+        <div class="card-status status-pending" id="status-pdca">Pendiente</div>
+      </div>
+      <div class="card-title">Ciclo PDCA</div>
+      <div class="card-desc">Plan → Do → Check → Act. Gestión de tareas de mejora con responsables, fechas y estado de avance.</div>
+      <div class="card-footer">
+        <span class="card-tag">Deming Cycle</span>
+        <span class="card-arrow">→</span>
+      </div>
+    </a>
+    <a class="tool-card locked" href="#" style="--card-accent:#3fb950" onclick="return false">
+      <div class="card-top">
+        <div class="card-icon">5️⃣S</div>
+        <div class="card-status status-locked">Próximamente</div>
+      </div>
+      <div class="card-title">Auditoría 5S</div>
+      <div class="card-desc">Checklist interactivo: Seiri · Seiton · Seiso · Seiketsu · Shitsuke. Puntuación por categoría y reporte de hallazgos.</div>
+      <div class="card-footer">
+        <span class="card-tag">5S Lean</span>
+        <span class="card-arrow">→</span>
+      </div>
+    </a>
+  </div>
+
+  <!-- FASE 4: CONTROLAR -->
+  <div class="phase-header">
+    <div class="phase-dot" style="background:#f85149"></div>
+    <div class="phase-label">Fase 4 — Controlar y Sostener</div>
+    <div class="phase-line"></div>
+  </div>
+  <div class="tools-grid">
+    <a class="tool-card locked" href="#" style="--card-accent:#ffa657" onclick="return false">
+      <div class="card-top">
+        <div class="card-icon">⚙️</div>
+        <div class="card-status status-locked">Próximamente</div>
+      </div>
+      <div class="card-title">OEE Calculator</div>
+      <div class="card-desc">Overall Equipment Effectiveness = Disponibilidad × Rendimiento × Calidad. Benchmark y tendencia histórica.</div>
+      <div class="card-footer">
+        <span class="card-tag">OEE</span>
+        <span class="card-arrow">→</span>
+      </div>
+    </a>
+    <a class="tool-card locked" href="#" style="--card-accent:#f85149" onclick="return false">
+      <div class="card-top">
+        <div class="card-icon">📉</div>
+        <div class="card-status status-locked">Próximamente</div>
+      </div>
+      <div class="card-title">Gráfica de Control</div>
+      <div class="card-desc">Control estadístico de proceso (SPC). UCL / LCL calculados automáticamente. Detecta causas especiales.</div>
+      <div class="card-footer">
+        <span class="card-tag">SPC · Control Chart</span>
+        <span class="card-arrow">→</span>
+      </div>
+    </a>
+  </div>
+
+</div>
+
+<footer>Lean Analysis Suite · VSM Flow Studio · v1.0</footer>
+
+<script>
+// Load project header from localStorage
+function loadHubState() {
+  const caso = JSON.parse(localStorage.getItem('lean-caso') || 'null');
+  const a3   = JSON.parse(localStorage.getItem('lean-a3')   || 'null');
+  const pdca = JSON.parse(localStorage.getItem('lean-pdca') || 'null');
+
+  if (caso) {
+    document.getElementById('stat-proj').textContent  = caso.projectName  || '—';
+    document.getElementById('stat-scope').textContent = caso.scope        || '—';
+    document.getElementById('stat-owner').textContent = caso.sponsor      || '—';
+    document.getElementById('stat-date').textContent  = caso.startDate    || '—';
+    setStatus('status-caso', 'done', '✔ Completo');
+  }
+  if (a3)   setStatus('status-a3',   'done', '✔ Completo');
+  if (pdca) setStatus('status-pdca', 'done', '✔ Completo');
+
+  const done = [caso, a3, pdca].filter(Boolean).length + 1; // VSM always available
+  const total = 4;
+  document.getElementById('prog-label').textContent = `${done} / ${total} completos`;
+  document.getElementById('prog-fill').style.width  = (done / total * 100) + '%';
+}
+
+function setStatus(id, cls, text) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.className = 'card-status status-' + cls;
+  el.textContent = text;
+}
+
+loadHubState();
+</script>
+</body>
+</html>
