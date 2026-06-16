@@ -1,0 +1,633 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Guía DMAIC — Almacén — Largotek</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300..700&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{
+      --bg:#0d1117;--surface:#161b22;--surface2:#21262d;--border:#30363d;
+      --text:#e6edf3;--muted:#8b949e;--faint:#3d444d;
+      --d:#4f98a3;--m:#e8c44a;--a:#f78c3f;--i:#bc8cff;--c:#5fc97a;
+      --radius:14px;
+    }
+    html{scroll-behavior:smooth}
+    body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;flex-direction:column}
+
+    /* HERO */
+    .hero{padding:48px 32px 32px;max-width:980px;margin:0 auto;width:100%}
+    .hero-eye{font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--d);margin-bottom:12px}
+    .hero h1{font-family:'Instrument Serif',serif;font-size:clamp(1.8rem,4vw,2.8rem);line-height:1.15;margin-bottom:12px}
+    .hero h1 em{color:var(--d);font-style:italic}
+    .hero-sub{font-size:14px;color:var(--muted);line-height:1.75;max-width:640px;margin-bottom:24px}
+    .hero-problem{background:rgba(248,81,73,.07);border:1px solid rgba(248,81,73,.2);border-radius:10px;padding:16px 20px;font-size:13px;line-height:1.7;max-width:700px}
+    .hero-problem strong{color:#f85149}
+    .hero-problem ul{margin-top:6px;padding-left:18px}
+    .hero-problem li{margin-bottom:3px}
+
+    /* PHASE TABS */
+    .phase-nav{display:flex;gap:6px;flex-wrap:wrap;padding:24px 32px 0;max-width:980px;margin:0 auto;width:100%}
+    .phase-tab{display:flex;align-items:center;gap:8px;padding:8px 16px;border-radius:99px;border:1.5px solid var(--border);background:transparent;color:var(--muted);font-size:12.5px;font-weight:600;cursor:pointer;transition:all .18s;font-family:'Inter',sans-serif;white-space:nowrap}
+    .phase-tab:hover{border-color:var(--muted);color:var(--text)}
+    .phase-tab.active{color:#fff;border-color:transparent}
+    .phase-tab .ptdot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+
+    /* CONTENT */
+    .content{max-width:980px;margin:0 auto;padding:24px 32px 80px;width:100%;flex:1}
+    .phase-block{display:none}
+    .phase-block.active{display:block}
+
+    /* PHASE HEADER */
+    .phase-header{display:flex;align-items:center;gap:16px;margin-bottom:24px;padding:20px 24px;border-radius:var(--radius);border:1px solid}
+    .phase-letter{font-family:'Instrument Serif',serif;font-size:3rem;font-weight:400;line-height:1;width:56px;text-align:center;flex-shrink:0}
+    .phase-header-text h2{font-size:1.3rem;font-weight:700;margin-bottom:4px}
+    .phase-header-text p{font-size:13px;color:var(--muted);line-height:1.6}
+    .phase-header-text .phase-goal{margin-top:8px;font-size:12px;font-weight:600;padding:4px 12px;border-radius:99px;display:inline-block}
+
+    /* STEP CARD */
+    .step-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:16px;overflow:hidden}
+    .step-header{display:flex;align-items:flex-start;gap:14px;padding:18px 20px;cursor:pointer;transition:background .15s}
+    .step-header:hover{background:var(--surface2)}
+    .step-num{font-size:11px;font-weight:800;letter-spacing:.06em;padding:4px 9px;border-radius:6px;flex-shrink:0;margin-top:1px}
+    .step-title-wrap{flex:1}
+    .step-title{font-size:14px;font-weight:700;margin-bottom:3px}
+    .step-brief{font-size:12px;color:var(--muted);line-height:1.5}
+    .step-tool-badge{font-size:10px;font-weight:700;letter-spacing:.05em;padding:3px 9px;border-radius:99px;white-space:nowrap;flex-shrink:0;margin-top:2px}
+    .step-chevron{font-size:12px;color:var(--muted);transition:transform .2s;flex-shrink:0;margin-top:3px}
+    .step-card.open .step-chevron{transform:rotate(180deg)}
+    .step-body{display:none;padding:0 20px 20px;border-top:1px solid var(--faint)}
+    .step-card.open .step-body{display:block}
+
+    /* STEP BODY CONTENTS */
+    .step-body h4{font-size:12px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);margin:16px 0 8px}
+    .step-body h4:first-child{margin-top:16px}
+    .step-body p{font-size:13px;line-height:1.7;color:#c9d1d9;margin-bottom:8px}
+    .step-body ul,.step-body ol{font-size:13px;line-height:1.7;color:#c9d1d9;padding-left:18px;margin-bottom:8px}
+    .step-body li{margin-bottom:4px}
+    .tip-box{background:rgba(79,152,163,.07);border:1px solid rgba(79,152,163,.2);border-radius:8px;padding:12px 16px;font-size:12px;line-height:1.65;color:#a8d4d8;margin-top:10px}
+    .tip-box strong{color:var(--d)}
+    .warn-box{background:rgba(232,196,74,.07);border:1px solid rgba(232,196,74,.2);border-radius:8px;padding:12px 16px;font-size:12px;line-height:1.65;color:#d4c07a;margin-top:10px}
+    .warn-box strong{color:var(--m)}
+    .tool-link-btn{display:inline-flex;align-items:center;gap:6px;margin-top:12px;padding:9px 18px;border-radius:8px;font-size:13px;font-weight:600;text-decoration:none;border:1.5px solid;transition:all .18s}
+    .checklist{list-style:none;padding:0;margin-top:4px}
+    .checklist li{display:flex;align-items:flex-start;gap:10px;font-size:13px;padding:7px 0;border-bottom:1px solid var(--faint);line-height:1.5}
+    .checklist li:last-child{border-bottom:none}
+    .chk{width:16px;height:16px;border-radius:4px;border:1.5px solid var(--border);background:transparent;flex-shrink:0;margin-top:1px;cursor:pointer;appearance:none;-webkit-appearance:none;transition:all .15s}
+    .chk:checked{background:var(--d);border-color:var(--d)}
+    .data-table{width:100%;border-collapse:collapse;font-size:12px;margin-top:8px}
+    .data-table th{text-align:left;padding:8px 10px;background:var(--surface2);color:var(--muted);font-weight:600;font-size:11px;letter-spacing:.05em}
+    .data-table td{padding:8px 10px;border-top:1px solid var(--faint);color:#c9d1d9;vertical-align:top}
+    .data-table tr:hover td{background:#1a2030}
+    .tag{display:inline-block;font-size:10px;font-weight:700;padding:2px 7px;border-radius:99px;margin-right:3px}
+
+    /* PROGRESS BAR */
+    .progress-bar-wrap{max-width:980px;margin:0 auto;padding:0 32px;width:100%}
+    .progress-bar-track{height:3px;background:var(--faint);border-radius:99px;overflow:hidden}
+    .progress-bar-fill{height:100%;background:var(--d);border-radius:99px;transition:width .4s}
+
+    /* FOOTER NAV */
+    .phase-footer-nav{display:flex;justify-content:space-between;margin-top:32px;gap:12px}
+    .nav-btn{display:flex;align-items:center;gap:8px;padding:10px 20px;border-radius:8px;border:1.5px solid var(--border);background:transparent;color:var(--muted);font-size:13px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;transition:all .18s}
+    .nav-btn:hover{border-color:var(--d);color:var(--d)}
+    .nav-btn.primary{background:var(--d);color:#fff;border-color:var(--d)}
+    .nav-btn.primary:hover{background:#3a7f8a}
+  </style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="hero-eye">📍 Largotek Lean Suite · Guía de Relevamiento</div>
+  <h1>Análisis DMAIC —<br><em>Almacén con problemas de entrega</em></h1>
+  <p class="hero-sub">Guía paso a paso para el equipo de terreno. Sigue cada fase en orden. Al completar cada paso, usa las herramientas del Suite para registrar los hallazgos.</p>
+  <div class="hero-problem">
+    <strong>🚨 Situación actual del almacén:</strong>
+    <ul>
+      <li>Quejas frecuentes por <strong>tiempos de entrega altos</strong>, especialmente en zona rural.</li>
+      <li><strong>Entregas incompletas</strong>: el cliente recibe menos ítéms de los pedidos.</li>
+      <li><strong>Entregas equivocadas</strong>: productos o destinatarios incorrectos.</li>
+      <li>Impacto en satisfacción del cliente y costos de re-entrega.</li>
+    </ul>
+  </div>
+</div>
+
+<div class="progress-bar-wrap">
+  <div class="progress-bar-track"><div class="progress-bar-fill" id="progress-fill" style="width:20%"></div></div>
+</div>
+
+<div class="phase-nav">
+  <button class="phase-tab active" data-phase="D" onclick="switchPhase('D',this)" style="">
+    <span class="ptdot" style="background:#4f98a3"></span>D — Definir
+  </button>
+  <button class="phase-tab" data-phase="M" onclick="switchPhase('M',this)">
+    <span class="ptdot" style="background:#e8c44a"></span>M — Medir
+  </button>
+  <button class="phase-tab" data-phase="A" onclick="switchPhase('A',this)">
+    <span class="ptdot" style="background:#f78c3f"></span>A — Analizar
+  </button>
+  <button class="phase-tab" data-phase="I" onclick="switchPhase('I',this)">
+    <span class="ptdot" style="background:#bc8cff"></span>I — Mejorar
+  </button>
+  <button class="phase-tab" data-phase="C" onclick="switchPhase('C',this)">
+    <span class="ptdot" style="background:#5fc97a"></span>C — Controlar
+  </button>
+</div>
+
+<div class="content">
+
+<!-- ======================================================= D E F I N I R -->
+<div class="phase-block active" id="phase-D">
+  <div class="phase-header" style="background:rgba(79,152,163,.06);border-color:rgba(79,152,163,.25)">
+    <div class="phase-letter" style="color:#4f98a3">D</div>
+    <div class="phase-header-text">
+      <h2>Definir el Problema</h2>
+      <p>Entender QUÉ está pasando, QUIENES son los afectados y CUÁL es el impacto económico. Al finalizar esta fase debes tener el <strong>Caso de Negocio</strong> y el <strong>A3</strong> iniciados.</p>
+      <span class="phase-goal" style="background:rgba(79,152,163,.12);color:#4f98a3">🎯 Entregable: Caso de Negocio + Alcance definido</span>
+    </div>
+  </div>
+
+  <div class="step-card open" id="step-D1">
+    <div class="step-header" onclick="toggleStep('D1')">
+      <span class="step-num" style="background:rgba(79,152,163,.15);color:#4f98a3">D-1</span>
+      <div class="step-title-wrap">
+        <div class="step-title">Entrevista inicial con el responsable del almacén</div>
+        <div class="step-brief">Recolectar datos de contexto antes de caminar el piso. 20–30 min.</div>
+      </div>
+      <span class="step-tool-badge" style="background:rgba(79,152,163,.1);color:#4f98a3">Sin herramienta</span>
+      <span class="step-chevron">▼</span>
+    </div>
+    <div class="step-body">
+      <h4>Preguntas clave a realizar</h4>
+      <ul class="checklist">
+        <li><input type="checkbox" class="chk"> ¿Cuántos pedidos despachan por día / semana?</li>
+        <li><input type="checkbox" class="chk"> ¿Cuál es el tiempo de entrega prometido al cliente (zona urbana vs. rural)?</li>
+        <li><input type="checkbox" class="chk"> ¿Cuántas quejas por entrega tardía reciben por semana?</li>
+        <li><input type="checkbox" class="chk"> ¿Cuántos casos de entrega incorrecta o incompleta en el último mes?</li>
+        <li><input type="checkbox" class="chk"> ¿Tienen registro (sistema o planilla) de incidencias de entrega?</li>
+        <li><input type="checkbox" class="chk"> ¿Quienes participan en el proceso? (picker, despachador, transportista, supervisor)</li>
+        <li><input type="checkbox" class="chk"> ¿Existe diferencia de proceso entre zona urbana y zona rural?</li>
+        <li><input type="checkbox" class="chk"> ¿Hubo cambios recientes? (personal, sistema, volúmen de pedidos)</li>
+      </ul>
+      <div class="tip-box"><strong>💡 Tip:</strong> No debatas soluciones todavía. El objetivo es solo escuchar y entender el contexto. Toma nota de datos numéricos: cantidades, frecuencias, porcentajes si los tienen.</div>
+    </div>
+  </div>
+
+  <div class="step-card" id="step-D2">
+    <div class="step-header" onclick="toggleStep('D2')">
+      <span class="step-num" style="background:rgba(79,152,163,.15);color:#4f98a3">D-2</span>
+      <div class="step-title-wrap">
+        <div class="step-title">Completar el Caso de Negocio (Project Charter)</div>
+        <div class="step-brief">Formaliza el problema, KPIs meta, alcance y equipo responsable.</div>
+      </div>
+      <span class="step-tool-badge" style="background:rgba(79,152,163,.1);color:#4f98a3">📋 caso-negocio.html</span>
+      <span class="step-chevron">▼</span>
+    </div>
+    <div class="step-body">
+      <h4>Qué completar en la herramienta</h4>
+      <table class="data-table">
+        <tr><th>Campo</th><th>Ejemplo para este caso</th></tr>
+        <tr><td>Enunciado del Problema</td><td>"El almacén presenta un 23% de quejas por entrega tardía y un 8% de entregas incorrectas o incompletas, impactando la satisfacción del cliente y generando re-envíos costosos."</td></tr>
+        <tr><td>KPI Principal</td><td>% Entregas a tiempo (On-Time Delivery) → Meta: &gt;95%</td></tr>
+        <tr><td>KPI Secundario</td><td>% Entregas correctas (Error-Free Rate) → Meta: &gt;98%</td></tr>
+        <tr><td>Alcance</td><td>Proceso desde recepción de pedido hasta entrega al cliente. Almacén central + rutas zona rural.</td></tr>
+        <tr><td>Fuera del alcance</td><td>Sistema de pedidos del cliente, logística del proveedor.</td></tr>
+        <tr><td>Plazo del proyecto</td><td>90 días (DMAIC básico)</td></tr>
+      </table>
+      <a class="tool-link-btn" href="caso-negocio.html" style="color:#4f98a3;border-color:rgba(79,152,163,.3)">📋 Abrir Caso de Negocio →</a>
+      <div class="warn-box"><strong>⚠️ Importante:</strong> El Caso de Negocio es el contrato del equipo. Consigue la firma o aprobación del responsable antes de avanzar a la siguiente fase.</div>
+    </div>
+  </div>
+
+  <div class="step-card" id="step-D3">
+    <div class="step-header" onclick="toggleStep('D3')">
+      <span class="step-num" style="background:rgba(79,152,163,.15);color:#4f98a3">D-3</span>
+      <div class="step-title-wrap">
+        <div class="step-title">Caminata Gemba — Observar el proceso en vivo</div>
+        <div class="step-brief">Camina el flujo completo del pedido: recepción → picking → packing → despacho. Sin interrumpir.</div>
+      </div>
+      <span class="step-tool-badge" style="background:rgba(79,152,163,.1);color:#4f98a3">Observación directa</span>
+      <span class="step-chevron">▼</span>
+    </div>
+    <div class="step-body">
+      <h4>Lista de observación en terreno</h4>
+      <ul class="checklist">
+        <li><input type="checkbox" class="chk"> Mapea físicamente el recorrido de un pedido (dónde empieza, dónde termina)</li>
+        <li><input type="checkbox" class="chk"> Observa cómo se recibe y procesa la orden de pedido</li>
+        <li><input type="checkbox" class="chk"> ¿El picker usa lista impresa, pantalla o de memoria?</li>
+        <li><input type="checkbox" class="chk"> ¿Hay verificación de cantidad y producto antes del empaque?</li>
+        <li><input type="checkbox" class="chk"> ¿Cómo se etiquetan los paquetes para zona rural vs. urbana?</li>
+        <li><input type="checkbox" class="chk"> ¿Existe punto de espera o cola antes del despacho?</li>
+        <li><input type="checkbox" class="chk"> Toma fotos (con permiso) de áreas desordenadas o procesos informales</li>
+        <li><input type="checkbox" class="chk"> Cronometra al menos 3 ciclos de picking de forma discreta</li>
+      </ul>
+      <div class="tip-box"><strong>💡 Regla Gemba:</strong> Ve a ver, pregunta por qué, muestra respeto. No corrijas ni critiques en el momento. Solo observa y anota. El análisis viene después.</div>
+    </div>
+  </div>
+
+  <div class="phase-footer-nav">
+    <div></div>
+    <button class="nav-btn primary" onclick="switchPhase('M', document.querySelector('[data-phase=M]'))">→ Siguiente: Medir</button>
+  </div>
+</div>
+
+<!-- ======================================================= M E D I R -->
+<div class="phase-block" id="phase-M">
+  <div class="phase-header" style="background:rgba(232,196,74,.06);border-color:rgba(232,196,74,.25)">
+    <div class="phase-letter" style="color:#e8c44a">M</div>
+    <div class="phase-header-text">
+      <h2>Medir el Estado Actual</h2>
+      <p>Cuantificar la magnitud del problema con datos reales. No podemos mejorar lo que no medimos. Al finalizar debes tener el <strong>VSM del estado actual</strong> y datos de frecuencia de fallas.</p>
+      <span class="phase-goal" style="background:rgba(232,196,74,.12);color:#e8c44a">🎯 Entregable: VSM Actual + Datos de incidencias</span>
+    </div>
+  </div>
+
+  <div class="step-card" id="step-M1">
+    <div class="step-header" onclick="toggleStep('M1')">
+      <span class="step-num" style="background:rgba(232,196,74,.15);color:#e8c44a">M-1</span>
+      <div class="step-title-wrap">
+        <div class="step-title">Construir el VSM (Value Stream Map) del estado actual</div>
+        <div class="step-brief">Mapea cada proceso del flujo del pedido con su tiempo de ciclo, espera y lote.</div>
+      </div>
+      <span class="step-tool-badge" style="background:rgba(232,196,74,.1);color:#e8c44a">🗺️ vsm.html</span>
+      <span class="step-chevron">▼</span>
+    </div>
+    <div class="step-body">
+      <h4>Procesos a mapear en el VSM</h4>
+      <table class="data-table">
+        <tr><th>Proceso</th><th>Qué medir (CT)</th><th>Qué buscar</th></tr>
+        <tr><td>1. Recepción de pedido</td><td>Tiempo desde que llega el pedido hasta que inicia el picking</td><td>Esperas, pedidos apilados sin procesar</td></tr>
+        <tr><td>2. Picking</td><td>Tiempo de recorrido + búsqueda + selección de ítems</td><td>Distancias largas, productos fuera de lugar, errores de lectura</td></tr>
+        <tr><td>3. Verificación / Control</td><td>Tiempo de chequeo de ítems vs. orden</td><td>¿Existe este paso? ¿se omite bajo presión?</td></tr>
+        <tr><td>4. Empaque y etiquetado</td><td>Tiempo de empacar y etiquetar destino</td><td>Errores de etiqueta, confusión de destinatarios</td></tr>
+        <tr><td>5. Despacho / Carga</td><td>Tiempo de carga en vehículo</td><td>Espera de vehículo, mezcla de rutas</td></tr>
+        <tr><td>6. Transporte zona rural</td><td>Tiempo de tránsito hasta entrega</td><td>Distancias, frecuencia de ruta, reagrupamiento de pedidos</td></tr>
+      </table>
+      <h4>Datos a registrar por proceso</h4>
+      <ul>
+        <li><strong>CT (Cycle Time):</strong> Tomar al menos 5 mediciones y promediar</li>
+        <li><strong>WIP:</strong> Cuántos pedidos hay en cola en ese momento</li>
+        <li><strong>Tamaño de lote:</strong> ¿Procesan pedidos de uno en uno o en grupos?</li>
+        <li><strong>Disponibilidad:</strong> ¿El proceso para a veces? ¿por cuánto tiempo?</li>
+      </ul>
+      <a class="tool-link-btn" href="vsm.html" style="color:#e8c44a;border-color:rgba(232,196,74,.3)">🗺️ Abrir VSM Flow Studio →</a>
+      <div class="tip-box"><strong>💡 Para zona rural:</strong> Registra si los pedidos rurales se acumulan hasta completar una carga (lote de ruta). Ese lote es una fuente clave de retraso. En el VSM usa el campo <em>Tamaño de Lote</em> para capturarlo.</div>
+    </div>
+  </div>
+
+  <div class="step-card" id="step-M2">
+    <div class="step-header" onclick="toggleStep('M2')">
+      <span class="step-num" style="background:rgba(232,196,74,.15);color:#e8c44a">M-2</span>
+      <div class="step-title-wrap">
+        <div class="step-title">Relevar la Auditoría 5S del almacén</div>
+        <div class="step-brief">El desorden físico es causa directa de errores de picking y tiempos altos. Medir el estado actual de orden y limpieza.</div>
+      </div>
+      <span class="step-tool-badge" style="background:rgba(232,196,74,.1);color:#e8c44a">🧹 5s.html</span>
+      <span class="step-chevron">▼</span>
+    </div>
+    <div class="step-body">
+      <h4>Cómo hacer la auditoría hoy</h4>
+      <ul class="checklist">
+        <li><input type="checkbox" class="chk"> Ingresa el área: <em>"Almacén Central"</em> + tu nombre + fecha de hoy</li>
+        <li><input type="checkbox" class="chk"> Evalúa <strong>S1 Seiri</strong>: ¿hay productos sin lugar asignado? ¿productos mezclados?</li>
+        <li><input type="checkbox" class="chk"> Evalúa <strong>S2 Seiton</strong>: ¿los productos tienen ubicación fija y etiquetada? ¿hay mapa del almacén?</li>
+        <li><input type="checkbox" class="chk"> Evalúa <strong>S3 Seiso</strong>: ¿pisos limpios? ¿áreas de trabajo despejadas?</li>
+        <li><input type="checkbox" class="chk"> Evalúa <strong>S4 Seiketsu</strong>: ¿hay procedimientos escritos para picking y despacho?</li>
+        <li><input type="checkbox" class="chk"> Evalúa <strong>S5 Shitsuke</strong>: ¿el equipo sigue los procedimientos sin supervisión?</li>
+        <li><input type="checkbox" class="chk"> Exporta el CSV con el puntaje y guárdalo como evidencia</li>
+      </ul>
+      <div class="warn-box"><strong>⚠️ Ojo especialmente en S2:</strong> En almacenes con entregas incorrectas, el problema de Seiton (orden y ubicación) suele estar entre los puntajes más bajos. Un producto en el lugar equivocado = pedido equivocado.</div>
+      <a class="tool-link-btn" href="5s.html" style="color:#e8c44a;border-color:rgba(232,196,74,.3)">🧹 Abrir Auditoría 5S →</a>
+    </div>
+  </div>
+
+  <div class="step-card" id="step-M3">
+    <div class="step-header" onclick="toggleStep('M3')">
+      <span class="step-num" style="background:rgba(232,196,74,.15);color:#e8c44a">M-3</span>
+      <div class="step-title-wrap">
+        <div class="step-title">Recolectar datos de incidencias: tipos y frecuencia</div>
+        <div class="step-brief">Clasificar los errores para saber cuáles representan el mayor impacto (Pareto).</div>
+      </div>
+      <span class="step-tool-badge" style="background:rgba(232,196,74,.1);color:#e8c44a">📊 pareto.html</span>
+      <span class="step-chevron">▼</span>
+    </div>
+    <div class="step-body">
+      <h4>Categorías de incidencias sugeridas</h4>
+      <table class="data-table">
+        <tr><th>Tipo de error</th><th>Cómo contarlo</th><th>Fuente de datos</th></tr>
+        <tr><td>Entrega tardía zona rural</td><td># pedidos fuera del plazo acordado</td><td>Registro de despachos, quejas, guias</td></tr>
+        <tr><td>Entrega tardía zona urbana</td><td># pedidos fuera del plazo acordado</td><td>Mismo registro</td></tr>
+        <tr><td>Producto incorrecto</td><td># pedidos con ítem equivocado</td><td>Registro de devoluciones / reclamos</td></tr>
+        <tr><td>Cantidad incompleta</td><td># pedidos con menos ítems de los pedidos</td><td>Reclamos de cliente, notas de crédito</td></tr>
+        <tr><td>Destinatario equivocado</td><td># pedidos enviados a dirección o persona incorrecta</td><td>Log de transportista</td></tr>
+        <tr><td>Pedido extraviado</td><td># pedidos sin confirmar entrega en 48h</td><td>Sistema de tracking</td></tr>
+      </table>
+      <h4>Ingresa estos datos en Pareto</h4>
+      <p>Con al menos 4 semanas de datos. Identifica las 2 categorías que generan el 80% de los problemas — esas son tu foco.</p>
+      <a class="tool-link-btn" href="pareto.html" style="color:#e8c44a;border-color:rgba(232,196,74,.3)">📊 Abrir Pareto 80/20 →</a>
+    </div>
+  </div>
+
+  <div class="phase-footer-nav">
+    <button class="nav-btn" onclick="switchPhase('D', document.querySelector('[data-phase=D]'))">← Volver: Definir</button>
+    <button class="nav-btn primary" onclick="switchPhase('A', document.querySelector('[data-phase=A]'))">→ Siguiente: Analizar</button>
+  </div>
+</div>
+
+<!-- ======================================================= A N A L I Z A R -->
+<div class="phase-block" id="phase-A">
+  <div class="phase-header" style="background:rgba(247,140,63,.06);border-color:rgba(247,140,63,.25)">
+    <div class="phase-letter" style="color:#f78c3f">A</div>
+    <div class="phase-header-text">
+      <h2>Analizar las Causas Raíz</h2>
+      <p>Con los datos de la fase M, identificamos POR QUÉ ocurren los problemas. Usamos Ishikawa y 5 Porqués para llegar a la causa sistémica, no solo al síntoma.</p>
+      <span class="phase-goal" style="background:rgba(247,140,63,.12);color:#f78c3f">🎯 Entregable: Causas raíz validadas + A3 completado</span>
+    </div>
+  </div>
+
+  <div class="step-card" id="step-A1">
+    <div class="step-header" onclick="toggleStep('A1')">
+      <span class="step-num" style="background:rgba(247,140,63,.15);color:#f78c3f">A-1</span>
+      <div class="step-title-wrap">
+        <div class="step-title">Diagrama Ishikawa — Brainstorming de causas</div>
+        <div class="step-brief">Analiza las 6M: Método, Mano de Obra, Máquina, Material, Medio Ambiente, Medición.</div>
+      </div>
+      <span class="step-tool-badge" style="background:rgba(247,140,63,.1);color:#f78c3f">🐟 ishikawa.html</span>
+      <span class="step-chevron">▼</span>
+    </div>
+    <div class="step-body">
+      <h4>Causas sugeridas por categoría para este almacén</h4>
+      <table class="data-table">
+        <tr><th>Categoría (M)</th><th>Causas potenciales a explorar</th></tr>
+        <tr><td><span class="tag" style="background:#f78c3f22;color:#f78c3f">Método</span></td><td>Sin procedimiento escrito de picking · Verificación omitida bajo presión · Rutas rurales no planificadas · Pedidos acumulados hasta completar carga</td></tr>
+        <tr><td><span class="tag" style="background:#4f98a322;color:#4f98a3">Mano de Obra</span></td><td>Rotación alta de personal · Falta de capacitación en picking exacto · Trabajo bajo presión de tiempo · Comunicación informal entre picker y despachador</td></tr>
+        <tr><td><span class="tag" style="background:#e8c44a22;color:#e8c44a">Material</span></td><td>Productos sin código o etiqueta · Embalajes similares en productos distintos · Ubicaciones sin señalética</td></tr>
+        <tr><td><span class="tag" style="background:#bc8cff22;color:#bc8cff">Máquina/Sistema</span></td><td>Sin sistema WMS · Uso de Excel o papel sin validación · Sin escaner de confirmación en picking</td></tr>
+        <tr><td><span class="tag" style="background:#5fc97a22;color:#5fc97a">Medio Ambiente</span></td><td>Almacén mal iluminado · Pasillos angostos o bloqueados · Zona rural sin dirección exacta o geoloc.</td></tr>
+        <tr><td><span class="tag" style="background:#f8514922;color:#f85149">Medición</span></td><td>Sin KPI de error de picking · Sin registro sistemático de incidencias · Feedback del cliente tardío</td></tr>
+      </table>
+      <a class="tool-link-btn" href="ishikawa.html" style="color:#f78c3f;border-color:rgba(247,140,63,.3)">🐟 Abrir Ishikawa →</a>
+      <div class="tip-box"><strong>💡 Tip:</strong> Haz el Ishikawa en grupo con el equipo del almacén. Las personas que hacen el trabajo saben las causas reales. Tu rol es facilitar, no llenar el diagrama solo.</div>
+    </div>
+  </div>
+
+  <div class="step-card" id="step-A2">
+    <div class="step-header" onclick="toggleStep('A2')">
+      <span class="step-num" style="background:rgba(247,140,63,.15);color:#f78c3f">A-2</span>
+      <div class="step-title-wrap">
+        <div class="step-title">5 Porqués — Profundizar en las causas principales</div>
+        <div class="step-brief">Aplica 5 Porqués a las 2–3 causas que el Pareto y el Ishikawa identifiquen como las más frecuentes.</div>
+      </div>
+      <span class="step-tool-badge" style="background:rgba(247,140,63,.1);color:#f78c3f">❓ 5-porques.html</span>
+      <span class="step-chevron">▼</span>
+    </div>
+    <div class="step-body">
+      <h4>Ejemplo de 5 Porqués para “Entregas incorrectas”</h4>
+      <table class="data-table">
+        <tr><th>#</th><th>Pregunta</th><th>Respuesta (ejemplo)</th></tr>
+        <tr><td>1</td><td>¿Por qué se envían productos incorrectos?</td><td>El picker toma el producto de la ubicación equivocada.</td></tr>
+        <tr><td>2</td><td>¿Por qué toma el producto de la ubicación equivocada?</td><td>Productos similares están ubicados en estantes adyacentes sin separación visual.</td></tr>
+        <tr><td>3</td><td>¿Por qué no hay separación visual?</td><td>No existe un estándar de ubicación ni señalética en el almacén.</td></tr>
+        <tr><td>4</td><td>¿Por qué no existe ese estándar?</td><td>Nunca se designó a nadie responsable de mantener el layout del almacén.</td></tr>
+        <tr><td>5</td><td>¿Por qué nadie es responsable del layout?</td><td>No hay procedimiento de gestión de almacén documentado (S4 - Seiketsu).</td></tr>
+      </table>
+      <p style="margin-top:8px"><strong>Causa raíz:</strong> Ausencia de estándares de ubicación y responsable de gestión del almacén.</p>
+      <a class="tool-link-btn" href="5-porques.html" style="color:#f78c3f;border-color:rgba(247,140,63,.3)">❓ Abrir 5 Porqués →</a>
+    </div>
+  </div>
+
+  <div class="step-card" id="step-A3">
+    <div class="step-header" onclick="toggleStep('A3')">
+      <span class="step-num" style="background:rgba(247,140,63,.15);color:#f78c3f">A-3</span>
+      <div class="step-title-wrap">
+        <div class="step-title">Completar el A3 Report con el análisis</div>
+        <div class="step-brief">Integra todos los hallazgos en el formato A3: estado actual, análisis y objetivo cuantificado.</div>
+      </div>
+      <span class="step-tool-badge" style="background:rgba(247,140,63,.1);color:#f78c3f">📄 a3-report.html</span>
+      <span class="step-chevron">▼</span>
+    </div>
+    <div class="step-body">
+      <h4>Secciones a completar en el A3</h4>
+      <ul>
+        <li><strong>Background:</strong> Contexto del almacén y problema (datos del Caso de Negocio)</li>
+        <li><strong>Estado Actual:</strong> VSM, % error, Pareto de incidencias, puntaje 5S</li>
+        <li><strong>Objetivo:</strong> On-Time Delivery &gt;95% · Error-Free &gt;98% en 90 días</li>
+        <li><strong>Análisis:</strong> Ishikawa + 5 Porqués de las causas raíz</li>
+        <li><strong>Contramedidas:</strong> Completar en fase Mejorar (I)</li>
+      </ul>
+      <a class="tool-link-btn" href="a3-report.html" style="color:#f78c3f;border-color:rgba(247,140,63,.3)">📄 Abrir A3 Report →</a>
+    </div>
+  </div>
+
+  <div class="phase-footer-nav">
+    <button class="nav-btn" onclick="switchPhase('M', document.querySelector('[data-phase=M]'))">← Volver: Medir</button>
+    <button class="nav-btn primary" onclick="switchPhase('I', document.querySelector('[data-phase=I]'))">→ Siguiente: Mejorar</button>
+  </div>
+</div>
+
+<!-- ======================================================= I M P R O V E -->
+<div class="phase-block" id="phase-I">
+  <div class="phase-header" style="background:rgba(188,140,255,.06);border-color:rgba(188,140,255,.25)">
+    <div class="phase-letter" style="color:#bc8cff">I</div>
+    <div class="phase-header-text">
+      <h2>Mejorar — Diseñar e Implementar Soluciones</h2>
+      <p>Con las causas raíz claras, diseña las contramedidas. Prioriza las de alto impacto y bajo costo. Pilotea antes de escalar.</p>
+      <span class="phase-goal" style="background:rgba(188,140,255,.12);color:#bc8cff">🎯 Entregable: Plan de acción PDCA + VSM Estado Futuro</span>
+    </div>
+  </div>
+
+  <div class="step-card" id="step-I1">
+    <div class="step-header" onclick="toggleStep('I1')">
+      <span class="step-num" style="background:rgba(188,140,255,.15);color:#bc8cff">I-1</span>
+      <div class="step-title-wrap">
+        <div class="step-title">Plan de mejora 5S aplicado al almacén</div>
+        <div class="step-brief">Las mejoras de Orden y Limpieza tienen retorno inmediato y bajo costo. Son el punto de partida.</div>
+      </div>
+      <span class="step-tool-badge" style="background:rgba(188,140,255,.1);color:#bc8cff">🧹 5s.html + Kaizen</span>
+      <span class="step-chevron">▼</span>
+    </div>
+    <div class="step-body">
+      <h4>Acciones prioritarias por S (basadas en puntaje bajo)</h4>
+      <table class="data-table">
+        <tr><th>S</th><th>Acción concreta</th><th>Responsable</th><th>Plazo</th></tr>
+        <tr><td>S1</td><td>Aplicar tarjeta roja a todo ítem sin ubicación asignada. Retirar en 48h.</td><td>Supervisor almacén</td><td>Semana 1</td></tr>
+        <tr><td>S2</td><td>Diseñar y pintar mapa de ubicaciones. Etiquetar cada estante con código de producto.</td><td>Equipo almacén</td><td>Semana 2</td></tr>
+        <tr><td>S2</td><td>Separar visualmente productos similares (cinta de color diferente por familia).</td><td>Supervisor</td><td>Semana 2</td></tr>
+        <tr><td>S3</td><td>Definir rutina de limpieza diaria de 10 min al inicio y fin de turno.</td><td>Todo el equipo</td><td>Semana 1</td></tr>
+        <tr><td>S4</td><td>Crear instructivo visual de picking (1 página, con fotos) y pegarlo en el área.</td><td>Supervisor + Lean</td><td>Semana 3</td></tr>
+        <tr><td>S5</td><td>Programar auditoría 5S mensual con el formulario digital.</td><td>Responsable Lean</td><td>Mensual</td></tr>
+      </table>
+      <a class="tool-link-btn" href="5s.html" style="color:#bc8cff;border-color:rgba(188,140,255,.3)">🧹 Abrir Auditoría 5S →</a>
+    </div>
+  </div>
+
+  <div class="step-card" id="step-I2">
+    <div class="step-header" onclick="toggleStep('I2')">
+      <span class="step-num" style="background:rgba(188,140,255,.15);color:#bc8cff">I-2</span>
+      <div class="step-title-wrap">
+        <div class="step-title">Rediseñar el flujo — VSM Estado Futuro</div>
+        <div class="step-brief">Diseña cómo debe verse el proceso eliminando los desperdicios identificados.</div>
+      </div>
+      <span class="step-tool-badge" style="background:rgba(188,140,255,.1);color:#bc8cff">🗺️ vsm.html</span>
+      <span class="step-chevron">▼</span>
+    </div>
+    <div class="step-body">
+      <h4>Oportunidades de mejora en el flujo</h4>
+      <ul>
+        <li><strong>Agregar paso de verificación:</strong> Check de ítem + cantidad antes de empacar (30 seg por pedido, evita re-envíos costosos).</li>
+        <li><strong>Reducir lote zona rural:</strong> En lugar de acumular pedidos rurales hasta llenar un vehículo, evaluar frecuencia fija de ruta (ej. Lunes-Miércoles-Viernes).</li>
+        <li><strong>Etiquetado estandarizado:</strong> Plantilla única con nombre, dirección, teléfono, zona y código de pedido. Reduce confusión de destinatario.</li>
+        <li><strong>Kanban de despacho:</strong> Tablero visual con columnas: Pendiente / En picking / Verificado / Listo para despacho / Despachado.</li>
+      </ul>
+      <a class="tool-link-btn" href="vsm.html" style="color:#bc8cff;border-color:rgba(188,140,255,.3)">🗺️ Abrir VSM →</a>
+      <div class="tip-box"><strong>💡 Clave para zona rural:</strong> El mayor desperdicio en rutas rurales suele ser el <em>lote de acumulación</em>. Si acumulan 3 días de pedidos para salir, cualquier pedido del lunes llega el juéves. Analiza si una frecuencia fija de ruta reduce el tiempo de espera más que la consolidación.</div>
+    </div>
+  </div>
+
+  <div class="step-card" id="step-I3">
+    <div class="step-header" onclick="toggleStep('I3')">
+      <span class="step-num" style="background:rgba(188,140,255,.15);color:#bc8cff">I-3</span>
+      <div class="step-title-wrap">
+        <div class="step-title">Crear el Plan de Acción PDCA</div>
+        <div class="step-brief">Convierte cada mejora en una tarea con responsable, fecha límite y cómo se mide el éxito.</div>
+      </div>
+      <span class="step-tool-badge" style="background:rgba(188,140,255,.1);color:#bc8cff">🔄 pdca.html</span>
+      <span class="step-chevron">▼</span>
+    </div>
+    <div class="step-body">
+      <h4>Estructura del plan PDCA para este caso</h4>
+      <table class="data-table">
+        <tr><th>Fase</th><th>Actividad</th><th>Meta</th></tr>
+        <tr><td><span class="tag" style="background:#4f98a322;color:#4f98a3">Plan</span></td><td>Diseñar layout nuevo del almacén, definir ubicaciones fijas por SKU</td><td>Mapa listo en 7 días</td></tr>
+        <tr><td><span class="tag" style="background:#e8c44a22;color:#e8c44a">Do</span></td><td>Implementar etiquetado, instrucción visual de picking, paso de verificación</td><td>Operativo en 15 días</td></tr>
+        <tr><td><span class="tag" style="background:#f78c3f22;color:#f78c3f">Check</span></td><td>Medir error de picking y tiempos de entrega semana a semana</td><td>Reducción 50% errores en 30 días</td></tr>
+        <tr><td><span class="tag" style="background:#5fc97a22;color:#5fc97a">Act</span></td><td>Ajustar según resultados, estandarizar lo que funciona</td><td>Nuevo estándar documentado en 45 días</td></tr>
+      </table>
+      <a class="tool-link-btn" href="pdca.html" style="color:#bc8cff;border-color:rgba(188,140,255,.3)">🔄 Abrir PDCA →</a>
+    </div>
+  </div>
+
+  <div class="phase-footer-nav">
+    <button class="nav-btn" onclick="switchPhase('A', document.querySelector('[data-phase=A]'))">← Volver: Analizar</button>
+    <button class="nav-btn primary" onclick="switchPhase('C', document.querySelector('[data-phase=C]'))">→ Siguiente: Controlar</button>
+  </div>
+</div>
+
+<!-- ======================================================= C O N T R O L A R -->
+<div class="phase-block" id="phase-C">
+  <div class="phase-header" style="background:rgba(95,201,122,.06);border-color:rgba(95,201,122,.25)">
+    <div class="phase-letter" style="color:#5fc97a">C</div>
+    <div class="phase-header-text">
+      <h2>Controlar — Sostener los Resultados</h2>
+      <p>Las mejoras sin control regreden. Esta fase asegura que los cambios se mantengan en el tiempo con métricas, auditorías y estándares.</p>
+      <span class="phase-goal" style="background:rgba(95,201,122,.12);color:#5fc97a">🎯 Entregable: KPIs activos + Auditoría 5S mensual + OEE si aplica</span>
+    </div>
+  </div>
+
+  <div class="step-card" id="step-C1">
+    <div class="step-header" onclick="toggleStep('C1')">
+      <span class="step-num" style="background:rgba(95,201,122,.15);color:#5fc97a">C-1</span>
+      <div class="step-title-wrap">
+        <div class="step-title">Auditoría 5S mensual programada</div>
+        <div class="step-brief">Repite la auditoría una vez al mes y compara el puntaje con el relevamiento inicial.</div>
+      </div>
+      <span class="step-tool-badge" style="background:rgba(95,201,122,.1);color:#5fc97a">🧹 5s.html</span>
+      <span class="step-chevron">▼</span>
+    </div>
+    <div class="step-body">
+      <h4>Protocolo de auditoría mensual</h4>
+      <ul class="checklist">
+        <li><input type="checkbox" class="chk"> Mismo auditor o rotación documentada</li>
+        <li><input type="checkbox" class="chk"> Mismo alcance: Almacén Central completo</li>
+        <li><input type="checkbox" class="chk"> Exportar CSV y guardar con fecha (evidencia)</li>
+        <li><input type="checkbox" class="chk"> Comparar puntaje vs. mes anterior por S</li>
+        <li><input type="checkbox" class="chk"> Comunicar resultados al equipo en reunión mensual</li>
+        <li><input type="checkbox" class="chk"> Si puntaje baja en alguna S, abrir acción correctiva en PDCA</li>
+      </ul>
+      <div class="tip-box"><strong>🎯 Meta progresiva:</strong> No se exige llegar a 100% de inmediato. Define un avance mínimo mensual: +5 puntos por mes es un ritmo sostenible. Celebra cada mejora.</div>
+      <a class="tool-link-btn" href="5s.html" style="color:#5fc97a;border-color:rgba(95,201,122,.3)">🧹 Abrir Auditoría 5S →</a>
+    </div>
+  </div>
+
+  <div class="step-card" id="step-C2">
+    <div class="step-header" onclick="toggleStep('C2')">
+      <span class="step-num" style="background:rgba(95,201,122,.15);color:#5fc97a">C-2</span>
+      <div class="step-title-wrap">
+        <div class="step-title">Monitoreo semanal de KPIs de entrega</div>
+        <div class="step-brief">El objetivo es detectar desviaciones antes de que se conviertan en quejas.</div>
+      </div>
+      <span class="step-tool-badge" style="background:rgba(95,201,122,.1);color:#5fc97a">📉 spc.html</span>
+      <span class="step-chevron">▼</span>
+    </div>
+    <div class="step-body">
+      <h4>KPIs a monitorear semanalmente</h4>
+      <table class="data-table">
+        <tr><th>KPI</th><th>Cómo calcularlo</th><th>Frecuencia</th><th>Alerta si...</th></tr>
+        <tr><td>% Entregas a tiempo (OTD)</td><td>Entregas en plazo / Total entregas × 100</td><td>Semanal</td><td>Baja de 90%</td></tr>
+        <tr><td>% Error de picking</td><td>Pedidos con error / Total pedidos × 100</td><td>Semanal</td><td>Supera 3%</td></tr>
+        <tr><td>Tiempo de ciclo zona rural (días)</td><td>Fecha despacho → Fecha entrega confirmada</td><td>Semanal</td><td>Supera X días acordados</td></tr>
+        <tr><td>Puntaje 5S</td><td>Resultado auditoría mensual</td><td>Mensual</td><td>Baja vs. mes anterior</td></tr>
+      </table>
+      <p>Ingresa los datos semanales de % error en la <strong>Gráfica SPC</strong> para detectar tendencias y señales fuera de control.</p>
+      <a class="tool-link-btn" href="spc.html" style="color:#5fc97a;border-color:rgba(95,201,122,.3)">📉 Abrir Gráfica SPC →</a>
+    </div>
+  </div>
+
+  <div class="step-card" id="step-C3">
+    <div class="step-header" onclick="toggleStep('C3')">
+      <span class="step-num" style="background:rgba(95,201,122,.15);color:#5fc97a">C-3</span>
+      <div class="step-title-wrap">
+        <div class="step-title">Documentar el nuevo estándar y cerrar el proyecto</div>
+        <div class="step-brief">Formaliza los cambios implementados para que sean el nuevo "cómo hacemos las cosas".</div>
+      </div>
+      <span class="step-tool-badge" style="background:rgba(95,201,122,.1);color:#5fc97a">📄 A3 Final</span>
+      <span class="step-chevron">▼</span>
+    </div>
+    <div class="step-body">
+      <h4>Entregables de cierre del proyecto</h4>
+      <ul class="checklist">
+        <li><input type="checkbox" class="chk"> A3 completo con resultados reales vs. meta</li>
+        <li><input type="checkbox" class="chk"> VSM Estado Futuro vs. Estado Actual (comparación de Lead Time)</li>
+        <li><input type="checkbox" class="chk"> Instructivo de picking actualizado y aprobado</li>
+        <li><input type="checkbox" class="chk"> Mapa de ubicaciones del almacén documentado</li>
+        <li><input type="checkbox" class="chk"> PDCA cerrado con todas las acciones en estado “Act”</li>
+        <li><input type="checkbox" class="chk"> Calendario de auditorías 5S para los próximos 6 meses</li>
+        <li><input type="checkbox" class="chk"> Presentación de resultados al management</li>
+      </ul>
+      <div class="tip-box"><strong>🎯 Regla de oro:</strong> Un proyecto DMAIC solo está realmente cerrado cuando el proceso mejorado puede mantenerse sin el equipo Lean presente. Si necesita supervisión constante, la fase de Control está incompleta.</div>
+      <a class="tool-link-btn" href="a3-report.html" style="color:#5fc97a;border-color:rgba(95,201,122,.3)">📄 Cerrar A3 →</a>
+    </div>
+  </div>
+
+  <div class="phase-footer-nav">
+    <button class="nav-btn" onclick="switchPhase('I', document.querySelector('[data-phase=I]'))">← Volver: Mejorar</button>
+    <button class="nav-btn primary" onclick="window.location.href='index.html'">🏠 Volver al Portal</button>
+  </div>
+</div>
+
+</div><!-- /content -->
+
+<script>
+const PHASES = ['D','M','A','I','C'];
+const PCTS   = {D:20, M:40, A:60, I:80, C:100};
+
+function switchPhase(key, tabEl){
+  document.querySelectorAll('.phase-block').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.phase-tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('phase-'+key).classList.add('active');
+  if(tabEl) tabEl.classList.add('active');
+  document.getElementById('progress-fill').style.width = PCTS[key]+'%';
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
+function toggleStep(id){
+  const card = document.getElementById('step-'+id);
+  card.classList.toggle('open');
+}
+</script>
+
+<script src="branding.js"></script>
+</body>
+</html>
