@@ -1,0 +1,782 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Propuesta de Mejora — Almacén — Largotek Consultoría</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Instrument+Serif:ital@0;1&display=swap');
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{font-size:16px;scroll-behavior:smooth}
+body{font-family:'Inter',system-ui,sans-serif;background:#f7f8fa;color:#1a1f2e;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+
+/* ── COVER ─────────────────────────────────────────────── */
+.cover{min-height:100vh;background:linear-gradient(135deg,#0d1117 0%,#1a2744 55%,#0f2035 100%);display:flex;flex-direction:column;justify-content:space-between;padding:56px 64px;page-break-after:always;position:relative;overflow:hidden}
+.cover::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 60% 50% at 80% 30%,rgba(79,152,163,.25) 0%,transparent 70%);pointer-events:none}
+.cover-logo{font-family:'Instrument Serif',serif;font-size:15px;color:rgba(255,255,255,.5);letter-spacing:.12em;text-transform:uppercase}
+.cover-logo span{color:#4f98a3}
+.cover-body{max-width:720px}
+.cover-tag{display:inline-block;background:rgba(79,152,163,.18);border:1px solid rgba(79,152,163,.4);color:#7ecdd6;font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:5px 14px;border-radius:99px;margin-bottom:20px}
+.cover-title{font-family:'Instrument Serif',serif;font-size:clamp(2.4rem,5vw,3.8rem);line-height:1.1;color:#fff;margin-bottom:16px}
+.cover-title em{color:#4f98a3;font-style:italic}
+.cover-sub{font-size:15px;color:rgba(255,255,255,.6);line-height:1.75;max-width:560px;margin-bottom:36px}
+.cover-meta{display:flex;gap:32px;flex-wrap:wrap}
+.cover-meta-item{display:flex;flex-direction:column;gap:3px}
+.cover-meta-label{font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.35)}
+.cover-meta-value{font-size:14px;font-weight:600;color:rgba(255,255,255,.85)}
+.cover-footer{display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:16px}
+.cover-footer-left{font-size:12px;color:rgba(255,255,255,.35);line-height:1.6}
+.cover-confidential{font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.25);border:1px solid rgba(255,255,255,.12);padding:4px 12px;border-radius:99px}
+
+/* ── LAYOUT ─────────────────────────────────────────────── */
+.page{max-width:900px;margin:0 auto;padding:0 40px}
+
+/* ── SECTION DIVIDER ─────────────────────────────────────── */
+.section-divider{display:flex;align-items:center;gap:16px;padding:48px 0 24px}
+.section-divider-line{flex:1;height:1px;background:#e2e6ee}
+.section-divider-label{font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#8896aa;white-space:nowrap}
+
+/* ── EXECUTIVE SUMMARY ──────────────────────────────────── */
+.exec-summary{background:#fff;border:1px solid #e2e6ee;border-radius:16px;padding:36px 40px;margin-bottom:32px;box-shadow:0 1px 4px rgba(0,0,0,.04)}
+.exec-summary h2{font-family:'Instrument Serif',serif;font-size:1.6rem;color:#1a1f2e;margin-bottom:12px}
+.exec-summary p{font-size:14px;line-height:1.8;color:#4a5568;margin-bottom:10px}
+.exec-summary p:last-child{margin-bottom:0}
+
+/* ── PROBLEM CARDS ──────────────────────────────────────── */
+.problem-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;margin-bottom:32px}
+.problem-card{background:#fff;border:1px solid #e2e6ee;border-radius:12px;padding:20px 22px;box-shadow:0 1px 3px rgba(0,0,0,.04)}
+.problem-card-icon{font-size:24px;margin-bottom:10px}
+.problem-card-title{font-size:13px;font-weight:700;color:#1a1f2e;margin-bottom:6px}
+.problem-card-desc{font-size:12px;color:#6b7280;line-height:1.6}
+.problem-card-metric{margin-top:10px;font-size:18px;font-weight:800;color:#e05a5a}
+.problem-card-metric-label{font-size:10px;color:#9ca3af;font-weight:500}
+
+/* ── DMAIC OVERVIEW ──────────────────────────────────────── */
+.dmaic-strip{display:flex;gap:0;border-radius:12px;overflow:hidden;margin-bottom:32px;border:1px solid #e2e6ee}
+.dmaic-cell{flex:1;padding:18px 16px;text-align:center;position:relative}
+.dmaic-cell::after{content:'▶';position:absolute;right:-8px;top:50%;transform:translateY(-50%);font-size:12px;color:#fff;z-index:2}
+.dmaic-cell:last-child::after{display:none}
+.dmaic-letter{font-family:'Instrument Serif',serif;font-size:2rem;font-weight:400;line-height:1;color:#fff;margin-bottom:4px}
+.dmaic-name{font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:rgba(255,255,255,.75)}
+.dmaic-weeks{font-size:10px;color:rgba(255,255,255,.5);margin-top:4px}
+
+/* ── PHASE SECTION ───────────────────────────────────────── */
+.phase-section{margin-bottom:40px}
+.phase-header-doc{display:flex;align-items:center;gap:18px;padding:22px 28px;border-radius:12px;margin-bottom:20px;border:1px solid}
+.phase-letter-doc{font-family:'Instrument Serif',serif;font-size:2.8rem;font-weight:400;line-height:1;width:52px;text-align:center;flex-shrink:0}
+.phase-header-doc h3{font-size:1.15rem;font-weight:700;margin-bottom:4px}
+.phase-header-doc p{font-size:13px;line-height:1.6;max-width:560px}
+.phase-goal-doc{font-size:11px;font-weight:700;padding:3px 11px;border-radius:99px;display:inline-block;margin-top:7px}
+
+/* ── STEPS ──────────────────────────────────────────────── */
+.steps-list{display:flex;flex-direction:column;gap:12px}
+.step-doc{background:#fff;border:1px solid #e2e6ee;border-radius:10px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.03)}
+.step-doc-header{display:flex;align-items:flex-start;gap:14px;padding:16px 20px;border-bottom:1px solid #f0f2f7}
+.step-doc-num{font-size:10px;font-weight:800;letter-spacing:.05em;padding:4px 9px;border-radius:6px;flex-shrink:0;margin-top:1px;white-space:nowrap}
+.step-doc-title{font-size:14px;font-weight:700;color:#1a1f2e;margin-bottom:3px}
+.step-doc-brief{font-size:12px;color:#6b7280;line-height:1.5}
+.step-doc-body{padding:16px 20px;background:#fdfdfe}
+.step-doc-body h4{font-size:11px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:#8896aa;margin:0 0 10px}
+.step-doc-body p{font-size:13px;color:#374151;line-height:1.7;margin-bottom:8px}
+.step-doc-body ul,.step-doc-body ol{font-size:13px;color:#374151;line-height:1.7;padding-left:18px;margin-bottom:8px}
+.step-doc-body li{margin-bottom:4px}
+.step-doc-body table{width:100%;border-collapse:collapse;font-size:12px;margin-top:4px;border-radius:8px;overflow:hidden}
+.step-doc-body th{text-align:left;padding:8px 12px;background:#f3f5f9;color:#6b7280;font-weight:600;font-size:11px;letter-spacing:.04em}
+.step-doc-body td{padding:8px 12px;border-top:1px solid #f0f2f7;color:#374151;vertical-align:top}
+.step-doc-body tr:hover td{background:#f9fafb}
+.infobox{border-radius:8px;padding:12px 16px;font-size:12px;line-height:1.65;margin-top:10px}
+.infobox-blue{background:#eff8fa;border:1px solid #c0dfe3;color:#2d6b72}
+.infobox-yellow{background:#fffbeb;border:1px solid #fde68a;color:#92400e}
+.infobox-red{background:#fff5f5;border:1px solid #fecaca;color:#991b1b}
+.tag-pill{display:inline-block;font-size:10px;font-weight:700;padding:2px 8px;border-radius:99px;margin-right:3px}
+.checklist-doc{list-style:none;padding:0}
+.checklist-doc li{display:flex;align-items:flex-start;gap:10px;font-size:13px;padding:6px 0;border-bottom:1px solid #f0f2f7;color:#374151;line-height:1.5}
+.checklist-doc li:last-child{border-bottom:none}
+.chkbox{width:15px;height:15px;border-radius:4px;border:1.5px solid #d1d5db;background:#fff;flex-shrink:0;margin-top:1px;cursor:pointer;appearance:none;-webkit-appearance:none;transition:all .15s;position:relative}
+.chkbox:checked{background:#4f98a3;border-color:#4f98a3}
+.chkbox:checked::after{content:'✓';position:absolute;top:-2px;left:1px;font-size:11px;color:#fff;font-weight:700}
+
+/* ── KPI TABLE ──────────────────────────────────────────── */
+.kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:14px;margin:16px 0}
+.kpi-card{background:#fff;border:1px solid #e2e6ee;border-radius:10px;padding:16px 18px;box-shadow:0 1px 3px rgba(0,0,0,.03)}
+.kpi-card-label{font-size:10px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:#8896aa;margin-bottom:4px}
+.kpi-card-value{font-size:1.6rem;font-weight:800;line-height:1;margin-bottom:2px}
+.kpi-card-desc{font-size:11px;color:#9ca3af}
+
+/* ── TIMELINE ───────────────────────────────────────────── */
+.timeline{margin:16px 0 0;position:relative;padding-left:28px}
+.timeline::before{content:'';position:absolute;left:8px;top:4px;bottom:4px;width:2px;background:#e2e6ee;border-radius:99px}
+.tl-item{position:relative;margin-bottom:18px}
+.tl-item:last-child{margin-bottom:0}
+.tl-dot{position:absolute;left:-24px;top:3px;width:14px;height:14px;border-radius:50%;border:2px solid;background:#fff}
+.tl-week{font-size:10px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:#8896aa;margin-bottom:3px}
+.tl-title{font-size:13px;font-weight:700;color:#1a1f2e;margin-bottom:3px}
+.tl-desc{font-size:12px;color:#6b7280;line-height:1.55}
+
+/* ── FOOTER ─────────────────────────────────────────────── */
+.doc-footer{margin-top:64px;padding:28px 40px;border-top:1px solid #e2e6ee;display:flex;justify-content:space-between;align-items:center;flex-wrap:gap;gap:12px;background:#fff}
+.doc-footer-brand{font-family:'Instrument Serif',serif;font-size:14px;color:#1a1f2e}
+.doc-footer-brand span{color:#4f98a3}
+.doc-footer-right{font-size:11px;color:#9ca3af;text-align:right;line-height:1.5}
+
+/* ── PRINT ──────────────────────────────────────────────── */
+@media print{
+  .cover{min-height:unset;padding:40px 48px;page-break-after:always}
+  .phase-section{page-break-inside:avoid}
+  .step-doc{page-break-inside:avoid}
+  body{background:#fff}
+  .no-print{display:none!important}
+}
+
+/* ── FLOATING ACTIONS ───────────────────────────────────── */
+.fab-bar{position:fixed;bottom:28px;right:28px;display:flex;flex-direction:column;gap:8px;z-index:100}
+.fab{display:flex;align-items:center;gap:8px;padding:10px 18px;border-radius:99px;border:none;font-size:13px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;box-shadow:0 4px 16px rgba(0,0,0,.15);transition:all .18s}
+.fab-primary{background:#1a1f2e;color:#fff}
+.fab-primary:hover{background:#2d3748;transform:translateY(-1px)}
+.fab-secondary{background:#fff;color:#1a1f2e;border:1px solid #e2e6ee}
+.fab-secondary:hover{border-color:#4f98a3;color:#4f98a3;transform:translateY(-1px)}
+
+/* ── NAV TABS ────────────────────────────────────────────── */
+.sticky-nav{position:sticky;top:0;z-index:50;background:rgba(247,248,250,.95);backdrop-filter:blur(8px);border-bottom:1px solid #e2e6ee;padding:12px 40px;display:flex;gap:4px;justify-content:center;flex-wrap:wrap;max-width:100%}
+.nav-pill{display:flex;align-items:center;gap:6px;padding:7px 16px;border-radius:99px;border:1.5px solid #e2e6ee;background:transparent;color:#6b7280;font-size:12px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;transition:all .18s;white-space:nowrap}
+.nav-pill:hover{border-color:#4f98a3;color:#4f98a3}
+.nav-pill.active{background:#1a1f2e;color:#fff;border-color:#1a1f2e}
+.nav-dot{width:7px;height:7px;border-radius:50%}
+</style>
+</head>
+<body>
+
+<!-- ═══════════════ PORTADA ═══════════════ -->
+<div class="cover">
+  <div class="cover-logo">Largotek <span>·</span> Consultoría Lean</div>
+  <div class="cover-body">
+    <div class="cover-tag">Propuesta de Mejora · DMAIC</div>
+    <h1 class="cover-title">Optimización de<br><em>Operaciones de Almacén</em><br>y Logística de Entrega</h1>
+    <p class="cover-sub">Plan de análisis y mejora basado en la metodología DMAIC (Lean Six Sigma) para reducir los tiempos de entrega en zona rural y eliminar los errores de picking que generan entregas incorrectas e incompletas.</p>
+    <div class="cover-meta">
+      <div class="cover-meta-item">
+        <span class="cover-meta-label">Metodología</span>
+        <span class="cover-meta-value">DMAIC · Lean Six Sigma</span>
+      </div>
+      <div class="cover-meta-item">
+        <span class="cover-meta-label">Duración estimada</span>
+        <span class="cover-meta-value">90 días</span>
+      </div>
+      <div class="cover-meta-item">
+        <span class="cover-meta-label">Preparado por</span>
+        <span class="cover-meta-value">Largotek Consultoría</span>
+      </div>
+      <div class="cover-meta-item">
+        <span class="cover-meta-label">Fecha</span>
+        <span class="cover-meta-value" id="cover-date">Junio 2026</span>
+      </div>
+    </div>
+  </div>
+  <div class="cover-footer">
+    <div class="cover-footer-left">
+      largotek.com · consultoría@largotek.com
+    </div>
+    <div class="cover-confidential">Confidencial · Uso exclusivo del cliente</div>
+  </div>
+</div>
+
+<!-- ═══════════════ NAVEGACIÓN ═══════════════ -->
+<div class="sticky-nav no-print">
+  <button class="nav-pill active" onclick="scrollToSection('resumen')">Resumen</button>
+  <button class="nav-pill" onclick="scrollToSection('fase-d')"><span class="nav-dot" style="background:#4f98a3"></span>D · Definir</button>
+  <button class="nav-pill" onclick="scrollToSection('fase-m')"><span class="nav-dot" style="background:#e8c44a"></span>M · Medir</button>
+  <button class="nav-pill" onclick="scrollToSection('fase-a')"><span class="nav-dot" style="background:#f78c3f"></span>A · Analizar</button>
+  <button class="nav-pill" onclick="scrollToSection('fase-i')"><span class="nav-dot" style="background:#bc8cff"></span>I · Mejorar</button>
+  <button class="nav-pill" onclick="scrollToSection('fase-c')"><span class="nav-dot" style="background:#5fc97a"></span>C · Controlar</button>
+  <button class="nav-pill" onclick="scrollToSection('cronograma')">Cronograma</button>
+</div>
+
+<div class="page" style="padding-top:40px">
+
+<!-- ═══════════════ RESUMEN EJECUTIVO ═══════════════ -->
+<div id="resumen">
+  <div class="section-divider">
+    <div class="section-divider-line"></div>
+    <div class="section-divider-label">Resumen Ejecutivo</div>
+    <div class="section-divider-line"></div>
+  </div>
+
+  <div class="exec-summary">
+    <h2>Situación actual y oportunidad de mejora</h2>
+    <p>El almacén enfrenta una doble problemática que afecta directamente la satisfacción del cliente y genera costos operativos evitables: <strong>tiempos de entrega elevados</strong> —especialmente en zonas rurales— y una <strong>tasa significativa de entregas incorrectas e incompletas</strong>.</p>
+    <p>El análisis preliminar indica que estos problemas tienen causas sistémicas identificables y tratables: ausencia de estándares de picking, falta de control visual en el almacén, lotes de ruta rurales no optimizados y ausencia de un paso de verificación antes del despacho.</p>
+    <p>La metodología <strong>DMAIC (Define · Measure · Analyze · Improve · Control)</strong> de Lean Six Sigma proporciona un marco estructurado, basado en datos, para diagnosticar las causas raíz y diseñar soluciones sostenibles. El proyecto contempla un plazo de <strong>90 días</strong> con entregables claros en cada fase.</p>
+  </div>
+
+  <div class="problem-grid">
+    <div class="problem-card">
+      <div class="problem-card-icon">🚚</div>
+      <div class="problem-card-title">Tiempos de entrega zona rural</div>
+      <div class="problem-card-desc">Pedidos acumulados para completar carga del vehículo generan esperas de 2–4 días adicionales antes de salir del almacén.</div>
+      <div class="problem-card-metric">Alto impacto</div>
+      <div class="problem-card-metric-label">en satisfacción del cliente</div>
+    </div>
+    <div class="problem-card">
+      <div class="problem-card-icon">📦</div>
+      <div class="problem-card-title">Entregas incompletas</div>
+      <div class="problem-card-desc">El cliente recibe menos ítems de los pedidos. Causa probable: error en picking sin verificación de cantidad.</div>
+      <div class="problem-card-metric">Re-envíos</div>
+      <div class="problem-card-metric-label">costo operativo adicional</div>
+    </div>
+    <div class="problem-card">
+      <div class="problem-card-icon">🔁</div>
+      <div class="problem-card-title">Entregas equivocadas</div>
+      <div class="problem-card-desc">Producto o destinatario incorrecto. Causa probable: productos similares sin señalética diferenciada, etiquetado no estandarizado.</div>
+      <div class="problem-card-metric">Devoluciones</div>
+      <div class="problem-card-metric-label">y re-entregas evitables</div>
+    </div>
+    <div class="problem-card">
+      <div class="problem-card-icon">😤</div>
+      <div class="problem-card-title">Quejas del cliente</div>
+      <div class="problem-card-desc">Las tres problemáticas anteriores se traducen en reclamos frecuentes que erosionan la reputación del servicio.</div>
+      <div class="problem-card-metric">Churn riesgo</div>
+      <div class="problem-card-metric-label">pérdida de clientes</div>
+    </div>
+  </div>
+
+  <!-- DMAIC STRIP -->
+  <div class="dmaic-strip">
+    <div class="dmaic-cell" style="background:#2a5a64">
+      <div class="dmaic-letter">D</div>
+      <div class="dmaic-name">Definir</div>
+      <div class="dmaic-weeks">Sem. 1–2</div>
+    </div>
+    <div class="dmaic-cell" style="background:#7a6520">
+      <div class="dmaic-letter">M</div>
+      <div class="dmaic-name">Medir</div>
+      <div class="dmaic-weeks">Sem. 3–4</div>
+    </div>
+    <div class="dmaic-cell" style="background:#7a4a1a">
+      <div class="dmaic-letter">A</div>
+      <div class="dmaic-name">Analizar</div>
+      <div class="dmaic-weeks">Sem. 5–6</div>
+    </div>
+    <div class="dmaic-cell" style="background:#5a3a7a">
+      <div class="dmaic-letter">I</div>
+      <div class="dmaic-name">Mejorar</div>
+      <div class="dmaic-weeks">Sem. 7–10</div>
+    </div>
+    <div class="dmaic-cell" style="background:#1e6b3a">
+      <div class="dmaic-letter">C</div>
+      <div class="dmaic-name">Controlar</div>
+      <div class="dmaic-weeks">Sem. 11–13</div>
+    </div>
+  </div>
+
+  <!-- KPIs META -->
+  <div class="kpi-grid">
+    <div class="kpi-card">
+      <div class="kpi-card-label">KPI Principal</div>
+      <div class="kpi-card-value" style="color:#4f98a3">&gt;95%</div>
+      <div class="kpi-card-desc">Entregas a tiempo (On-Time Delivery) — meta al final del proyecto</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-card-label">KPI Calidad</div>
+      <div class="kpi-card-value" style="color:#5fc97a">&gt;98%</div>
+      <div class="kpi-card-desc">Entregas correctas y completas (Error-Free Rate)</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-card-label">Lead Time Rural</div>
+      <div class="kpi-card-value" style="color:#bc8cff">–40%</div>
+      <div class="kpi-card-desc">Reducción del tiempo total pedido→entrega en zona rural</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-card-label">Puntaje 5S</div>
+      <div class="kpi-card-value" style="color:#e8c44a">&gt;75</div>
+      <div class="kpi-card-desc">Score de auditoría 5S al finalizar la fase Controlar</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════ FASE D ═══════════════ -->
+<div id="fase-d">
+  <div class="section-divider">
+    <div class="section-divider-line"></div>
+    <div class="section-divider-label">Fase 1 · Definir</div>
+    <div class="section-divider-line"></div>
+  </div>
+  <div class="phase-section">
+    <div class="phase-header-doc" style="background:#f0f8fa;border-color:#c0dde3">
+      <div class="phase-letter-doc" style="color:#2a7080">D</div>
+      <div>
+        <h3 style="color:#1a4f58">Definir el problema y el alcance</h3>
+        <p style="color:#4a7880">Establecer qué se va a mejorar, quiénes están involucrados, cuál es el impacto económico y cuáles son las metas cuantificadas. Esta fase produce el <strong>Caso de Negocio</strong> que formaliza el compromiso del equipo.</p>
+        <span class="phase-goal-doc" style="background:#d0eef2;color:#1a5f6e">🎯 Entregable: Project Charter firmado + Alcance definido</span>
+      </div>
+    </div>
+    <div class="steps-list">
+
+      <div class="step-doc">
+        <div class="step-doc-header">
+          <span class="step-doc-num" style="background:#e0f2f5;color:#1a6a78">D-1</span>
+          <div>
+            <div class="step-doc-title">Entrevista inicial con el responsable del almacén</div>
+            <div class="step-doc-brief">Recolectar el contexto operativo antes de caminar el piso. Duración: 20–30 minutos.</div>
+          </div>
+        </div>
+        <div class="step-doc-body">
+          <h4>Preguntas clave</h4>
+          <ul class="checklist-doc">
+            <li><input type="checkbox" class="chkbox"> ¿Cuántos pedidos despachan por día / semana?</li>
+            <li><input type="checkbox" class="chkbox"> ¿Cuál es el tiempo de entrega prometido al cliente (zona urbana vs. rural)?</li>
+            <li><input type="checkbox" class="chkbox"> ¿Cuántas quejas por entrega tardía reciben por semana?</li>
+            <li><input type="checkbox" class="chkbox"> ¿Cuántos casos de entrega incorrecta o incompleta en el último mes?</li>
+            <li><input type="checkbox" class="chkbox"> ¿Tienen registro (sistema o planilla) de incidencias de entrega?</li>
+            <li><input type="checkbox" class="chkbox"> ¿Quiénes participan en el proceso? (picker, despachador, transportista, supervisor)</li>
+            <li><input type="checkbox" class="chkbox"> ¿Existe diferencia de proceso entre zona urbana y zona rural?</li>
+            <li><input type="checkbox" class="chkbox"> ¿Hubo cambios recientes? (personal, sistema, volumen de pedidos)</li>
+          </ul>
+          <div class="infobox infobox-blue"><strong>💡 Tip:</strong> No debatas soluciones todavía. El objetivo es escuchar y entender el contexto. Registra datos numéricos: cantidades, frecuencias, porcentajes.</div>
+        </div>
+      </div>
+
+      <div class="step-doc">
+        <div class="step-doc-header">
+          <span class="step-doc-num" style="background:#e0f2f5;color:#1a6a78">D-2</span>
+          <div>
+            <div class="step-doc-title">Completar el Project Charter (Caso de Negocio)</div>
+            <div class="step-doc-brief">Formalizar el problema, KPIs meta, alcance y equipo responsable.</div>
+          </div>
+        </div>
+        <div class="step-doc-body">
+          <h4>Campos del Project Charter</h4>
+          <table>
+            <tr><th>Campo</th><th>Ejemplo para este caso</th></tr>
+            <tr><td><strong>Enunciado del Problema</strong></td><td>El almacén presenta quejas frecuentes por entrega tardía (especialmente zona rural) y un porcentaje significativo de entregas incorrectas e incompletas, impactando satisfacción del cliente y generando costos de re-entrega.</td></tr>
+            <tr><td><strong>KPI Principal</strong></td><td>% Entregas a tiempo (OTD) → Meta: &gt;95%</td></tr>
+            <tr><td><strong>KPI Secundario</strong></td><td>% Entregas correctas (Error-Free) → Meta: &gt;98%</td></tr>
+            <tr><td><strong>Alcance</strong></td><td>Proceso desde recepción de pedido hasta entrega al cliente. Almacén central + rutas zona rural.</td></tr>
+            <tr><td><strong>Fuera del alcance</strong></td><td>Sistema de pedidos del cliente, logística del proveedor.</td></tr>
+            <tr><td><strong>Plazo</strong></td><td>90 días</td></tr>
+          </table>
+          <div class="infobox infobox-yellow" style="margin-top:12px"><strong>⚠️ Importante:</strong> El Project Charter es el contrato del equipo. Debe ser aprobado por el responsable antes de avanzar a la fase Medir.</div>
+        </div>
+      </div>
+
+      <div class="step-doc">
+        <div class="step-doc-header">
+          <span class="step-doc-num" style="background:#e0f2f5;color:#1a6a78">D-3</span>
+          <div>
+            <div class="step-doc-title">Caminata Gemba — Observar el proceso en vivo</div>
+            <div class="step-doc-brief">Recorrer el flujo completo de un pedido desde recepción hasta despacho, sin interrumpir las operaciones.</div>
+          </div>
+        </div>
+        <div class="step-doc-body">
+          <h4>Lista de observación</h4>
+          <ul class="checklist-doc">
+            <li><input type="checkbox" class="chkbox"> Mapear físicamente el recorrido de un pedido (inicio y fin)</li>
+            <li><input type="checkbox" class="chkbox"> Observar cómo se recibe y procesa la orden de pedido</li>
+            <li><input type="checkbox" class="chkbox"> ¿El picker usa lista impresa, pantalla o de memoria?</li>
+            <li><input type="checkbox" class="chkbox"> ¿Hay verificación de cantidad y producto antes del empaque?</li>
+            <li><input type="checkbox" class="chkbox"> ¿Cómo se etiquetan los paquetes para zona rural vs. urbana?</li>
+            <li><input type="checkbox" class="chkbox"> ¿Existe punto de espera o cola antes del despacho?</li>
+            <li><input type="checkbox" class="chkbox"> Fotografiar áreas desordenadas o procesos informales (con permiso)</li>
+            <li><input type="checkbox" class="chkbox"> Cronometrar al menos 3 ciclos de picking</li>
+          </ul>
+          <div class="infobox infobox-blue"><strong>💡 Regla Gemba:</strong> Ve a ver, pregunta por qué, muestra respeto. No corrijas ni critiques en el momento. Solo observa y documenta.</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════ FASE M ═══════════════ -->
+<div id="fase-m">
+  <div class="section-divider">
+    <div class="section-divider-line"></div>
+    <div class="section-divider-label">Fase 2 · Medir</div>
+    <div class="section-divider-line"></div>
+  </div>
+  <div class="phase-section">
+    <div class="phase-header-doc" style="background:#fffdf0;border-color:#e8d97a">
+      <div class="phase-letter-doc" style="color:#7a6000">M</div>
+      <div>
+        <h3 style="color:#5a4800">Medir el estado actual con datos</h3>
+        <p style="color:#7a6820">Cuantificar la magnitud del problema. Mapear el flujo de valor actual, auditar el estado 5S del almacén y recolectar datos de incidencias para construir el Pareto de causas.</p>
+        <span class="phase-goal-doc" style="background:#fef9c3;color:#7a6000">🎯 Entregable: VSM Estado Actual + Pareto de incidencias + Score 5S inicial</span>
+      </div>
+    </div>
+    <div class="steps-list">
+
+      <div class="step-doc">
+        <div class="step-doc-header">
+          <span class="step-doc-num" style="background:#fef9c3;color:#7a5c00">M-1</span>
+          <div>
+            <div class="step-doc-title">Value Stream Map (VSM) — Estado Actual</div>
+            <div class="step-doc-brief">Mapear cada proceso del flujo del pedido con tiempos de ciclo, esperas y tamaño de lote.</div>
+          </div>
+        </div>
+        <div class="step-doc-body">
+          <h4>Procesos a mapear</h4>
+          <table>
+            <tr><th>Proceso</th><th>Qué medir</th><th>Qué buscar</th></tr>
+            <tr><td>1. Recepción de pedido</td><td>Tiempo hasta inicio de picking</td><td>Pedidos apilados sin procesar</td></tr>
+            <tr><td>2. Picking</td><td>Tiempo recorrido + búsqueda + selección</td><td>Distancias largas, productos fuera de lugar</td></tr>
+            <tr><td>3. Verificación / Control</td><td>Tiempo de chequeo vs. orden</td><td>¿Existe este paso? ¿Se omite bajo presión?</td></tr>
+            <tr><td>4. Empaque y etiquetado</td><td>Tiempo de empacar + etiquetar destino</td><td>Errores de etiqueta, confusión de destinatarios</td></tr>
+            <tr><td>5. Despacho / Carga</td><td>Tiempo de carga en vehículo</td><td>Espera de vehículo, mezcla de rutas</td></tr>
+            <tr><td>6. Transporte zona rural</td><td>Tiempo tránsito hasta entrega</td><td>Distancias, frecuencia de ruta, acumulación de lote</td></tr>
+          </table>
+          <div class="infobox infobox-blue" style="margin-top:10px"><strong>💡 Zona Rural:</strong> Registrar si los pedidos rurales se acumulan hasta completar la carga. Este lote es frecuentemente la mayor fuente de retraso — puede representar 2 a 4 días de espera innecesaria.</div>
+        </div>
+      </div>
+
+      <div class="step-doc">
+        <div class="step-doc-header">
+          <span class="step-doc-num" style="background:#fef9c3;color:#7a5c00">M-2</span>
+          <div>
+            <div class="step-doc-title">Auditoría 5S — Diagnóstico de Orden y Limpieza</div>
+            <div class="step-doc-brief">El desorden físico es causa directa de errores de picking. Evaluar las 5 dimensiones con puntuación 1–5 (25 criterios, máx. 125 puntos).</div>
+          </div>
+        </div>
+        <div class="step-doc-body">
+          <h4>Dimensiones a evaluar (1 = crítico · 5 = excelente)</h4>
+          <table>
+            <tr><th>S</th><th>Nombre</th><th>Foco especial en almacén</th></tr>
+            <tr><td><strong>S1</strong></td><td>Seiri — Clasificación</td><td>¿Hay productos sin lugar asignado o mezclados con otros?</td></tr>
+            <tr><td><strong>S2</strong></td><td>Seiton — Orden</td><td>⚠️ Crítico: ¿Tienen ubicación fija y etiquetada? ¿Hay mapa del almacén?</td></tr>
+            <tr><td><strong>S3</strong></td><td>Seiso — Limpieza</td><td>¿Pisos despejados? ¿Áreas de trabajo limpias y organizadas?</td></tr>
+            <tr><td><strong>S4</strong></td><td>Seiketsu — Estandarización</td><td>¿Existen procedimientos escritos de picking y despacho?</td></tr>
+            <tr><td><strong>S5</strong></td><td>Shitsuke — Disciplina</td><td>¿El equipo sigue los procedimientos sin supervisión constante?</td></tr>
+          </table>
+          <div class="infobox infobox-red" style="margin-top:10px"><strong>⚠️ Atención S2:</strong> En almacenes con alta tasa de entregas incorrectas, Seiton (orden y ubicación) suele ser la dimensión de menor puntaje. Un producto en el lugar equivocado = pedido equivocado.</div>
+        </div>
+      </div>
+
+      <div class="step-doc">
+        <div class="step-doc-header">
+          <span class="step-doc-num" style="background:#fef9c3;color:#7a5c00">M-3</span>
+          <div>
+            <div class="step-doc-title">Registro y clasificación de incidencias (Pareto)</div>
+            <div class="step-doc-brief">Recolectar datos de al menos 4 semanas para construir el análisis de Pareto 80/20.</div>
+          </div>
+        </div>
+        <div class="step-doc-body">
+          <h4>Categorías de incidencias a registrar</h4>
+          <table>
+            <tr><th>Tipo</th><th>Cómo contabilizar</th><th>Fuente</th></tr>
+            <tr><td>Entrega tardía — zona rural</td><td># pedidos fuera del plazo acordado</td><td>Registro despachos, guías</td></tr>
+            <tr><td>Entrega tardía — zona urbana</td><td># pedidos fuera del plazo acordado</td><td>Mismo registro</td></tr>
+            <tr><td>Producto incorrecto</td><td># pedidos con ítem equivocado</td><td>Reclamos / devoluciones</td></tr>
+            <tr><td>Cantidad incompleta</td><td># pedidos con menos ítems</td><td>Reclamos, notas de crédito</td></tr>
+            <tr><td>Destinatario equivocado</td><td># pedidos con dirección incorrecta</td><td>Log de transportista</td></tr>
+            <tr><td>Pedido extraviado</td><td># pedidos sin confirmar en 48h</td><td>Sistema de tracking</td></tr>
+          </table>
+          <p style="margin-top:8px">Con el Pareto identificaremos las <strong>2 categorías que generan el 80% de los problemas</strong> — esas serán el foco del análisis de causas raíz.</p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════ FASE A ═══════════════ -->
+<div id="fase-a">
+  <div class="section-divider">
+    <div class="section-divider-line"></div>
+    <div class="section-divider-label">Fase 3 · Analizar</div>
+    <div class="section-divider-line"></div>
+  </div>
+  <div class="phase-section">
+    <div class="phase-header-doc" style="background:#fff8f2;border-color:#f0c080">
+      <div class="phase-letter-doc" style="color:#8a4400">A</div>
+      <div>
+        <h3 style="color:#6a3200">Identificar las causas raíz</h3>
+        <p style="color:#8a5420">Con los datos de la fase Medir, analizamos por qué ocurren los problemas. El Diagrama Ishikawa explora todas las dimensiones posibles y los 5 Porqués profundizan en las causas sistémicas.</p>
+        <span class="phase-goal-doc" style="background:#feede0;color:#7a3800">🎯 Entregable: Causas raíz validadas + A3 Report completado hasta análisis</span>
+      </div>
+    </div>
+    <div class="steps-list">
+
+      <div class="step-doc">
+        <div class="step-doc-header">
+          <span class="step-doc-num" style="background:#feede0;color:#7a3800">A-1</span>
+          <div>
+            <div class="step-doc-title">Diagrama de Ishikawa (Espina de Pescado)</div>
+            <div class="step-doc-brief">Brainstorming estructurado de causas por las 6 categorías (6M). Se realiza en grupo con el equipo del almacén.</div>
+          </div>
+        </div>
+        <div class="step-doc-body">
+          <h4>Causas potenciales por categoría</h4>
+          <table>
+            <tr><th>Categoría</th><th>Causas a explorar</th></tr>
+            <tr><td><span class="tag-pill" style="background:#f78c3f22;color:#c25a00">Método</span></td><td>Sin procedimiento escrito de picking · Verificación omitida bajo presión · Rutas rurales no planificadas · Pedidos acumulados para completar carga</td></tr>
+            <tr><td><span class="tag-pill" style="background:#4f98a322;color:#1a5a65">Mano de Obra</span></td><td>Rotación alta de personal · Falta de capacitación en picking exacto · Trabajo bajo presión de tiempo · Comunicación informal</td></tr>
+            <tr><td><span class="tag-pill" style="background:#e8c44a22;color:#7a5c00">Material</span></td><td>Productos sin código o etiqueta · Embalajes similares en productos distintos · Ubicaciones sin señalética</td></tr>
+            <tr><td><span class="tag-pill" style="background:#bc8cff22;color:#5a2a90">Máquina/Sistema</span></td><td>Sin WMS · Uso de Excel o papel sin validación · Sin escáner de confirmación</td></tr>
+            <tr><td><span class="tag-pill" style="background:#5fc97a22;color:#1a6a30">Medio Ambiente</span></td><td>Almacén mal iluminado · Pasillos angostos o bloqueados · Zona rural sin dirección exacta</td></tr>
+            <tr><td><span class="tag-pill" style="background:#f8514922;color:#8a1010">Medición</span></td><td>Sin KPI de error de picking · Sin registro sistemático de incidencias · Feedback del cliente tardío</td></tr>
+          </table>
+          <div class="infobox infobox-blue" style="margin-top:10px"><strong>💡 Facilitación:</strong> El Ishikawa se realiza en sesión con el equipo. Las personas que hacen el trabajo conocen las causas reales. El consultor facilita, no rellena el diagrama solo.</div>
+        </div>
+      </div>
+
+      <div class="step-doc">
+        <div class="step-doc-header">
+          <span class="step-doc-num" style="background:#feede0;color:#7a3800">A-2</span>
+          <div>
+            <div class="step-doc-title">5 Porqués — Análisis de profundidad</div>
+            <div class="step-doc-brief">Aplicar a las 2–3 causas de mayor frecuencia según el Pareto. Llegar a la causa raíz sistémica.</div>
+          </div>
+        </div>
+        <div class="step-doc-body">
+          <h4>Ejemplo: ¿Por qué se envían productos incorrectos?</h4>
+          <table>
+            <tr><th>#</th><th>Pregunta</th><th>Respuesta típica encontrada</th></tr>
+            <tr><td><strong>1</strong></td><td>¿Por qué se envían productos incorrectos?</td><td>El picker toma el producto de la ubicación equivocada.</td></tr>
+            <tr><td><strong>2</strong></td><td>¿Por qué toma el producto incorrecto?</td><td>Productos similares están en estantes adyacentes sin separación visual.</td></tr>
+            <tr><td><strong>3</strong></td><td>¿Por qué no hay separación visual?</td><td>No existe un estándar de ubicación ni señalética en el almacén.</td></tr>
+            <tr><td><strong>4</strong></td><td>¿Por qué no existe ese estándar?</td><td>Nunca se designó un responsable del layout del almacén.</td></tr>
+            <tr><td><strong>5</strong></td><td>¿Por qué nadie es responsable?</td><td>No hay procedimiento de gestión de almacén documentado.</td></tr>
+          </table>
+          <div class="infobox infobox-blue" style="margin-top:10px"><strong>Causa raíz identificada:</strong> Ausencia de estándares de ubicación y responsable formal de gestión del almacén. La solución apunta a S4 (Estandarización) del modelo 5S.</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════ FASE I ═══════════════ -->
+<div id="fase-i">
+  <div class="section-divider">
+    <div class="section-divider-line"></div>
+    <div class="section-divider-label">Fase 4 · Mejorar</div>
+    <div class="section-divider-line"></div>
+  </div>
+  <div class="phase-section">
+    <div class="phase-header-doc" style="background:#f9f0ff;border-color:#d4aaff">
+      <div class="phase-letter-doc" style="color:#5a2090">I</div>
+      <div>
+        <h3 style="color:#3a1060">Diseñar e implementar las soluciones</h3>
+        <p style="color:#6a40a0">Con las causas raíz claras, diseñamos las contramedidas priorizando alto impacto y bajo costo. Se pilotea antes de escalar a toda la operación.</p>
+        <span class="phase-goal-doc" style="background:#ede0ff;color:#4a1890">🎯 Entregable: Plan de acción PDCA + VSM Estado Futuro + 5S implementado</span>
+      </div>
+    </div>
+    <div class="steps-list">
+
+      <div class="step-doc">
+        <div class="step-doc-header">
+          <span class="step-doc-num" style="background:#ede0ff;color:#4a1890">I-1</span>
+          <div>
+            <div class="step-doc-title">Plan de mejora 5S — Acciones inmediatas</div>
+            <div class="step-doc-brief">Las mejoras de orden y señalética tienen el mayor retorno por costo. Son el punto de partida obligado.</div>
+          </div>
+        </div>
+        <div class="step-doc-body">
+          <h4>Acciones por dimensión 5S</h4>
+          <table>
+            <tr><th>S</th><th>Acción concreta</th><th>Responsable</th><th>Plazo</th></tr>
+            <tr><td><strong>S1</strong></td><td>Aplicar tarjeta roja a todo ítem sin ubicación asignada. Retirar o reubicar en 48h.</td><td>Supervisor almacén</td><td>Semana 1</td></tr>
+            <tr><td><strong>S2</strong></td><td>Diseñar y marcar mapa de ubicaciones fijas. Etiquetar cada estante con código de producto.</td><td>Equipo almacén</td><td>Semana 2</td></tr>
+            <tr><td><strong>S2</strong></td><td>Separar visualmente productos similares (cinta de color diferente por familia de producto).</td><td>Supervisor</td><td>Semana 2</td></tr>
+            <tr><td><strong>S3</strong></td><td>Rutina de limpieza diaria 10 min al inicio y fin de turno. Responsable rotativo.</td><td>Todo el equipo</td><td>Semana 1</td></tr>
+            <tr><td><strong>S4</strong></td><td>Crear instructivo visual de picking (1 página, con fotos) y fijarlo en el área de trabajo.</td><td>Supervisor + Consultor</td><td>Semana 3</td></tr>
+            <tr><td><strong>S5</strong></td><td>Programar auditoría 5S mensual con formulario estándar y comunicar resultados al equipo.</td><td>Responsable Lean</td><td>Mensual</td></tr>
+          </table>
+        </div>
+      </div>
+
+      <div class="step-doc">
+        <div class="step-doc-header">
+          <span class="step-doc-num" style="background:#ede0ff;color:#4a1890">I-2</span>
+          <div>
+            <div class="step-doc-title">Rediseño del flujo — VSM Estado Futuro</div>
+            <div class="step-doc-brief">Eliminación de desperdicios identificados en el VSM actual. Cuatro oportunidades de alto impacto.</div>
+          </div>
+        </div>
+        <div class="step-doc-body">
+          <h4>Mejoras al flujo del pedido</h4>
+          <ul>
+            <li><strong>Agregar paso de verificación:</strong> Chequeo de ítem y cantidad antes del empaque. Demora 30 seg. por pedido; evita re-envíos que cuestan entre 3× y 10× más.</li>
+            <li><strong>Reducir lote zona rural:</strong> Reemplazar acumulación hasta llenar camión por <em>frecuencia fija de ruta</em> (ej. Lunes / Miércoles / Viernes). Elimina 2–3 días de espera.</li>
+            <li><strong>Etiquetado estandarizado:</strong> Plantilla única con nombre, dirección, teléfono, zona y código de pedido. Elimina confusión de destinatario.</li>
+            <li><strong>Tablero Kanban de despacho:</strong> Columnas: Pendiente → En picking → Verificado → Listo → Despachado. Visibilidad en tiempo real del estado de cada pedido.</li>
+          </ul>
+          <div class="infobox infobox-blue"><strong>💡 Clave zona rural:</strong> El lote de acumulación es el mayor desperdicio. Si los pedidos del lunes salen el jueves, el Lead Time es 3 días más largo de lo necesario. Una frecuencia fija de ruta reduce el tiempo de espera sin aumentar el costo por km.</div>
+        </div>
+      </div>
+
+      <div class="step-doc">
+        <div class="step-doc-header">
+          <span class="step-doc-num" style="background:#ede0ff;color:#4a1890">I-3</span>
+          <div>
+            <div class="step-doc-title">Plan de Acción PDCA</div>
+            <div class="step-doc-brief">Cada mejora convertida en tarea con responsable, fecha límite y métrica de éxito.</div>
+          </div>
+        </div>
+        <div class="step-doc-body">
+          <table>
+            <tr><th>Fase PDCA</th><th>Actividad</th><th>Meta</th></tr>
+            <tr><td><span class="tag-pill" style="background:#e0f2f522;color:#1a5a65">Plan</span></td><td>Diseñar layout nuevo del almacén, definir ubicaciones fijas por SKU, crear instructivo de picking</td><td>Documentos listos en 7 días</td></tr>
+            <tr><td><span class="tag-pill" style="background:#fef9c322;color:#7a5c00">Do</span></td><td>Implementar etiquetado, instructivo visual, paso de verificación, rutina de limpieza</td><td>Operativo en 15 días</td></tr>
+            <tr><td><span class="tag-pill" style="background:#feede022;color:#7a3800">Check</span></td><td>Medir % error de picking y tiempos de entrega semana a semana</td><td>-50% errores en 30 días</td></tr>
+            <tr><td><span class="tag-pill" style="background:#ecfdf522;color:#1a6a30">Act</span></td><td>Ajustar según resultados, estandarizar lo que funciona, documentar el nuevo estándar</td><td>Estándar documentado en 45 días</td></tr>
+          </table>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════ FASE C ═══════════════ -->
+<div id="fase-c">
+  <div class="section-divider">
+    <div class="section-divider-line"></div>
+    <div class="section-divider-label">Fase 5 · Controlar</div>
+    <div class="section-divider-line"></div>
+  </div>
+  <div class="phase-section">
+    <div class="phase-header-doc" style="background:#f0fdf4;border-color:#86efac">
+      <div class="phase-letter-doc" style="color:#166534">C</div>
+      <div>
+        <h3 style="color:#14532d">Sostener los resultados en el tiempo</h3>
+        <p style="color:#166534">Las mejoras sin un sistema de control regredan. Esta fase instala los mecanismos que garantizan que los cambios se mantengan sin depender de la presencia del equipo consultor.</p>
+        <span class="phase-goal-doc" style="background:#dcfce7;color:#166534">🎯 Entregable: KPIs activos + Auditoría 5S mensual + Estándares documentados</span>
+      </div>
+    </div>
+    <div class="steps-list">
+
+      <div class="step-doc">
+        <div class="step-doc-header">
+          <span class="step-doc-num" style="background:#dcfce7;color:#166534">C-1</span>
+          <div>
+            <div class="step-doc-title">Auditoría 5S mensual — Protocolo de seguimiento</div>
+            <div class="step-doc-brief">Repetir la auditoría mensualmente y comparar el puntaje con el diagnóstico inicial.</div>
+          </div>
+        </div>
+        <div class="step-doc-body">
+          <ul class="checklist-doc">
+            <li><input type="checkbox" class="chkbox"> Mismo auditor o rotación documentada</li>
+            <li><input type="checkbox" class="chkbox"> Mismo alcance: Almacén Central completo</li>
+            <li><input type="checkbox" class="chkbox"> Exportar evidencia (CSV o reporte) con fecha</li>
+            <li><input type="checkbox" class="chkbox"> Comparar puntaje vs. mes anterior por dimensión</li>
+            <li><input type="checkbox" class="chkbox"> Comunicar resultados al equipo en reunión mensual</li>
+            <li><input type="checkbox" class="chkbox"> Si puntaje baja en alguna S → abrir acción correctiva</li>
+          </ul>
+          <div class="infobox infobox-blue"><strong>🎯 Meta progresiva:</strong> No se exige alcanzar 100/125 de inmediato. Un avance de +5 puntos por mes es ritmo sostenible. La clave es la tendencia, no el valor absoluto.</div>
+        </div>
+      </div>
+
+      <div class="step-doc">
+        <div class="step-doc-header">
+          <span class="step-doc-num" style="background:#dcfce7;color:#166534">C-2</span>
+          <div>
+            <div class="step-doc-title">Monitoreo semanal de KPIs de entrega</div>
+            <div class="step-doc-brief">Detectar desviaciones antes de que se conviertan en quejas. Panel de indicadores visible para el equipo.</div>
+          </div>
+        </div>
+        <div class="step-doc-body">
+          <table>
+            <tr><th>KPI</th><th>Cálculo</th><th>Frecuencia</th><th>Alerta si...</th></tr>
+            <tr><td>% Entregas a tiempo (OTD)</td><td>Entregas en plazo / Total × 100</td><td>Semanal</td><td>Baja de 90%</td></tr>
+            <tr><td>% Error de picking</td><td>Pedidos con error / Total × 100</td><td>Semanal</td><td>Supera 3%</td></tr>
+            <tr><td>Lead Time zona rural (días)</td><td>Fecha despacho → Fecha entrega</td><td>Semanal</td><td>Supera el plazo acordado</td></tr>
+            <tr><td>Puntaje 5S</td><td>Resultado auditoría mensual</td><td>Mensual</td><td>Baja vs. mes anterior</td></tr>
+          </table>
+        </div>
+      </div>
+
+      <div class="step-doc">
+        <div class="step-doc-header">
+          <span class="step-doc-num" style="background:#dcfce7;color:#166534">C-3</span>
+          <div>
+            <div class="step-doc-title">Entregables de cierre del proyecto</div>
+            <div class="step-doc-brief">El proyecto se considera cerrado cuando el proceso puede sostenerse sin el equipo consultor.</div>
+          </div>
+        </div>
+        <div class="step-doc-body">
+          <ul class="checklist-doc">
+            <li><input type="checkbox" class="chkbox"> A3 Report completo con resultados reales vs. meta</li>
+            <li><input type="checkbox" class="chkbox"> VSM Estado Futuro documentado (Lead Time antes vs. después)</li>
+            <li><input type="checkbox" class="chkbox"> Instructivo de picking actualizado y aprobado por supervisión</li>
+            <li><input type="checkbox" class="chkbox"> Mapa de ubicaciones del almacén documentado y visible</li>
+            <li><input type="checkbox" class="chkbox"> Calendario de auditorías 5S para los próximos 6 meses</li>
+            <li><input type="checkbox" class="chkbox"> Presentación de resultados al management con KPIs finales</li>
+          </ul>
+          <div class="infobox infobox-blue"><strong>🎯 Criterio de cierre:</strong> El proyecto DMAIC está completo cuando el proceso mejorado funciona autónomamente. Si requiere supervisión constante del equipo consultor, la fase Control está incompleta.</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════ CRONOGRAMA ═══════════════ -->
+<div id="cronograma">
+  <div class="section-divider">
+    <div class="section-divider-line"></div>
+    <div class="section-divider-label">Cronograma General</div>
+    <div class="section-divider-line"></div>
+  </div>
+  <div style="background:#fff;border:1px solid #e2e6ee;border-radius:16px;padding:32px 36px;margin-bottom:40px;box-shadow:0 1px 4px rgba(0,0,0,.04)">
+    <div class="timeline">
+      <div class="tl-item">
+        <div class="tl-dot" style="border-color:#4f98a3;background:#e0f2f5"></div>
+        <div class="tl-week">Semanas 1–2</div>
+        <div class="tl-title" style="color:#2a6070">D · Definir</div>
+        <div class="tl-desc">Entrevista inicial · Caminata Gemba · Project Charter firmado · Alcance acordado con el equipo.</div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-dot" style="border-color:#e8c44a;background:#fef9c3"></div>
+        <div class="tl-week">Semanas 3–4</div>
+        <div class="tl-title" style="color:#7a6000">M · Medir</div>
+        <div class="tl-desc">VSM del estado actual · Auditoría 5S inicial · Recolección de datos de incidencias · Pareto construido.</div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-dot" style="border-color:#f78c3f;background:#feede0"></div>
+        <div class="tl-week">Semanas 5–6</div>
+        <div class="tl-title" style="color:#7a3800">A · Analizar</div>
+        <div class="tl-desc">Sesión Ishikawa con el equipo · 5 Porqués de causas principales · Causas raíz validadas · A3 hasta análisis.</div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-dot" style="border-color:#bc8cff;background:#ede0ff"></div>
+        <div class="tl-week">Semanas 7–10</div>
+        <div class="tl-title" style="color:#5a2090">I · Mejorar</div>
+        <div class="tl-desc">Implementación 5S · Layout nuevo · Instructivo de picking · Paso de verificación · VSM futuro · PDCA activo.</div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-dot" style="border-color:#5fc97a;background:#dcfce7"></div>
+        <div class="tl-week">Semanas 11–13</div>
+        <div class="tl-title" style="color:#166534">C · Controlar</div>
+        <div class="tl-desc">KPIs activos · Primera auditoría 5S post-mejora · Cierre del A3 · Presentación de resultados al management.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</div><!-- /page -->
+
+<!-- ═══════════════ FOOTER ═══════════════ -->
+<div class="doc-footer">
+  <div class="doc-footer-brand">Largotek <span>Consultoría Lean</span></div>
+  <div class="doc-footer-right">Documento confidencial · Uso exclusivo del cliente<br>largotek.com · consultoría@largotek.com</div>
+</div>
+
+<!-- ═══════════════ FAB BUTTONS ═══════════════ -->
+<div class="fab-bar no-print">
+  <button class="fab fab-primary" onclick="window.print()">🖨️ Imprimir / PDF</button>
+  <button class="fab fab-secondary" onclick="scrollToTop()">↑ Inicio</button>
+</div>
+
+<script>
+function scrollToSection(id){
+  const el=document.getElementById(id);
+  if(el){el.scrollIntoView({behavior:'smooth',block:'start'});}
+  document.querySelectorAll('.nav-pill').forEach(p=>p.classList.remove('active'));
+  event.target.classList.add('active');
+}
+function scrollToTop(){
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+document.getElementById('cover-date').textContent=new Date().toLocaleDateString('es-AR',{month:'long',year:'numeric'});
+</script>
+</body>
+</html>
