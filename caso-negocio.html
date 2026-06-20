@@ -1,17 +1,242 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Caso de Negocio — Largotek</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300..700&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/styles.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Caso de Negocio — Largotek</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300..700&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#0d1117;--surface:#161b22;--surface2:#21262d;--border:#30363d;--text:#e6edf3;--muted:#8b949e;--faint:#3d444d;--accent:#4f98a3;--green:#5fc97a;--yellow:#e8c44a;--red:#f85149;--radius:14px}
+html{scroll-behavior:smooth}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:13px 28px;border-bottom:1px solid var(--border);background:var(--surface)}
+.topbar-brand{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:var(--muted);text-decoration:none}
+.topbar-brand span{color:var(--accent)}
+.topbar-right{display:flex;align-items:center;gap:8px}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:7px 15px;border-radius:8px;border:1.5px solid var(--border);background:transparent;color:var(--muted);font-size:12px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;transition:all .18s}
+.btn:hover{border-color:var(--accent);color:var(--accent)}
+.btn-primary{background:var(--accent);color:#fff;border-color:var(--accent)}
+.btn-primary:hover{background:#3a7f8a}
+.btn-danger:hover{border-color:var(--red);color:var(--red)}
+.hero{padding:32px 32px 20px;max-width:900px;margin:0 auto}
+.hero-eye{font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--accent);margin-bottom:8px}
+.hero h1{font-family:'Instrument Serif',serif;font-size:clamp(1.5rem,3vw,2.2rem);margin-bottom:6px}
+.hero-sub{font-size:13px;color:var(--muted);line-height:1.7}
+.wrap{max-width:900px;margin:0 auto;padding:0 32px 80px}
+.saved-bar{display:flex;align-items:center;justify-content:flex-end;margin-bottom:14px}
+.saved-label{font-size:11px;color:var(--muted)}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:16px;overflow:hidden}
+.card-head{display:flex;align-items:center;gap:10px;padding:13px 18px;border-bottom:1px solid var(--faint);background:var(--surface2)}
+.card-icon{font-size:15px}
+.card-title{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.card-body{padding:16px 18px;display:grid;gap:12px}
+.two-col{grid-template-columns:1fr 1fr}
+@media(max-width:600px){.two-col{grid-template-columns:1fr}}
+.field{display:flex;flex-direction:column;gap:5px}
+.field label{font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.field input,.field select,.field textarea{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:9px 12px;font-size:13px;color:var(--text);font-family:'Inter',sans-serif;transition:border-color .18s;width:100%}
+.field textarea{resize:vertical;min-height:80px;line-height:1.65}
+.field input:focus,.field select:focus,.field textarea:focus{outline:none;border-color:var(--accent)}
+.field input::placeholder,.field textarea::placeholder{color:var(--faint)}
+.kpi-table{width:100%;border-collapse:collapse;font-size:12px}
+.kpi-table th{text-align:left;padding:7px 10px;background:var(--surface2);color:var(--muted);font-size:11px;font-weight:600;letter-spacing:.04em}
+.kpi-table td{padding:7px 8px;border-top:1px solid var(--faint);vertical-align:middle}
+.kpi-table td input,.kpi-table td select{width:100%;background:transparent;border:none;color:var(--text);font-size:12px;font-family:'Inter',sans-serif;padding:2px 4px}
+.kpi-table td input:focus{outline:1px solid var(--accent);border-radius:3px}
+.kpi-table td select{background:var(--surface2);border:1px solid var(--border);border-radius:4px;padding:3px 6px;cursor:pointer}
+.add-btn{display:inline-flex;align-items:center;gap:5px;margin-top:8px;padding:6px 12px;border-radius:6px;border:1px dashed var(--border);background:transparent;color:var(--muted);font-size:11px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;transition:all .18s}
+.add-btn:hover{border-color:var(--accent);color:var(--accent)}
+.del-btn{background:transparent;border:none;color:var(--faint);cursor:pointer;font-size:14px;padding:0 4px;transition:color .15s}
+.del-btn:hover{color:var(--red)}
+.risk-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+@media(max-width:580px){.risk-grid{grid-template-columns:1fr}}
+.risk-card{background:var(--surface2);border-radius:10px;padding:12px 14px}
+.risk-card label{font-size:10px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;margin-bottom:6px;display:block}
+.risk-card textarea{width:100%;background:transparent;border:none;color:var(--muted);font-size:12px;font-family:'Inter',sans-serif;resize:none;min-height:60px;line-height:1.55}
+.risk-card textarea:focus{outline:none;color:var(--text)}
+.sign-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+@media(max-width:600px){.sign-grid{grid-template-columns:1fr}}
+.sign-box{background:var(--surface2);border-radius:8px;padding:14px;display:flex;flex-direction:column;gap:8px}
+.sign-box label{font-size:10px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--muted)}
+.sign-box input{background:transparent;border:none;border-bottom:1px solid var(--border);color:var(--text);font-size:12px;font-family:'Inter',sans-serif;padding:4px 0;width:100%;transition:border-color .18s}
+.sign-box input:focus{outline:none;border-color:var(--accent)}
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:#1e3a2e;border:1px solid var(--green);color:var(--green);padding:10px 22px;border-radius:99px;font-size:13px;font-weight:600;opacity:0;transition:all .3s;z-index:999;white-space:nowrap}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+@media print{
+  .topbar,.btn,.add-btn,.del-btn{display:none!important}
+  body{background:#fff;color:#111}
+  .card{border-color:#ccc;background:#fff}
+  .card-head{background:#f3f3f3}
+  .field input,.field select,.field textarea,.risk-card textarea,.kpi-table td input,.sign-box input{background:#f9f9f9;color:#111}
+}
+</style>
 </head>
 <body>
-  <div id="app"></div>
-  <script src="js/caso-negocio.js"></script>
-  <script src="branding.js"></script>
+<div class="topbar">
+  <a href="index.html" class="topbar-brand">← <span>Largotek</span> Lean Suite</a>
+  <div class="topbar-right">
+    <span class="saved-label" id="saved-lbl"></span>
+    <button class="btn btn-danger" onclick="clearAll()">🗑 Limpiar</button>
+    <button class="btn" onclick="saveLocal()">💾 Guardar</button>
+    <button class="btn btn-primary" onclick="window.print()">🖨 PDF</button>
+  </div>
+</div>
+<div class="hero">
+  <div class="hero-eye">📁 Caso de Negocio — Largotek Lean Suite</div>
+  <h1>Project Charter / Caso de Negocio</h1>
+  <p class="hero-sub">Documento de inicio del proyecto de mejora. Define el problema, el alcance, los KPIs meta, el equipo y los riesgos. Debe ser aprobado antes de avanzar a la fase Medir.</p>
+</div>
+<div class="wrap">
+  <div class="saved-bar"><span class="saved-label" id="saved-lbl2"></span></div>
+
+  <div class="card">
+    <div class="card-head"><span class="card-icon">🏷️</span><span class="card-title">Identificación del Proyecto</span></div>
+    <div class="card-body two-col">
+      <div class="field"><label>Título del Proyecto</label><input id="p-title" placeholder="Ej: Reducción de errores de entrega — Almacén Central"></div>
+      <div class="field"><label>Área / Proceso</label><input id="p-area" placeholder="Ej: Logística — Almacén Central"></div>
+      <div class="field"><label>Líder del Proyecto</label><input id="p-leader" placeholder="Nombre y cargo"></div>
+      <div class="field"><label>Patrocinador (Sponsor)</label><input id="p-sponsor" placeholder="Nombre y cargo del aprobador"></div>
+      <div class="field"><label>Fecha de Inicio</label><input id="p-start" type="date"></div>
+      <div class="field"><label>Fecha Meta de Cierre</label><input id="p-end" type="date"></div>
+      <div class="field"><label>Metodología</label>
+        <select id="p-method">
+          <option>DMAIC — Lean Six Sigma</option>
+          <option>Kaizen</option>
+          <option>PDCA</option>
+          <option>A3</option>
+          <option>VSM — Value Stream Mapping</option>
+        </select>
+      </div>
+      <div class="field"><label>Estado</label>
+        <select id="p-status">
+          <option value="draft">🟡 Borrador</option>
+          <option value="active">🔵 Aprobado — En progreso</option>
+          <option value="review">🟠 En revisión</option>
+          <option value="closed">🟢 Cerrado</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-head"><span class="card-icon">🚨</span><span class="card-title">Enunciado del Problema y Alcance</span></div>
+    <div class="card-body">
+      <div class="field"><label>Enunciado del Problema (específico y cuantificado)</label>
+        <textarea id="p-problem" placeholder="Ej: El almacén presenta quejas frecuentes por entregas tardías en zona rural y una tasa significativa de pedidos con producto incorrecto o cantidad incompleta..."></textarea>
+      </div>
+      <div class="field"><label>Impacto del Problema (económico / operativo)</label>
+        <textarea id="p-impact" style="min-height:60px" placeholder="Ej: Costo estimado de re-entregas: $X/mes. Horas de atención de reclamos: Z hs/semana..."></textarea>
+      </div>
+      <div class="two-col" style="display:grid;gap:12px">
+        <div class="field"><label>Qué incluye el alcance</label>
+          <textarea id="p-scope-in" style="min-height:60px" placeholder="Ej: Proceso desde recepción del pedido hasta entrega al cliente. Almacén central + rutas zona rural."></textarea>
+        </div>
+        <div class="field"><label>Qué NO incluye el alcance</label>
+          <textarea id="p-scope-out" style="min-height:60px" placeholder="Ej: Sistema de pedidos del cliente. Logística de proveedores. Sucursales externas."></textarea>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-head"><span class="card-icon">🎯</span><span class="card-title">Objetivo y KPIs Meta</span></div>
+    <div class="card-body">
+      <div class="field"><label>Objetivo SMART del Proyecto</label>
+        <textarea id="p-goal" style="min-height:60px" placeholder="Ej: Reducir el porcentaje de entregas tardías al 5% o menos y el error de picking al 2% o menos, en 90 días, sin incremento de personal."></textarea>
+      </div>
+      <table class="kpi-table">
+        <thead><tr><th>KPI</th><th>Valor Actual</th><th>Meta</th><th>Plazo</th><th>Prioridad</th><th></th></tr></thead>
+        <tbody id="kpi-body"></tbody>
+      </table>
+      <button class="add-btn" onclick="addKpi()">+ Agregar KPI</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-head"><span class="card-icon">👥</span><span class="card-title">Equipo del Proyecto</span></div>
+    <div class="card-body">
+      <table class="kpi-table">
+        <thead><tr><th>Nombre</th><th>Rol en el Proyecto</th><th>Puesto / Área</th><th>% Dedicación</th><th></th></tr></thead>
+        <tbody id="team-body"></tbody>
+      </table>
+      <button class="add-btn" onclick="addTeam()">+ Agregar integrante</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-head"><span class="card-icon">⚠️</span><span class="card-title">Riesgos y Restricciones</span></div>
+    <div class="card-body">
+      <div class="risk-grid">
+        <div class="risk-card"><label style="color:#f85149">Riesgos del proyecto</label><textarea id="r-risks" placeholder="Ej: Resistencia al cambio · Alta rotación de personal · Temporada alta durante la implementación..."></textarea></div>
+        <div class="risk-card"><label style="color:#e8c44a">Restricciones</label><textarea id="r-constraints" placeholder="Ej: Presupuesto limitado · No se puede detener la operación · Plazo fijo..."></textarea></div>
+        <div class="risk-card"><label style="color:#4f98a3">Supuestos</label><textarea id="r-assumptions" placeholder="Ej: Se cuenta con apoyo del gerente · El equipo estará disponible al menos 4 hs/semana..."></textarea></div>
+        <div class="risk-card"><label style="color:#5fc97a">Beneficios esperados</label><textarea id="r-benefits" placeholder="Ej: Reducción de costos de re-entrega · Mayor satisfacción del cliente · Proceso replicable..."></textarea></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-head"><span class="card-icon">✍️</span><span class="card-title">Aprobaciones</span></div>
+    <div class="card-body">
+      <div class="sign-grid">
+        <div class="sign-box"><label>Líder del Proyecto</label><input id="s-leader" placeholder="Nombre"><input id="s-leader-date" type="date"><input id="s-leader-sign" placeholder="Confirmación"></div>
+        <div class="sign-box"><label>Patrocinador (Sponsor)</label><input id="s-sponsor" placeholder="Nombre"><input id="s-sponsor-date" type="date"><input id="s-sponsor-sign" placeholder="Confirmación"></div>
+        <div class="sign-box"><label>Responsable del Área</label><input id="s-area" placeholder="Nombre"><input id="s-area-date" type="date"><input id="s-area-sign" placeholder="Confirmación"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-head"><span class="card-icon">📝</span><span class="card-title">Notas y Observaciones</span></div>
+    <div class="card-body">
+      <div class="field"><textarea id="p-notes" placeholder="Observaciones adicionales, historial de cambios, aclaraciones..."></textarea></div>
+    </div>
+  </div>
+
+</div>
+<div class="toast" id="toast">✅ Guardado en caché</div>
+<script>
+const KEY='largotek_caso_negocio';
+const FIELDS=['p-title','p-area','p-leader','p-sponsor','p-start','p-end','p-method','p-status','p-problem','p-impact','p-scope-in','p-scope-out','p-goal','r-risks','r-constraints','r-assumptions','r-benefits','s-leader','s-leader-date','s-leader-sign','s-sponsor','s-sponsor-date','s-sponsor-sign','s-area','s-area-date','s-area-sign','p-notes'];
+function addKpi(d={}){
+  const tr=document.createElement('tr');
+  tr.innerHTML=`<td><input placeholder="Ej: % Entregas a tiempo" value="${d.kpi||''}" oninput="autoSave()"></td><td><input placeholder="Ej: 77%" value="${d.actual||''}" oninput="autoSave()"></td><td><input placeholder="Ej: >95%" value="${d.meta||''}" oninput="autoSave()"></td><td><input placeholder="Ej: 90 días" value="${d.plazo||''}" oninput="autoSave()"></td><td><select onchange="autoSave()"><option ${d.prio==='Alta'?'selected':''}>Alta</option><option ${d.prio==='Media'?'selected':''}>Media</option><option ${d.prio==='Baja'?'selected':''}>Baja</option></select></td><td><button class="del-btn" onclick="this.closest('tr').remove();autoSave()">✕</button></td>`;
+  document.getElementById('kpi-body').appendChild(tr);
+}
+function addTeam(d={}){
+  const tr=document.createElement('tr');
+  tr.innerHTML=`<td><input placeholder="Nombre completo" value="${d.name||''}" oninput="autoSave()"></td><td><input placeholder="Ej: Líder, Analista" value="${d.role||''}" oninput="autoSave()"></td><td><input placeholder="Ej: Supervisor Almacén" value="${d.area||''}" oninput="autoSave()"></td><td><input placeholder="Ej: 20%" value="${d.ded||''}" oninput="autoSave()"></td><td><button class="del-btn" onclick="this.closest('tr').remove();autoSave()">✕</button></td>`;
+  document.getElementById('team-body').appendChild(tr);
+}
+let saveTimer;
+function autoSave(){clearTimeout(saveTimer);saveTimer=setTimeout(saveLocal,1000);}
+function saveLocal(){
+  const d={fields:{},kpis:[],team:[]};
+  FIELDS.forEach(id=>{const el=document.getElementById(id);if(el)d.fields[id]=el.value;});
+  document.querySelectorAll('#kpi-body tr').forEach(tr=>{const i=tr.querySelectorAll('input,select');d.kpis.push({kpi:i[0]?.value,actual:i[1]?.value,meta:i[2]?.value,plazo:i[3]?.value,prio:i[4]?.value});});
+  document.querySelectorAll('#team-body tr').forEach(tr=>{const i=tr.querySelectorAll('input');d.team.push({name:i[0]?.value,role:i[1]?.value,area:i[2]?.value,ded:i[3]?.value});});
+  d.ts=new Date().toISOString();
+  localStorage.setItem(KEY,JSON.stringify(d));
+  const t=new Date().toLocaleTimeString('es-AR',{hour:'2-digit',minute:'2-digit'});
+  ['saved-lbl','saved-lbl2'].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent='✓ Guardado '+t;});
+  const toast=document.getElementById('toast');toast.classList.add('show');setTimeout(()=>toast.classList.remove('show'),2200);
+}
+function loadLocal(){
+  const raw=localStorage.getItem(KEY);if(!raw)return;
+  try{
+    const d=JSON.parse(raw);
+    FIELDS.forEach(id=>{const el=document.getElementById(id);if(el&&d.fields[id]!=null)el.value=d.fields[id];});
+    (d.kpis||[]).forEach(k=>addKpi(k));
+    (d.team||[]).forEach(t=>addTeam(t));
+    if(d.ts){const t=new Date(d.ts).toLocaleString('es-AR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});['saved-lbl','saved-lbl2'].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent='Último guardado: '+t;});}
+  }catch(e){}
+}
+function clearAll(){if(!confirm('¿Limpiar todo el Caso de Negocio?'))return;localStorage.removeItem(KEY);location.reload();}
+document.querySelectorAll('input,textarea,select').forEach(el=>el.addEventListener('input',autoSave));
+window.addEventListener('load',loadLocal);
+</script>
+<script src="branding.js"></script>
 </body>
 </html>
