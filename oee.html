@@ -1,17 +1,209 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>OEE Calculator — Largotek</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300..700&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/styles.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>OEE — Largotek</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300..700&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#0d1117;--surface:#161b22;--surface2:#21262d;--border:#30363d;--text:#e6edf3;--muted:#8b949e;--faint:#3d444d;--green:#5fc97a;--yellow:#e8c44a;--red:#f85149;--cyan:#4f98a3;--violet:#bc8cff;--radius:14px}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:13px 28px;border-bottom:1px solid var(--border);background:var(--surface)}
+.topbar-brand{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:var(--muted);text-decoration:none}.topbar-brand span{color:var(--green)}
+.topbar-right{display:flex;align-items:center;gap:8px}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:7px 15px;border-radius:8px;border:1.5px solid var(--border);background:transparent;color:var(--muted);font-size:12px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;transition:all .18s}.btn:hover{border-color:var(--green);color:var(--green)}.btn-primary{background:var(--green);color:#0b1b10;border-color:var(--green)}.btn-primary:hover{opacity:.88}.btn-danger:hover{border-color:var(--red);color:var(--red)}
+.hero{padding:32px 32px 20px;max-width:1040px;margin:0 auto}.hero-eye{font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--green);margin-bottom:8px}.hero h1{font-family:'Instrument Serif',serif;font-size:clamp(1.5rem,3vw,2.2rem);margin-bottom:6px}.hero-sub{font-size:13px;color:var(--muted);line-height:1.7}
+.wrap{max-width:1040px;margin:0 auto;padding:0 32px 80px}.saved-bar{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px}.saved-label{font-size:11px;color:var(--muted)}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:16px;overflow:hidden}.card-head{display:flex;align-items:center;gap:10px;padding:13px 18px;border-bottom:1px solid var(--faint);background:var(--surface2)}.card-title{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}.card-body{padding:16px 18px}
+.meta-grid,.input-grid,.factor-grid,.loss-grid{display:grid;gap:14px}.meta-grid{grid-template-columns:1fr 1fr 1fr}.input-grid{grid-template-columns:1fr 1fr 1fr 1fr}.factor-grid{grid-template-columns:1fr 1fr 1fr}.loss-grid{grid-template-columns:1fr 1fr}
+@media(max-width:900px){.input-grid{grid-template-columns:1fr 1fr}.factor-grid{grid-template-columns:1fr}.loss-grid{grid-template-columns:1fr}}@media(max-width:620px){.meta-grid,.input-grid{grid-template-columns:1fr}}
+.field{display:flex;flex-direction:column;gap:5px}.field label{font-size:10px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--muted)}.field input,.field textarea,.field select{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:9px 12px;font-size:13px;color:var(--text);font-family:'Inter',sans-serif;transition:border-color .18s;width:100%}.field textarea{resize:vertical;min-height:64px;line-height:1.65}.field input:focus,.field textarea:focus,.field select:focus{outline:none;border-color:var(--green)}.field-full{grid-column:1/-1}.hint{font-size:11px;color:var(--muted);line-height:1.5}
+.score-wrap{display:grid;grid-template-columns:1.2fr .8fr;gap:16px;margin-bottom:16px}@media(max-width:880px){.score-wrap{grid-template-columns:1fr}}
+.oee-main{background:linear-gradient(180deg,rgba(95,201,122,.08),rgba(95,201,122,.03));border:1px solid rgba(95,201,122,.2);border-radius:var(--radius);padding:18px 20px}.oee-main-top{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:12px}.oee-main-label{font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--green)}.oee-main-value{font-size:clamp(2.3rem,5vw,3.6rem);font-weight:800;line-height:1;margin-top:4px}.oee-band{font-size:13px;font-weight:700;margin-top:8px}.formula{font-size:12px;color:var(--muted)}
+.gauge{height:14px;background:#0f141b;border:1px solid var(--border);border-radius:99px;overflow:hidden;margin-top:16px}.gauge-fill{height:100%;width:0;background:linear-gradient(90deg,var(--red),var(--yellow),var(--green));transition:width .25s}
+.factor-card{border-radius:var(--radius);padding:16px;border:1px solid var(--border)}.factor-name{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;margin-bottom:6px}.factor-value{font-size:1.8rem;font-weight:800;margin-bottom:6px}.factor-desc{font-size:12px;color:var(--muted);line-height:1.55}.factor-formula{font-size:11px;color:var(--muted);margin-top:10px}
+.loss-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px}.loss-title{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:10px}.loss-row{display:flex;justify-content:space-between;gap:10px;padding:9px 0;border-top:1px solid var(--faint)}.loss-row:first-child{border-top:none}.loss-name{font-size:13px}.loss-val{font-size:13px;font-weight:700}.loss-note{font-size:11px;color:var(--muted);margin-top:10px;line-height:1.5}
+.conclusion{background:rgba(79,152,163,.08);border:1px solid rgba(79,152,163,.24);border-radius:var(--radius);padding:16px 18px}.conclusion label{font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--cyan);display:block;margin-bottom:8px}.conclusion textarea{width:100%;background:transparent;border:none;color:var(--text);font-family:'Inter',sans-serif;font-size:13px;line-height:1.65;resize:vertical;min-height:72px}.conclusion textarea:focus{outline:none}
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:#1e3a2e;border:1px solid var(--green);color:var(--green);padding:10px 22px;border-radius:99px;font-size:13px;font-weight:600;opacity:0;transition:all .3s;z-index:999;white-space:nowrap}.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+@media print{.topbar,.btn{display:none!important}body{background:#fff;color:#111}.card,.loss-card,.oee-main,.factor-card,.conclusion{border-color:#ccc;background:#fff}.field input,.field textarea,.conclusion textarea{background:#f9f9f9;color:#111}}
+</style>
 </head>
 <body>
-  <div id="app"></div>
-  <script src="js/oee.js"></script>
-  <script src="branding.js"></script>
+<div class="topbar">
+  <a href="index.html" class="topbar-brand">← <span>Largotek</span> Lean Suite</a>
+  <div class="topbar-right">
+    <span class="saved-label" id="saved-lbl"></span>
+    <button class="btn btn-danger" onclick="clearAll()">🗑 Limpiar</button>
+    <button class="btn" onclick="saveLocal()">💾 Guardar</button>
+    <button class="btn btn-primary" onclick="window.print()">🖨 PDF</button>
+  </div>
+</div>
+<div class="hero">
+  <div class="hero-eye">⚙️ OEE — Largotek Lean Suite</div>
+  <h1>OEE — Overall Equipment Effectiveness</h1>
+  <p class="hero-sub">Calculadora visual para medir la efectividad global de un equipo a partir de Disponibilidad, Rendimiento y Calidad. Ideal para producción, mantenimiento y mejora continua.</p>
+</div>
+<div class="wrap">
+  <div class="saved-bar"><div></div><span class="saved-label" id="saved-lbl2"></span></div>
+
+  <div class="card">
+    <div class="card-head"><span>🏷️</span><span class="card-title">Datos del análisis</span></div>
+    <div class="card-body meta-grid">
+      <div class="field"><label>Equipo / Línea</label><input id="m-equipo" placeholder="Ej: Envasadora Línea 2"></div>
+      <div class="field"><label>Área</label><input id="m-area" placeholder="Ej: Producción"></div>
+      <div class="field"><label>Fecha</label><input id="m-date" type="date"></div>
+      <div class="field field-full"><label>Observaciones</label><textarea id="m-notes" placeholder="Contexto del turno, incidencias, lote, producto, etc."></textarea></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-head"><span>🧮</span><span class="card-title">Entradas del cálculo</span></div>
+    <div class="card-body">
+      <div class="input-grid">
+        <div class="field"><label>Tiempo planificado (min)</label><input id="i-planned" type="number" min="0" placeholder="480"></div>
+        <div class="field"><label>Paradas no planificadas (min)</label><input id="i-downtime" type="number" min="0" placeholder="45"></div>
+        <div class="field"><label>Producción total (unid)</label><input id="i-total" type="number" min="0" placeholder="920"></div>
+        <div class="field"><label>Unidades buenas</label><input id="i-good" type="number" min="0" placeholder="890"></div>
+        <div class="field"><label>Tiempo ideal por pieza (seg)</label><input id="i-ideal" type="number" min="0" step="0.01" placeholder="0.45"></div>
+        <div class="field"><label>Scrap / defectuosas</label><input id="i-scrap" type="number" min="0" placeholder="30"></div>
+        <div class="field"><label>Microparadas (min)</label><input id="i-micro" type="number" min="0" placeholder="12"></div>
+        <div class="field"><label>Pérdida por velocidad (%)</label><input id="i-speedloss" type="number" min="0" max="100" step="0.1" placeholder="5"></div>
+      </div>
+      <p class="hint" style="margin-top:10px">Fórmulas usadas: Disponibilidad = Tiempo Operativo / Tiempo Planificado; Rendimiento = (Tiempo Ideal × Producción Total) / Tiempo Operativo; Calidad = Unidades Buenas / Producción Total; OEE = Disponibilidad × Rendimiento × Calidad.</p>
+    </div>
+  </div>
+
+  <div class="score-wrap">
+    <div class="oee-main">
+      <div class="oee-main-top">
+        <div>
+          <div class="oee-main-label">Resultado OEE</div>
+          <div class="oee-main-value" id="oee-val">0.0%</div>
+          <div class="oee-band" id="oee-band">Sin datos</div>
+        </div>
+        <div class="formula">OEE = A × P × Q</div>
+      </div>
+      <div class="gauge"><div class="gauge-fill" id="gauge-fill"></div></div>
+      <p class="hint" id="oee-text" style="margin-top:12px">Cargá datos para calcular el OEE del equipo.</p>
+    </div>
+
+    <div class="card" style="margin-bottom:0">
+      <div class="card-head"><span>📌</span><span class="card-title">Referencia rápida</span></div>
+      <div class="card-body" style="display:flex;flex-direction:column;gap:10px">
+        <div class="loss-row"><span class="loss-name">≥ 85%</span><span class="loss-val" style="color:var(--green)">Clase mundial</span></div>
+        <div class="loss-row"><span class="loss-name">60% – 84.9%</span><span class="loss-val" style="color:var(--yellow)">Oportunidad de mejora</span></div>
+        <div class="loss-row"><span class="loss-name">< 60%</span><span class="loss-val" style="color:var(--red)">Crítico</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="factor-grid">
+    <div class="factor-card" style="background:rgba(79,152,163,.08);border-color:rgba(79,152,163,.18)">
+      <div class="factor-name" style="color:var(--cyan)">Disponibilidad</div>
+      <div class="factor-value" id="a-val">0.0%</div>
+      <div class="factor-desc">Mide cuánto tiempo el equipo estuvo realmente operativo respecto al tiempo planificado.</div>
+      <div class="factor-formula" id="a-formula">Tiempo operativo: 0 min</div>
+    </div>
+    <div class="factor-card" style="background:rgba(232,196,74,.08);border-color:rgba(232,196,74,.18)">
+      <div class="factor-name" style="color:var(--yellow)">Rendimiento</div>
+      <div class="factor-value" id="p-val">0.0%</div>
+      <div class="factor-desc">Compara la velocidad real de producción contra la velocidad teórica ideal.</div>
+      <div class="factor-formula" id="p-formula">Tiempo ideal neto: 0 min</div>
+    </div>
+    <div class="factor-card" style="background:rgba(188,140,255,.08);border-color:rgba(188,140,255,.18)">
+      <div class="factor-name" style="color:var(--violet)">Calidad</div>
+      <div class="factor-value" id="q-val">0.0%</div>
+      <div class="factor-desc">Refleja qué proporción de lo producido salió bien a la primera, sin retrabajo ni scrap.</div>
+      <div class="factor-formula" id="q-formula">Buenas: 0 / 0</div>
+    </div>
+  </div>
+
+  <div class="loss-grid" style="margin-top:16px">
+    <div class="loss-card">
+      <div class="loss-title">Pérdidas del tiempo</div>
+      <div class="loss-row"><span class="loss-name">Tiempo operativo</span><span class="loss-val" id="loss-oper">0 min</span></div>
+      <div class="loss-row"><span class="loss-name">Paradas no planificadas</span><span class="loss-val" id="loss-down">0 min</span></div>
+      <div class="loss-row"><span class="loss-name">Microparadas</span><span class="loss-val" id="loss-micro">0 min</span></div>
+      <div class="loss-note">Usá este bloque para entender dónde se pierde disponibilidad y estabilidad del proceso.</div>
+    </div>
+    <div class="loss-card">
+      <div class="loss-title">Pérdidas de producción</div>
+      <div class="loss-row"><span class="loss-name">Unidades buenas</span><span class="loss-val" id="loss-good">0</span></div>
+      <div class="loss-row"><span class="loss-name">Defectuosas / scrap</span><span class="loss-val" id="loss-scrap">0</span></div>
+      <div class="loss-row"><span class="loss-name">Pérdida por velocidad</span><span class="loss-val" id="loss-speed">0%</span></div>
+      <div class="loss-note">Cuando el rendimiento cae, suele haber microparadas, esperas, desajustes, o velocidad inferior a la nominal.</div>
+    </div>
+  </div>
+
+  <div class="conclusion" style="margin-top:16px">
+    <label>🎯 Conclusión / Acciones sugeridas</label>
+    <textarea id="m-conclusion" placeholder="Ej: El principal driver de pérdida está en disponibilidad por paradas de cambio de formato. Priorizar SMED, checklist de arranque y mantenimiento autónomo."></textarea>
+  </div>
+</div>
+<div class="toast" id="toast">✅ Guardado en caché</div>
+<script>
+const KEY='largotek_oee';
+const FIELDS=['m-equipo','m-area','m-date','m-notes','i-planned','i-downtime','i-total','i-good','i-ideal','i-scrap','i-micro','i-speedloss','m-conclusion'];
+
+const n=v=>Math.max(0,parseFloat(v)||0);
+const pct=v=>(isFinite(v)?(v*100).toFixed(1):'0.0')+'%';
+
+function calc(){
+  const planned=n(val('i-planned'));
+  const downtime=n(val('i-downtime'));
+  const total=n(val('i-total'));
+  const good=n(val('i-good'));
+  const idealSec=n(val('i-ideal'));
+  const scrap=n(val('i-scrap'));
+  const micro=n(val('i-micro'));
+  const speedLoss=n(val('i-speedloss'))/100;
+
+  const operating=Math.max(0,planned-downtime);
+  const idealNetMin=(idealSec*total)/60;
+  let availability=planned>0?operating/planned:0;
+  let performance=operating>0?idealNetMin/operating:0;
+  if(speedLoss>0 && performance>0) performance=Math.max(0,performance*(1-speedLoss));
+  performance=Math.min(performance,1.2);
+  let quality=total>0?good/total:0;
+  if(!good && total>0 && scrap>0) quality=Math.max(0,(total-scrap)/total);
+  quality=Math.min(quality,1);
+  const oee=availability*performance*quality;
+
+  setText('a-val',pct(availability));
+  setText('p-val',pct(performance));
+  setText('q-val',pct(quality));
+  setText('oee-val',pct(oee));
+  setText('a-formula','Tiempo operativo: '+fmt(operating)+' min');
+  setText('p-formula','Tiempo ideal neto: '+fmt(idealNetMin)+' min');
+  setText('q-formula','Buenas: '+fmt(good||Math.max(0,total-scrap),0)+' / '+fmt(total,0));
+  setText('loss-oper',fmt(operating)+' min');
+  setText('loss-down',fmt(downtime)+' min');
+  setText('loss-micro',fmt(micro)+' min');
+  setText('loss-good',fmt(good||Math.max(0,total-scrap),0));
+  setText('loss-scrap',fmt(scrap,0));
+  setText('loss-speed',fmt(speedLoss*100,1)+'%');
+  document.getElementById('gauge-fill').style.width=Math.max(0,Math.min(100,oee*100))+'%';
+
+  let band='Sin datos', text='Cargá datos para calcular el OEE del equipo.';
+  if (planned>0 || total>0){
+    if (oee>=0.85){ band='Clase mundial'; text='El equipo muestra una efectividad muy alta. El foco pasa a sostener el estándar y atacar pérdidas menores.'; }
+    else if (oee>=0.60){ band='Oportunidad de mejora'; text='El proceso funciona, pero todavía tiene pérdidas relevantes. Revisá cuál de los tres factores está más bajo para priorizar acciones.'; }
+    else { band='Crítico'; text='La efectividad global es baja. Conviene intervenir primero sobre la mayor pérdida visible entre disponibilidad, rendimiento o calidad.'; }
+  }
+  const bandEl=document.getElementById('oee-band'); bandEl.textContent=band; bandEl.style.color=oee>=0.85?'var(--green)':oee>=0.60?'var(--yellow)':'var(--red)';
+  setText('oee-text',text);
+}
+function fmt(v,d=1){return (parseFloat(v)||0).toFixed(d).replace('.0','');}
+function val(id){return document.getElementById(id).value}
+function setText(id,t){document.getElementById(id).textContent=t}
+let timer; function autoSave(){clearTimeout(timer);timer=setTimeout(saveLocal,1000);calc();}
+function saveLocal(){const d={fields:{},ts:new Date().toISOString()};FIELDS.forEach(id=>{const el=document.getElementById(id);if(el)d.fields[id]=el.value});localStorage.setItem(KEY,JSON.stringify(d));const t=new Date().toLocaleTimeString('es-AR',{hour:'2-digit',minute:'2-digit'});['saved-lbl','saved-lbl2'].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent='✓ Guardado '+t});const toast=document.getElementById('toast');toast.classList.add('show');setTimeout(()=>toast.classList.remove('show'),2200)}
+function loadLocal(){const raw=localStorage.getItem(KEY);if(!raw){calc();return;}try{const d=JSON.parse(raw);FIELDS.forEach(id=>{const el=document.getElementById(id);if(el&&d.fields[id]!=null)el.value=d.fields[id]});if(d.ts){const t=new Date(d.ts).toLocaleString('es-AR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});['saved-lbl','saved-lbl2'].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent='Último guardado: '+t})}}catch(e){}calc()}
+function clearAll(){if(!confirm('¿Limpiar el análisis OEE?'))return;localStorage.removeItem(KEY);location.reload()}
+document.querySelectorAll('input,textarea,select').forEach(el=>el.addEventListener('input',autoSave));window.addEventListener('load',loadLocal);
+</script>
+<script src="branding.js"></script>
 </body>
 </html>
