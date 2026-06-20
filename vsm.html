@@ -79,8 +79,12 @@
           <div class="kpi-card" id="kpi-bn"><div class="kpi-label">Cuello botella</div><div class="kpi-value">&mdash;</div><div class="kpi-unit">proceso</div></div>
           <div class="kpi-card" id="kpi-avail"><div class="kpi-label">Capacidad BN</div><div class="kpi-value">&mdash;</div><div class="kpi-unit">u/día</div></div>
         </div>
-        <div style="font-size:11px;color:var(--text-muted);margin-bottom:8px;font-weight:700">TIMELINE DE VALOR</div>
-        <div class="timeline-wrap"><div id="timeline-content" style="display:flex;height:24px"></div></div>
+
+        <!-- TIMELINE SCROLLEABLE -->
+        <div style="font-size:11px;color:var(--text-muted);margin-bottom:6px;font-weight:700">TIMELINE DE VALOR</div>
+        <div class="timeline-scroll-wrap">
+          <div id="timeline-content"></div>
+        </div>
         <div class="timeline-legend">
           <span><span class="tl-dot" style="background:rgba(63,185,80,.7)"></span>VA</span>
           <span><span class="tl-dot" style="background:rgba(248,81,73,.7)"></span>NVA</span>
@@ -119,12 +123,15 @@
         <pre id="sim-log" style="margin-bottom:14px">Agrega procesos al canvas y presiona CALCULAR.</pre>
 
         <div style="font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--text-muted);margin-bottom:8px;border-top:1px solid var(--border);padding-top:12px">&#127910; Animación de Flujo</div>
-        <div style="display:flex;align-items:center;gap:6px;margin-bottom:10px">
+        <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px;flex-wrap:wrap">
           <span style="font-size:11px;color:var(--text-muted);width:60px">Velocidad</span>
-          <button class="btn speed-btn active" data-speed="1" onclick="setAnimSpeed(1)">1X</button>
-          <button class="btn speed-btn" data-speed="2" onclick="setAnimSpeed(2)">2X</button>
-          <button class="btn speed-btn" data-speed="5" onclick="setAnimSpeed(5)">5X</button>
-          <button class="btn speed-btn" data-speed="10" onclick="setAnimSpeed(10)">10X</button>
+          <button class="btn speed-btn active" data-speed="1"   onclick="setAnimSpeed(1)">1X</button>
+          <button class="btn speed-btn"        data-speed="2"   onclick="setAnimSpeed(2)">2X</button>
+          <button class="btn speed-btn"        data-speed="5"   onclick="setAnimSpeed(5)">5X</button>
+          <button class="btn speed-btn"        data-speed="10"  onclick="setAnimSpeed(10)">10X</button>
+          <button class="btn speed-btn"        data-speed="25"  onclick="setAnimSpeed(25)">25X</button>
+          <button class="btn speed-btn"        data-speed="100" onclick="setAnimSpeed(100)">100X</button>
+          <button class="btn speed-btn"        data-speed="400" onclick="setAnimSpeed(400)">400X</button>
         </div>
         <div style="display:flex;gap:6px;margin-bottom:10px">
           <button class="btn btn-accent" id="btn-anim-start" onclick="startAnimation()" style="flex:1">&#9654; Iniciar</button>
@@ -154,7 +161,7 @@
   </div>
 </div>
 
-<!-- REPORT OVERLAY — id="report-overlay" requerido por report.js -->
+<!-- REPORT OVERLAY -->
 <div id="report-overlay" class="hidden" onclick="closeReport(event)">
   <div class="report-modal" onclick="event.stopPropagation()">
     <div class="report-header">
@@ -172,7 +179,7 @@
   </div>
 </div>
 
-<!-- SCRIPTS: orden estricto -->
+<!-- SCRIPTS -->
 <script src="js/nodes.js"></script>
 <script src="js/canvas.js"></script>
 <script src="js/ui.js"></script>

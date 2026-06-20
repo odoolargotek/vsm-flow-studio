@@ -31,7 +31,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);heigh
 .btn.btn-danger{color:var(--danger);border-color:transparent}
 .btn.btn-danger:hover{border-color:var(--danger);background:rgba(248,81,73,.1)}
 .topbar-sep{width:1px;height:22px;background:var(--border);flex-shrink:0}
-.speed-btn{padding:4px 10px;font-size:11px}
+.speed-btn{padding:4px 8px;font-size:11px}
 .speed-btn.active{border-color:var(--accent);color:var(--accent);background:rgba(88,166,255,.15)}
 
 /* LAYOUT */
@@ -114,14 +114,53 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);heigh
 .kpi-value.warn{color:var(--danger)}.kpi-value.ok{color:var(--warning)}.kpi-value.good{color:var(--success)}
 .kpi-unit{font-size:10px;color:var(--text-muted);margin-top:2px}
 
-/* TIMELINE */
-.timeline-wrap{overflow-x:auto;margin-bottom:12px}
-.tl-seg{height:24px;display:inline-flex;align-items:center;justify-content:center;overflow:hidden;min-width:4px;flex-shrink:0}
+/* TIMELINE SCROLLEABLE — una fila por proceso */
+.timeline-scroll-wrap{
+  max-height:180px;
+  overflow-y:auto;
+  overflow-x:hidden;
+  margin-bottom:8px;
+  border:1px solid var(--border);
+  border-radius:8px;
+  background:var(--surface2);
+  padding:6px 8px;
+}
+#timeline-content{
+  display:flex;
+  flex-direction:column;
+  gap:4px;
+}
+.tl-row{
+  display:flex;
+  align-items:center;
+  gap:6px;
+  height:22px;
+}
+.tl-row-label{
+  font-size:9px;
+  color:var(--text-muted);
+  width:72px;
+  flex-shrink:0;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  text-align:right;
+}
+.tl-row-bar{
+  display:flex;
+  flex:1;
+  height:100%;
+  border-radius:4px;
+  overflow:hidden;
+  background:rgba(255,255,255,.04);
+}
+/* segmentos (los mismos colores que antes) */
+.tl-seg{display:flex;align-items:center;justify-content:center;overflow:hidden;min-width:3px;height:100%}
 .tl-va{background:rgba(63,185,80,.7)}.tl-nva{background:rgba(248,81,73,.5)}
 .tl-nva-proc{background:rgba(248,81,73,.7)}.tl-inv{background:rgba(210,153,34,.6)}
 .tl-batch{background:rgba(188,140,255,.5)}
 .tl-label{font-size:9px;color:#fff;font-weight:700;white-space:nowrap;padding:0 3px;overflow:hidden}
-.timeline-legend{display:flex;gap:10px;margin-top:6px;font-size:10px;color:var(--text-muted)}
+.timeline-legend{display:flex;gap:10px;margin-bottom:12px;font-size:10px;color:var(--text-muted);flex-wrap:wrap}
 .tl-dot{width:8px;height:8px;border-radius:2px;display:inline-block;margin-right:3px}
 
 /* PROCESS LIST */
@@ -167,10 +206,10 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);heigh
 .prop-calc{font-size:11px;color:var(--text-muted);background:rgba(88,166,255,.06);border:1px solid rgba(88,166,255,.15);border-radius:6px;padding:10px 12px;line-height:1.8}
 .prop-calc span{color:var(--accent);font-weight:600}
 
-/* REPORT OVERLAY — empieza justo debajo del topbar */
+/* REPORT OVERLAY */
 #report-overlay{
   position:fixed;
-  top:var(--topbar-h);   /* se actualiza en JS al abrir */
+  top:var(--topbar-h);
   left:0;right:0;bottom:0;
   background:rgba(0,0,0,.72);
   z-index:200;
@@ -186,7 +225,6 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);heigh
   border:1px solid var(--border);
   border-radius:var(--radius);
   width:min(860px,97vw);
-  /* altura máxima = area disponible menos el padding */
   max-height:calc(100vh - var(--topbar-h) - 48px);
   display:flex;
   flex-direction:column;

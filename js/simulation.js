@@ -10,7 +10,6 @@ function runSimulation() {
   const hoursDay    = parseFloat(document.getElementById('sim-hours').value)  || 8;
   const taktTime    = (hoursDay * 3600) / demand;
 
-  // ── per-process metrics ──
   const procData = procs.map(node => {
     const p          = node.props;
     const ct         = sampleCT(p);
@@ -23,14 +22,11 @@ function runSimulation() {
     const coSec      = (p.co || 0) * 60;
     const availSec   = hours * shifts * 3600 * uptime;
     const netCT      = ct / uptime;
-    const capacity   = availSec / ct;                   // u/day
+    const capacity   = availSec / ct;
     const saturation = (netCT / taktTime) * 100;
     const batchDelay = (batchSize - 1) * ct;
-
-    // Resource utilization — uses resourceCT if set, else ct
     const resCT      = (p.resourceName && p.resourceCT > 0) ? p.resourceCT : ct;
-    const resUtil    = (resCT / ct) * 100;  // % of process time the resource is active
-
+    const resUtil    = (resCT / ct) * 100;
     return { node, p, ct, netCT, capacity, saturation, batchDelay, defRate, coSec, availSec, ops, batchSize, resCT, resUtil };
   });
 
@@ -38,10 +34,8 @@ function runSimulation() {
   const totalVA       = procData.filter(d => d.p.isVA !== false).reduce((s,d) => s + d.ct, 0);
   const totalBatch    = procData.reduce((s,d) => s + d.batchDelay, 0);
 
-  // Lead time from arrows (transport) + process times + batch delays
   const transportTotal = arrows.reduce((s,a) => {
     if (a.fromId && a.toId && a.transportDays != null) {
-      // For gate arrows, weight by splitPct
       const fromNode = getNode(a.fromId);
       const pct = (fromNode && fromNode.type === 'gate' && a.splitPct != null)
         ? (a.splitPct / 100) : 1;
@@ -54,11 +48,9 @@ function runSimulation() {
   const leadTimeDays    = leadTimeSec / (8 * 3600);
   const pce             = totalVA > 0 ? (totalVA / leadTimeSec) * 100 : 0;
 
-  // ── WIP from inventory nodes ──
   const invNodes    = getInventoriesOrdered();
   const totalWIP    = invNodes.reduce((s,n) => s + (n.props.units || 0), 0);
 
-  // ── update KPIs ──
   setKPI('kpi-takt',  taktTime.toFixed(1) + ' s',  taktTime < 30 ? 'warn' : '');
   setKPI('kpi-lt',    leadTimeDays.toFixed(3) + ' d', '');
   setKPI('kpi-pt',    (processTotalSec/3600).toFixed(2) + ' h', '');
@@ -66,7 +58,6 @@ function runSimulation() {
   setKPI('kpi-bn',    bottleneck.p.label,  'warn');
   setKPI('kpi-avail', (bottleneck.capacity).toFixed(0) + ' u/d', '');
 
-  // ── process list ──
   const pl = document.getElementById('process-list');
   pl.innerHTML = '';
   procData.forEach(d => {
@@ -88,10 +79,8 @@ function runSimulation() {
     pl.appendChild(row);
   });
 
-  // ── Value Stream Timeline ──
   buildTimeline(procData, transportTotal, leadTimeSec);
 
-  // ── Save scenario ──
   scenarios.push({
     label: `Escenario ${scenarios.length + 1}`,
     takt: taktTime, lt: leadTimeDays, pce,
@@ -130,48 +119,56 @@ function setKPI(id, val, cls) {
   v.className = 'kpi-value' + (cls ? ' ' + cls : '');
 }
 
-function buildTimeline(procData, transportDays, leadTimeSec) {
+// TIMELINE — una fila por proceso/transporte con label + barra
+function buildTimeline(procData, transportTotal, leadTimeSec) {
   const container = document.getElementById('timeline-content');
   container.innerHTML = '';
   const totalSec = leadTimeSec || 1;
 
-  let cursor = 0;
   procData.forEach((d, i) => {
-    // transport before this process
+    // Transporte previo a este proceso
     const transportArrow = arrows.find(a => a.toId === d.node.id && getNode(a.fromId)?.type !== 'gate');
-    const transDays = transportArrow ? (transportArrow.transportDays || 0) : (i === 0 ? 0 : 0.5);
+    const transDays = transportArrow ? (transportArrow.transportDays || 0) : (i === 0 ? 0 : 0);
     const transSec  = transDays * 8 * 3600;
 
     if (transSec > 0) {
-      const w = Math.max(1, (transSec / totalSec) * 100);
-      const seg = document.createElement('div');
-      seg.className = 'tl-seg tl-nva';
-      seg.style.width = w + '%';
-      seg.title = `Transporte/Espera: ${transDays}d`;
-      seg.innerHTML = `<span class="tl-label">${transDays}d</span>`;
-      container.appendChild(seg);
-      cursor += transSec;
+      const row = document.createElement('div');
+      row.className = 'tl-row';
+      const w = Math.max(2, (transSec / totalSec) * 100);
+      row.innerHTML = `
+        <div class="tl-row-label">→ ${transDays}d</div>
+        <div class="tl-row-bar">
+          <div class="tl-seg tl-nva" style="width:${w}%" title="Transporte: ${transDays}d"></div>
+        </div>`;
+      container.appendChild(row);
     }
 
-    // batch delay before process
+    // Lote delay
     if (d.batchDelay > 0) {
-      const bw = Math.max(1, (d.batchDelay / totalSec) * 100);
-      const bseg = document.createElement('div');
-      bseg.className = 'tl-seg tl-batch';
-      bseg.style.width = bw + '%';
-      bseg.title = `Espera de lote: ${d.batchDelay.toFixed(0)}s`;
-      bseg.innerHTML = `<span class="tl-label">L×${d.batchSize}</span>`;
-      container.appendChild(bseg);
-      cursor += d.batchDelay;
+      const row = document.createElement('div');
+      row.className = 'tl-row';
+      const w = Math.max(2, (d.batchDelay / totalSec) * 100);
+      row.innerHTML = `
+        <div class="tl-row-label">×${d.batchSize} lote</div>
+        <div class="tl-row-bar">
+          <div class="tl-seg tl-batch" style="width:${w}%" title="Lote delay: ${d.batchDelay.toFixed(0)}s"></div>
+        </div>`;
+      container.appendChild(row);
     }
 
-    const w = Math.max(1, (d.netCT / totalSec) * 100);
-    const seg = document.createElement('div');
-    seg.className = 'tl-seg ' + (d.p.isVA !== false ? 'tl-va' : 'tl-nva-proc');
-    seg.style.width = w + '%';
-    seg.title = `${d.p.label}: CT ${d.ct.toFixed(1)}s | Sat ${d.saturation.toFixed(0)}%`;
-    seg.innerHTML = `<span class="tl-label">${d.p.label.substring(0,8)} ${d.netCT.toFixed(0)}s${d.batchSize>1?' ×'+d.batchSize:''}</span>`;
-    container.appendChild(seg);
-    cursor += d.netCT;
+    // Proceso
+    const row = document.createElement('div');
+    row.className = 'tl-row';
+    const w = Math.max(2, (d.netCT / totalSec) * 100);
+    const cls = d.p.isVA !== false ? 'tl-va' : 'tl-nva-proc';
+    const label = d.p.label.substring(0, 10);
+    row.innerHTML = `
+      <div class="tl-row-label" title="${d.p.label}">${label}</div>
+      <div class="tl-row-bar">
+        <div class="tl-seg ${cls}" style="width:${w}%" title="${d.p.label}: CT ${d.ct.toFixed(1)}s | Sat ${d.saturation.toFixed(0)}%">
+          <span class="tl-label">${d.netCT.toFixed(0)}s ${d.saturation.toFixed(0)}%</span>
+        </div>
+      </div>`;
+    container.appendChild(row);
   });
 }
