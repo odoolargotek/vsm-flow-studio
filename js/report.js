@@ -18,9 +18,14 @@ function saveReportData(data) {
 
 function openReport() {
   if (!_lastReport) {
-    alert('⚠ Primero presiona ▶ CALCULAR para generar los datos.');
+    alert('\u26a0 Primero presiona \u25ba CALCULAR para generar los datos.');
     return;
   }
+  // Medir topbar real en este momento (funciona aunque haya crecido por wrap)
+  const tb = document.querySelector('.topbar');
+  const tbH = tb ? tb.getBoundingClientRect().height : 52;
+  document.documentElement.style.setProperty('--topbar-h', tbH + 'px');
+
   document.getElementById('report-body').innerHTML = buildDashboardHTML(_lastReport);
   document.getElementById('report-overlay').classList.remove('hidden');
 }
@@ -30,7 +35,7 @@ function closeReport(e) {
   document.getElementById('report-overlay').classList.add('hidden');
 }
 
-// ─ MAIN ────────────────────────────────────────────────────────────
+// ─ MAIN ────────────────────────────────────────────────────────
 function buildDashboardHTML(d) {
   return `<div class="db-root">
     ${buildScoreboard(d)}
@@ -43,22 +48,22 @@ function buildDashboardHTML(d) {
   </div>`;
 }
 
-// ─ 1. SCOREBOARD ────────────────────────────────────────────────────
+// ─ 1. SCOREBOARD ────────────────────────────────────────────
 function buildScoreboard(d) {
   const scRows = Object.entries(_scenarios).map(([name, sd]) => `
     <tr class="${name===_baselineKey?'sc-baseline':'sc-scenario'}">
-      <td>${name===_baselineKey?'🟦':'🟩'} ${name}</td>
+      <td>${name===_baselineKey?'\ud83d\udfe6':'\ud83d\udfe9'} ${name}</td>
       <td class="sc-num">${sd.ltMean.toFixed(3)} d</td>
       <td class="sc-num">${sd.taktTime.toFixed(1)} s</td>
       <td class="sc-num">${sd.pceMean.toFixed(1)}%</td>
       <td class="sc-num">${fmtTime(sd.totalVASec)}</td>
       <td class="sc-num">${sd.demand} u/d</td>
-      <td class="sc-num ${sd.pceMean>=35?'sc-ok':'sc-warn'}">${sd.pceMean>=60?'★ Óptimo':sd.pceMean>=35?'✔ Moderado':sd.pceMean>=15?'⚠ Mejorar':'🔴 Crítico'}</td>
+      <td class="sc-num ${sd.pceMean>=35?'sc-ok':'sc-warn'}">${sd.pceMean>=60?'\u2605 \u00d3ptimo':sd.pceMean>=35?'\u2714 Moderado':sd.pceMean>=15?'\u26a0 Mejorar':'\ud83d\udd34 Cr\u00edtico'}</td>
     </tr>`).join('');
 
   return `
   <div class="db-panel" id="db-scoreboard">
-    <div class="db-panel-title">🏆 Scoreboard — Comparativo de Escenarios</div>
+    <div class="db-panel-title">\ud83c\udfc6 Scoreboard — Comparativo de Escenarios</div>
     <table class="db-table sc-table">
       <thead><tr>
         <th>Escenario</th><th>Lead Time</th><th>Takt Time</th>
@@ -66,11 +71,11 @@ function buildScoreboard(d) {
       </tr></thead>
       <tbody>${scRows}</tbody>
     </table>
-    <div class="db-note">ℹ️ Cada CALCULAR guarda un nuevo escenario automáticamente para comparar.</div>
+    <div class="db-note">\u2139\ufe0f Cada CALCULAR guarda un nuevo escenario autom\u00e1ticamente para comparar.</div>
   </div>`;
 }
 
-// ─ 2. ENTITY STATES ────────────────────────────────────────────────
+// ─ 2. ENTITY STATES ──────────────────────────────────────────
 function buildEntityStates() {
   const rows = Object.entries(_scenarios).map(([name, sd]) => {
     const wipSec = sd.wipDays * sd.availSec;
@@ -96,7 +101,7 @@ function buildEntityStates() {
 
   return `
   <div class="db-panel">
-    <div class="db-panel-title">📦 Entity States — Distribución de Tiempo (Work Unit)</div>
+    <div class="db-panel-title">\ud83d\udce6 Entity States — Distribuci\u00f3n de Tiempo (Work Unit)</div>
     <div class="db-legend">
       <span class="seg-va-txt">■ Valor Agregado (VA)</span>
       <span class="seg-nva-txt">■ No VA (Transporte/Espera)</span>
@@ -106,7 +111,7 @@ function buildEntityStates() {
   </div>`;
 }
 
-// ─ 3. SINGLE CAPACITY ACTIVITY STATES ─────────────────────────────
+// ─ 3. SINGLE CAPACITY ACTIVITY STATES ─────────────────────────
 function buildActivityStates(d) {
   const allLabels = d.procResults.map(p => p.label);
   const allSc     = Object.entries(_scenarios);
@@ -138,7 +143,7 @@ function buildActivityStates(d) {
 
   return `
   <div class="db-panel">
-    <div class="db-panel-title">⚙️ Single Capacity Activity States — Uso por Proceso</div>
+    <div class="db-panel-title">\u2699\ufe0f Single Capacity Activity States — Uso por Proceso</div>
     <div class="db-legend">
       <span class="seg-op-txt">■ % Operando</span>
       <span class="seg-idle-txt">■ % Idle</span>
@@ -149,7 +154,7 @@ function buildActivityStates(d) {
   </div>`;
 }
 
-// ─ 4. RESOURCE STATES ──────────────────────────────────────────────
+// ─ 4. RESOURCE STATES ──────────────────────────────────────────
 function buildResourceStates(d) {
   const totalOps = d.procResults.reduce((s, p) => s + (p.operators||1), 0);
   if (!totalOps) return '';
@@ -161,7 +166,7 @@ function buildResourceStates(d) {
     <div class="db-bar-row">
       <div class="db-bar-label">${p.label} <span class="sc-tag">(${p.operators} op.)</span></div>
       <div class="db-bar-track">
-        <div class="db-bar-seg seg-op"   style="width:${util.toFixed(1)}%" title="Utilización ${util.toFixed(1)}%"></div>
+        <div class="db-bar-seg seg-op"   style="width:${util.toFixed(1)}%" title="Utilizaci\u00f3n ${util.toFixed(1)}%"></div>
         <div class="db-bar-seg seg-idle" style="width:${idle.toFixed(1)}%" title="Libre ${idle.toFixed(1)}%"></div>
       </div>
       <div class="db-bar-pct">${util.toFixed(0)}%</div>
@@ -170,7 +175,7 @@ function buildResourceStates(d) {
 
   return `
   <div class="db-panel">
-    <div class="db-panel-title">👷 Resource States — Utilización de Operadores</div>
+    <div class="db-panel-title">\ud83d\udc77 Resource States — Utilizaci\u00f3n de Operadores</div>
     <div class="db-legend">
       <span class="seg-op-txt">■ % Utilizando</span>
       <span class="seg-idle-txt">■ % Libre</span>
@@ -179,7 +184,7 @@ function buildResourceStates(d) {
   </div>`;
 }
 
-// ─ 5. WIP BUFFER STATES ────────────────────────────────────────────
+// ─ 5. WIP BUFFER STATES ────────────────────────────────────────
 function buildWIPStates(d) {
   if (!d.wipStats.length) return '';
   const allSc = Object.entries(_scenarios);
@@ -196,7 +201,7 @@ function buildWIPStates(d) {
       <div class="db-bar-row">
         <div class="db-bar-label">${w.label} Input Buffer <span class="sc-tag">(${name})</span></div>
         <div class="db-bar-track">
-          <div class="db-bar-seg seg-idle" style="width:${emptyPct.toFixed(1)}%" title="Vacío ${emptyPct.toFixed(1)}%"></div>
+          <div class="db-bar-seg seg-idle" style="width:${emptyPct.toFixed(1)}%" title="Vac\u00edo ${emptyPct.toFixed(1)}%"></div>
           <div class="db-bar-seg seg-wip"  style="width:${fullPct.toFixed(1)}%"  title="Ocupado ${fullPct.toFixed(1)}%"></div>
         </div>
         <div class="db-bar-pct">${wsd.units} u / ${wsd.days.toFixed(2)}d</div>
@@ -206,22 +211,22 @@ function buildWIPStates(d) {
 
   return `
   <div class="db-panel">
-    <div class="db-panel-title">📊 Multiple Capacity Activity States — Buffers WIP</div>
+    <div class="db-panel-title">\ud83d\udcca Multiple Capacity Activity States — Buffers WIP</div>
     <div class="db-legend">
-      <span class="seg-idle-txt">■ Vacío</span>
+      <span class="seg-idle-txt">■ Vac\u00edo</span>
       <span class="seg-wip-txt">■ Ocupado (WIP)</span>
     </div>
     ${rows}
   </div>`;
 }
 
-// ─ 6. PROCESS DETAIL ───────────────────────────────────────────────
+// ─ 6. PROCESS DETAIL ────────────────────────────────────────────
 function buildProcessDetail(d) {
   const rows = d.procResults.map(p => {
     const sat      = p.netCT / d.taktTime * 100;
     const satClass = sat > 100 ? 'sc-warn' : sat > 80 ? 'sc-warn80' : 'sc-ok';
-    const batchBadge = p.batchSize > 1 ? `<span class="db-badge db-badge-blue">×${p.batchSize} lote</span>` : '';
-    const bnBadge    = p.isBn ? '<span class="db-badge db-badge-red">🔴 CUELLO</span>' : '';
+    const batchBadge = p.batchSize > 1 ? `<span class="db-badge db-badge-blue">\u00d7${p.batchSize} lote</span>` : '';
+    const bnBadge    = p.isBn ? '<span class="db-badge db-badge-red">\ud83d\udd34 CUELLO</span>' : '';
     return `
     <tr>
       <td>${p.label} ${bnBadge}${batchBadge}</td>
@@ -232,16 +237,16 @@ function buildProcessDetail(d) {
       <td class="sc-num">${p.uptime}%</td>
       <td class="sc-num">${p.operators}</td>
       <td class="sc-num">${p.defectRate}%</td>
-      <td class="sc-num">${p.isVA ? '<span class="sc-ok">✅ VA</span>' : '<span class="sc-warn">❌ NVA</span>'}</td>
+      <td class="sc-num">${p.isVA ? '<span class="sc-ok">\u2705 VA</span>' : '<span class="sc-warn">\u274c NVA</span>'}</td>
     </tr>`;
   }).join('');
 
   return `
   <div class="db-panel">
-    <div class="db-panel-title">📄 Detalle de Procesos</div>
+    <div class="db-panel-title">\ud83d\udcc4 Detalle de Procesos</div>
     <table class="db-table">
       <thead><tr>
-        <th>Proceso</th><th>CT Medio</th><th>CT Neto</th><th>Saturación</th>
+        <th>Proceso</th><th>CT Medio</th><th>CT Neto</th><th>Saturaci\u00f3n</th>
         <th>Capacidad</th><th>Uptime</th><th>Ops.</th><th>Defectos</th><th>Tipo</th>
       </tr></thead>
       <tbody>${rows}</tbody>
@@ -249,33 +254,33 @@ function buildProcessDetail(d) {
   </div>`;
 }
 
-// ─ 7. OPPORTUNITIES ────────────────────────────────────────────────
+// ─ 7. OPPORTUNITIES ────────────────────────────────────────────
 function buildOpportunities(d) {
   const fp  = v => v.toFixed(1) + '%';
   const opps = [];
 
-  if (d.pceMean < 15)       opps.push({ icon:'🔴', cls:'opp-critical', text:`PCE crítico (${fp(d.pceMean)}). El ${fp(100-d.pceMean)} del tiempo es desperdicio puro.` });
-  else if (d.pceMean < 35)  opps.push({ icon:'⚠️', cls:'opp-warn',     text:`PCE bajo (${fp(d.pceMean)}). Objetivo recomendado: >35%.` });
-  else                       opps.push({ icon:'✅', cls:'opp-ok',       text:`PCE aceptable (${fp(d.pceMean)}). Busca mejoras incrementales.` });
+  if (d.pceMean < 15)       opps.push({ icon:'\ud83d\udd34', cls:'opp-critical', text:`PCE cr\u00edtico (${fp(d.pceMean)}). El ${fp(100-d.pceMean)} del tiempo es desperdicio puro.` });
+  else if (d.pceMean < 35)  opps.push({ icon:'\u26a0\ufe0f', cls:'opp-warn',     text:`PCE bajo (${fp(d.pceMean)}). Objetivo recomendado: >35%.` });
+  else                       opps.push({ icon:'\u2705', cls:'opp-ok',       text:`PCE aceptable (${fp(d.pceMean)}). Busca mejoras incrementales.` });
 
   d.procResults.filter(p => p.netCT > d.taktTime).forEach(p =>
-    opps.push({ icon:'🔴', cls:'opp-critical', text:`Sobrecarga: "${p.label}" CT neto ${p.netCT.toFixed(1)}s > Takt ${d.taktTime.toFixed(1)}s.` })
+    opps.push({ icon:'\ud83d\udd34', cls:'opp-critical', text:`Sobrecarga: "${p.label}" CT neto ${p.netCT.toFixed(1)}s > Takt ${d.taktTime.toFixed(1)}s.` })
   );
   d.arrowStats.filter(a => a.days >= 1).forEach(a =>
-    opps.push({ icon:'⏳', cls:'opp-warn', text:`Transporte largo: ${a.from}→${a.to} tarda ${a.days.toFixed(1)} días (NVA).` })
+    opps.push({ icon:'\u23f3', cls:'opp-warn', text:`Transporte largo: ${a.from}\u2192${a.to} tarda ${a.days.toFixed(1)} d\u00edas (NVA).` })
   );
   d.wipStats.filter(w => w.days >= 2).forEach(w =>
-    opps.push({ icon:'📦', cls:'opp-warn', text:`WIP alto en "${w.label}": ${w.units} u = ${w.days.toFixed(1)} días.` })
+    opps.push({ icon:'\ud83d\udce6', cls:'opp-warn', text:`WIP alto en "${w.label}": ${w.units} u = ${w.days.toFixed(1)} d\u00edas.` })
   );
   d.procResults.filter(p => p.defectRate > 2).forEach(p =>
-    opps.push({ icon:'⚠️', cls:'opp-warn', text:`Defectos en "${p.label}": ${p.defectRate}%.` })
+    opps.push({ icon:'\u26a0\ufe0f', cls:'opp-warn', text:`Defectos en "${p.label}": ${p.defectRate}%.` })
   );
   if (opps.every(o => o.cls === 'opp-ok'))
-    opps.push({ icon:'⭐', cls:'opp-ok', text:'¡No se detectaron desperdicios críticos! Excelente VSM.' });
+    opps.push({ icon:'\u2b50', cls:'opp-ok', text:'\u00a1No se detectaron desperdicios cr\u00edticos! Excelente VSM.' });
 
   return `
   <div class="db-panel">
-    <div class="db-panel-title">💡 Oportunidades de Mejora Lean</div>
+    <div class="db-panel-title">\ud83d\udca1 Oportunidades de Mejora Lean</div>
     <div class="db-opps">
       ${opps.map(o => `<div class="db-opp ${o.cls}"><span class="db-opp-icon">${o.icon}</span><span>${o.text}</span></div>`).join('')}
     </div>
