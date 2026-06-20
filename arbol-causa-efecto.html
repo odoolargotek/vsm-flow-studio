@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Árbol Causa-Efecto — Largotek</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300..700&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0d1117;--surface:#161b22;--surface2:#21262d;
+  --border:#30363d;--border2:#3d444d;
+  --text:#e6edf3;--text-muted:#8b949e;--text-faint:#484f58;
+  --accent:#58a6ff;--success:#3fb950;--warning:#d29922;--danger:#f85149;
+  --c-effect:#bc8cff;--c-problem:#f85149;--c-cause:#d29922;--c-root:#58a6ff;
+  --radius:10px;--topbar-h:52px;
+}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);height:100vh;overflow:hidden;display:flex;flex-direction:column}
+
+/* TOPBAR */
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:10px 20px;background:var(--surface);border-bottom:1px solid var(--border);flex-shrink:0;gap:8px;flex-wrap:wrap}
+.topbar-brand{font-family:'Instrument Serif',serif;font-size:1.1rem;color:var(--accent)}
+.topbar-brand small{font-family:'Inter',sans-serif;font-size:11px;color:var(--text-muted);font-style:normal}
+.topbar-actions{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.btn{display:inline-flex;align-items:center;gap:5px;padding:6px 13px;border-radius:7px;border:1.5px solid var(--border);background:transparent;color:var(--text-muted);font-size:12px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;transition:all .15s;white-space:nowrap}
+.btn:hover{border-color:var(--accent);color:var(--accent)}
+.btn.active,.btn.btn-accent{background:var(--accent);color:#fff;border-color:var(--accent)}
+.btn.btn-accent:hover{opacity:.88}
+.btn.btn-danger{color:var(--danger);border-color:transparent}
+.btn.btn-danger:hover{border-color:var(--danger);background:rgba(248,81,73,.1)}
+.sep{width:1px;height:22px;background:var(--border);flex-shrink:0}
+
+/* LAYOUT */
+.app-body{display:flex;flex:1;overflow:hidden}
+
+/* LEFT PANEL */
+.left-panel{width:220px;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden;flex-shrink:0}
+.lp-section{padding:12px;border-bottom:1px solid var(--border)}
+.lp-title{font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text-muted);margin-bottom:10px}
+.node-btn{display:flex;align-items:center;gap:8px;width:100%;padding:9px 11px;border-radius:7px;border:1.5px solid var(--border);background:var(--surface2);color:var(--text);font-size:12px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;margin-bottom:6px;transition:all .15s;text-align:left}
+.node-btn:hover{border-color:var(--accent);color:var(--accent)}
+.node-btn .dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.arrow-btns{display:flex;flex-direction:column;gap:6px}
+.arrow-btn{display:flex;align-items:center;gap:8px;width:100%;padding:8px 10px;border-radius:7px;border:1.5px solid var(--border);background:transparent;color:var(--text-muted);font-size:11px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;transition:all .15s;text-align:left}
+.arrow-btn:hover,.arrow-btn.active{border-color:var(--accent);color:var(--accent);background:rgba(88,166,255,.08)}
+.lp-hint{padding:12px;font-size:10px;color:var(--text-muted);line-height:1.65;flex:1;overflow-y:auto}
+.lp-hint b{color:var(--text)}
+
+/* CANVAS */
+.canvas-area{flex:1;position:relative;overflow:hidden;background:var(--bg)}
+.canvas-bg-grid{position:absolute;inset:0;background-image:radial-gradient(circle,#30363d 1px,transparent 1px);background-size:28px 28px;pointer-events:none;opacity:.5}
+#crt-canvas{position:absolute;inset:0}
+#crt-svg{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:1}
+.zoom-badge{position:absolute;bottom:10px;left:10px;background:rgba(0,0,0,.55);color:#8b949e;font-size:11px;font-weight:700;padding:3px 8px;border-radius:5px;pointer-events:none;z-index:50;backdrop-filter:blur(4px)}
+
+/* LEVEL BANDS */
+.level-band{position:absolute;left:0;right:0;pointer-events:none;z-index:0}
+.level-label{position:absolute;right:10px;font-size:11px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;opacity:.5;pointer-events:none}
+
+/* NODES */
+.crt-node{position:absolute;z-index:10;cursor:move;user-select:none;min-width:160px;max-width:220px}
+.crt-node.selected .node-card{box-shadow:0 0 0 2px var(--accent)}
+.node-card{border-radius:var(--radius);padding:10px 12px;border:2px solid;position:relative;transition:box-shadow .15s;background:var(--surface2)}
+.node-card.type-effect  {border-color:rgba(188,140,255,.5);background:rgba(188,140,255,.07)}
+.node-card.type-problem {border-color:rgba(248,81,73,.6) ;background:rgba(248,81,73,.08)}
+.node-card.type-cause   {border-color:rgba(210,153,34,.5);background:rgba(210,153,34,.07)}
+.node-card.type-root    {border-color:rgba(88,166,255,.5) ;background:rgba(88,166,255,.07)}
+.node-type-label{font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;margin-bottom:5px;opacity:.75}
+.type-effect  .node-type-label{color:var(--c-effect)}
+.type-problem .node-type-label{color:var(--c-problem)}
+.type-cause   .node-type-label{color:var(--c-cause)}
+.type-root    .node-type-label{color:var(--c-root)}
+.node-text{font-size:12px;font-weight:600;color:var(--text);line-height:1.45;word-break:break-word}
+.node-text[contenteditable]{outline:none;cursor:text}
+.node-text[contenteditable]:focus{background:rgba(255,255,255,.04);border-radius:4px;padding:2px 4px;margin:-2px -4px}
+.node-del{position:absolute;top:4px;right:4px;background:transparent;border:none;color:var(--text-faint);cursor:pointer;font-size:13px;padding:2px 4px;opacity:0;transition:opacity .15s}
+.crt-node:hover .node-del{opacity:1}
+.node-del:hover{color:var(--danger)}
+.node-port{position:absolute;width:10px;height:10px;border-radius:50%;background:var(--border2);border:2px solid var(--surface);cursor:crosshair;z-index:6;opacity:0;transition:opacity .15s}
+.crt-node:hover .node-port,.node-port:hover{opacity:1!important}
+.node-port:hover{background:var(--accent)}
+.port-top   {top:-5px;left:50%;transform:translateX(-50%)}
+.port-bottom{bottom:-5px;left:50%;transform:translateX(-50%)}
+.port-left  {left:-5px;top:50%;transform:translateY(-50%)}
+.port-right {right:-5px;top:50%;transform:translateY(-50%)}
+
+/* RIGHT PANEL */
+.right-panel{width:260px;background:var(--surface);border-left:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden;flex-shrink:0}
+.rp-tabs{display:flex;border-bottom:1px solid var(--border);flex-shrink:0}
+.rp-tab{flex:1;padding:10px;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--text-muted);cursor:pointer;text-align:center;border-bottom:2px solid transparent;transition:all .15s}
+.rp-tab.active{color:var(--accent);border-bottom-color:var(--accent)}
+.rp-body{padding:14px;flex:1;overflow-y:auto}
+.rp-section{display:none}.rp-section.active{display:block}
+.kpi-card{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:10px 12px;margin-bottom:8px}
+.kpi-label{font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--text-muted);margin-bottom:4px}
+.kpi-value{font-size:1.3rem;font-weight:800;color:var(--accent)}
+.kpi-sub{font-size:10px;color:var(--text-muted);margin-top:2px}
+.ue-list{display:flex;flex-direction:column;gap:6px}
+.ue-item{background:var(--surface2);border:1px solid var(--border);border-radius:7px;padding:8px 10px;font-size:11px}
+.ue-item .ue-tag{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;margin-bottom:3px}
+.ue-item.ue-problem .ue-tag{color:var(--c-problem)}
+.ue-item.ue-effect  .ue-tag{color:var(--c-effect)}
+.ue-item.ue-cause   .ue-tag{color:var(--c-cause)}
+.ue-item.ue-root    .ue-tag{color:var(--c-root)}
+.logic-row{background:var(--surface2);border:1px solid var(--border);border-radius:7px;padding:8px 10px;margin-bottom:6px;font-size:11px;line-height:1.5}
+.logic-row .l-if{color:var(--c-cause);font-weight:700}
+.logic-row .l-then{color:var(--c-effect);font-weight:700}
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-track{background:var(--bg)}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
+</style>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <a href="index.html" style="text-decoration:none">
+    <div class="topbar-brand">🌳 Árbol Causa-Efecto <small>by Largotek</small></div>
+  </a>
+  <div class="topbar-actions">
+    <button class="btn" onclick="newDiagram()">+ Nuevo</button>
+    <button class="btn" onclick="saveDiagram()">💾 Guardar</button>
+    <button class="btn" onclick="loadDiagram()">📂 Cargar</button>
+    <button class="btn" onclick="exportPNG()">🖼 PNG</button>
+    <div class="sep"></div>
+    <button class="btn btn-accent" onclick="autoLayout()">⬆ Auto-layout</button>
+    <button class="btn btn-danger" id="btn-del" onclick="deleteSelected()" disabled>🗑 Borrar</button>
+  </div>
+</div>
+
+<!-- APP BODY -->
+<div class="app-body">
+
+  <!-- LEFT PANEL -->
+  <div class="left-panel">
+    <div class="lp-section">
+      <div class="lp-title">Agregar nodo</div>
+      <button class="node-btn" onclick="addNode('root')"   ><span class="dot" style="background:var(--c-root)"></span>   Causa Raíz</button>
+      <button class="node-btn" onclick="addNode('cause')"  ><span class="dot" style="background:var(--c-cause)"></span>  Causa</button>
+      <button class="node-btn" onclick="addNode('problem')"><span class="dot" style="background:var(--c-problem)"></span> Problema</button>
+      <button class="node-btn" onclick="addNode('effect')" ><span class="dot" style="background:var(--c-effect)"></span>  Efecto</button>
+    </div>
+    <div class="lp-section">
+      <div class="lp-title">Conectar</div>
+      <div class="arrow-btns">
+        <button class="arrow-btn" id="btn-connect" onclick="toggleConnect()">🔗 Si → Entonces</button>
+      </div>
+    </div>
+    <div class="lp-hint">
+      <b>Instrucciones</b><br><br>
+      1. Agrega nodos con los botones superiores.<br><br>
+      2. Edita el texto haciendo <b>doble click</b> en el nodo.<br><br>
+      3. Activa <b>Si → Entonces</b> y luego haz click en el nodo origen (causa) y luego en el destino (efecto).<br><br>
+      4. <b>Rueda</b> del mouse = zoom. <b>Espacio+drag</b> = pan.<br><br>
+      5. <b>Delete</b> elimina el nodo/flecha seleccionado.<br><br>
+      <b>Lógica del árbol:</b><br>
+      <span style="color:var(--c-cause)">Causa Raíz</span> → <span style="color:var(--c-cause)">Causa</span> → <span style="color:var(--c-problem)">Problema</span> → <span style="color:var(--c-effect)">Efecto</span>
+    </div>
+  </div>
+
+  <!-- CANVAS -->
+  <div class="canvas-area" id="canvas-area">
+    <div class="canvas-bg-grid"></div>
+    <div id="crt-canvas"></div>
+    <svg id="crt-svg"></svg>
+    <div class="zoom-badge" id="zoom-badge">100%</div>
+  </div>
+
+  <!-- RIGHT PANEL -->
+  <div class="right-panel">
+    <div class="rp-tabs">
+      <div class="rp-tab active" onclick="switchRTab('resumen',this)">Resumen</div>
+      <div class="rp-tab" onclick="switchRTab('logica',this)">Lógica</div>
+    </div>
+    <div class="rp-body">
+      <div class="rp-section active" id="rp-resumen">
+        <div class="kpi-card"><div class="kpi-label">Causas raíz</div><div class="kpi-value" id="k-roots">0</div><div class="kpi-sub">entidades a eliminar</div></div>
+        <div class="kpi-card"><div class="kpi-label">Efectos no deseados</div><div class="kpi-value" id="k-ue">0</div><div class="kpi-sub">síntomas visibles</div></div>
+        <div class="kpi-card"><div class="kpi-label">Conexiones</div><div class="kpi-value" id="k-arrows">0</div><div class="kpi-sub">relaciones causales</div></div>
+        <div style="margin-top:14px">
+          <div class="lp-title" style="margin-bottom:8px">Nodos en el árbol</div>
+          <div class="ue-list" id="ue-list"></div>
+        </div>
+      </div>
+      <div class="rp-section" id="rp-logica">
+        <div style="font-size:10px;color:var(--text-muted);margin-bottom:10px">Cadenas "Si…Entonces" detectadas en el diagrama.</div>
+        <div id="logic-list"></div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ── DATA ──────────────────────────────────────────────────────────────────
+let nodes   = [];
+let arrows  = [];
+let selNode = null;
+let selArrow= null;
+let connectMode = false;
+let connectFrom = null;
+let nodeIdCtr   = 1;
+let arrowIdCtr  = 1;
+
+// ── CAMERA ────────────────────────────────────────────────────────────────
+const CAM = { scale:1, x:0, y:0 };
+const ZOOM_MIN=0.15, ZOOM_MAX=3, ZOOM_STEP=0.1;
+let spaceDown=false, panStart=null, panOrigin=null;
+
+function applyCamera(){
+  const inner = document.getElementById('crt-canvas');
+  inner.style.transform = `translate(${CAM.x}px,${CAM.y}px) scale(${CAM.scale})`;
+  inner.style.transformOrigin = '0 0';
+  document.getElementById('zoom-badge').textContent = Math.round(CAM.scale*100)+'%';
+  renderArrows();
+}
+
+document.getElementById('canvas-area').addEventListener('wheel', e=>{
+  e.preventDefault();
+  const area=document.getElementById('canvas-area');
+  const rect=area.getBoundingClientRect();
+  const mx=e.clientX-rect.left, my=e.clientY-rect.top;
+  const delta=e.deltaY<0?ZOOM_STEP:-ZOOM_STEP;
+  const ns=Math.min(ZOOM_MAX,Math.max(ZOOM_MIN,CAM.scale+delta));
+  const ratio=ns/CAM.scale;
+  CAM.x=mx-ratio*(mx-CAM.x); CAM.y=my-ratio*(my-CAM.y); CAM.scale=ns;
+  applyCamera();
+},{passive:false});
+
+document.addEventListener('keydown',e=>{
+  if(e.code==='Space'&&!e.target.matches('input,textarea,[contenteditable]')){
+    e.preventDefault(); spaceDown=true;
+    document.getElementById('canvas-area').style.cursor='grab';
+  }
+  if(e.key==='Escape'){ cancelConnect(); deselect(); }
+  if((e.key==='Delete'||e.key==='Backspace')&&!e.target.matches('input,textarea,[contenteditable]')){
+    deleteSelected();
+  }
+  if((e.ctrlKey||e.metaKey)&&(e.key==='='||e.key==='+')){ e.preventDefault(); zoomCtr(ZOOM_STEP); }
+  if((e.ctrlKey||e.metaKey)&&e.key==='-'){ e.preventDefault(); zoomCtr(-ZOOM_STEP); }
+  if((e.ctrlKey||e.metaKey)&&e.key==='0'){ e.preventDefault(); CAM.scale=1;CAM.x=0;CAM.y=0;applyCamera(); }
+});
+document.addEventListener('keyup',e=>{
+  if(e.code==='Space'){ spaceDown=false; panStart=null; document.getElementById('canvas-area').style.cursor='default'; }
+});
+document.getElementById('canvas-area').addEventListener('mousedown',e=>{
+  if(spaceDown){
+    panStart={x:e.clientX,y:e.clientY}; panOrigin={x:CAM.x,y:CAM.y};
+    document.getElementById('canvas-area').style.cursor='grabbing'; e.preventDefault();
+  }
+});
+document.addEventListener('mousemove',e=>{
+  if(spaceDown&&panStart){ CAM.x=panOrigin.x+(e.clientX-panStart.x); CAM.y=panOrigin.y+(e.clientY-panStart.y); applyCamera(); }
+});
+document.addEventListener('mouseup',()=>{ if(spaceDown) panStart=null; });
+
+function zoomCtr(d){
+  const area=document.getElementById('canvas-area');
+  const cx=area.offsetWidth/2,cy=area.offsetHeight/2;
+  const ns=Math.min(ZOOM_MAX,Math.max(ZOOM_MIN,CAM.scale+d));
+  const r=ns/CAM.scale; CAM.x=cx-r*(cx-CAM.x); CAM.y=cy-r*(cy-CAM.y); CAM.scale=ns; applyCamera();
+}
+
+// ── NODE TYPES ────────────────────────────────────────────────────────────
+const TYPE_META={
+  root:    {label:'Causa Raíz',  color:'var(--c-root)',    level:4},
+  cause:   {label:'Causa',       color:'var(--c-cause)',   level:3},
+  problem: {label:'Problema',    color:'var(--c-problem)', level:2},
+  effect:  {label:'Efecto',      color:'var(--c-effect)',  level:1},
+};
+
+// ── ADD NODE ──────────────────────────────────────────────────────────────
+function addNode(type, x, y, text){
+  const area=document.getElementById('canvas-area');
+  if(x===undefined){
+    x=(area.offsetWidth/2-CAM.x)/CAM.scale-90;
+    y=(area.offsetHeight/2-CAM.y)/CAM.scale-40;
+  }
+  const id='n'+(nodeIdCtr++);
+  const node={id,type,x,y,text:text||(TYPE_META[type].label+' '+nodeIdCtr)};
+  nodes.push(node);
+  renderNode(node);
+  updatePanel();
+  return node;
+}
+
+function renderNode(node){
+  const inner=document.getElementById('crt-canvas');
+  const el=document.createElement('div');
+  el.id=node.id; el.className='crt-node';
+  el.style.left=node.x+'px'; el.style.top=node.y+'px';
+  el.innerHTML=`
+    <div class="node-card type-${node.type}">
+      <div class="node-type-label">${TYPE_META[node.type].label}</div>
+      <div class="node-text" contenteditable="true" spellcheck="false"
+        onblur="saveText('${node.id}',this)"
+        onclick="event.stopPropagation()"
+        ondblclick="event.stopPropagation()"
+      >${node.text}</div>
+      <button class="node-del" onclick="event.stopPropagation();deleteNode('${node.id}')">✕</button>
+      <div class="node-port port-top"    data-node="${node.id}" data-port="top"></div>
+      <div class="node-port port-bottom" data-node="${node.id}" data-port="bottom"></div>
+      <div class="node-port port-left"   data-node="${node.id}" data-port="left"></div>
+      <div class="node-port port-right"  data-node="${node.id}" data-port="right"></div>
+    </div>`;
+  el.addEventListener('mousedown', e=>startDrag(e,node));
+  el.addEventListener('click', e=>{ e.stopPropagation(); onNodeClick(node.id); });
+  el.querySelectorAll('.node-port').forEach(p=>{
+    p.addEventListener('mousedown',e=>e.stopPropagation());
+    p.addEventListener('click',e=>{ e.stopPropagation(); onPortClick(node.id); });
+  });
+  inner.appendChild(el);
+}
+
+function saveText(id,el){
+  const n=nodes.find(n=>n.id===id); if(n) n.text=el.textContent.trim()||n.text;
+  updatePanel();
+}
+
+// ── DRAG ──────────────────────────────────────────────────────────────────
+let dragging=null, dOffX=0, dOffY=0;
+function startDrag(e,node){
+  if(e.target.classList.contains('node-port')||e.target.classList.contains('node-del')) return;
+  if(e.target.hasAttribute('contenteditable')&&document.activeElement===e.target) return;
+  if(spaceDown) return;
+  dragging=node;
+  const rect=document.getElementById(node.id).getBoundingClientRect();
+  dOffX=e.clientX-rect.left; dOffY=e.clientY-rect.top;
+  document.addEventListener('mousemove',onDragMove);
+  document.addEventListener('mouseup',onDragEnd);
+  selectNode(node.id);
+  e.preventDefault();
+}
+function onDragMove(e){
+  if(!dragging) return;
+  const area=document.getElementById('canvas-area');
+  const rect=area.getBoundingClientRect();
+  const rx=(e.clientX-rect.left-CAM.x)/CAM.scale;
+  const ry=(e.clientY-rect.top -CAM.y)/CAM.scale;
+  dragging.x=Math.max(0,rx-dOffX/CAM.scale);
+  dragging.y=Math.max(0,ry-dOffY/CAM.scale);
+  const el=document.getElementById(dragging.id);
+  el.style.left=dragging.x+'px'; el.style.top=dragging.y+'px';
+  renderArrows();
+}
+function onDragEnd(){ dragging=null; document.removeEventListener('mousemove',onDragMove); document.removeEventListener('mouseup',onDragEnd); }
+
+// ── SELECTION ─────────────────────────────────────────────────────────────
+function selectNode(id){
+  deselect();
+  selNode=id;
+  document.getElementById(id)?.classList.add('selected');
+  document.getElementById('btn-del').disabled=false;
+}
+function deselect(){
+  if(selNode) document.getElementById(selNode)?.classList.remove('selected');
+  selNode=null; selArrow=null;
+  document.getElementById('btn-del').disabled=true;
+  renderArrows();
+}
+document.getElementById('canvas-area').addEventListener('click',e=>{
+  if(e.target===document.getElementById('canvas-area')||e.target.classList.contains('canvas-bg-grid')||e.target===document.getElementById('crt-canvas')){
+    deselect(); if(connectMode) cancelConnect();
+  }
+});
+
+function onNodeClick(id){
+  if(connectMode){
+    if(!connectFrom){ connectFrom=id; document.getElementById(id).classList.add('selected'); return; }
+    if(connectFrom===id){ cancelConnect(); return; }
+    addArrow(connectFrom,id);
+    cancelConnect();
+  } else {
+    selectNode(id);
+  }
+}
+function onPortClick(id){
+  if(!connectMode) startConnect();
+  onNodeClick(id);
+}
+
+// ── CONNECT ───────────────────────────────────────────────────────────────
+function startConnect(){
+  connectMode=true; connectFrom=null;
+  document.getElementById('btn-connect').classList.add('active');
+  document.getElementById('canvas-area').style.cursor='crosshair';
+}
+function cancelConnect(){
+  connectMode=false; connectFrom=null;
+  document.getElementById('btn-connect').classList.remove('active');
+  document.getElementById('canvas-area').style.cursor='default';
+  document.querySelectorAll('.crt-node.selected').forEach(el=>el.classList.remove('selected'));
+  selNode=null;
+}
+function toggleConnect(){ connectMode?cancelConnect():startConnect(); }
+
+// ── ARROWS ────────────────────────────────────────────────────────────────
+function addArrow(fromId,toId){
+  if(arrows.find(a=>a.from===fromId&&a.to===toId)) return;
+  arrows.push({id:'a'+(arrowIdCtr++),from:fromId,to:toId});
+  renderArrows();
+  updatePanel();
+}
+
+function renderArrows(){
+  const svg=document.getElementById('crt-svg');
+  svg.innerHTML=`<defs>
+    <marker id="arr" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0,10 3.5,0 7" fill="#58a6ff"/></marker>
+    <marker id="arr-sel" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0,10 3.5,0 7" fill="#fff"/></marker>
+  </defs>`;
+
+  const g=document.createElementNS('http://www.w3.org/2000/svg','g');
+  g.setAttribute('transform',`translate(${CAM.x},${CAM.y}) scale(${CAM.scale})`);
+  svg.appendChild(g);
+
+  arrows.forEach(a=>{
+    const fn=nodes.find(n=>n.id===a.from), tn=nodes.find(n=>n.id===a.to);
+    if(!fn||!tn) return;
+    const fEl=document.getElementById(fn.id), tEl=document.getElementById(tn.id);
+    if(!fEl||!tEl) return;
+    const x1=fn.x+fEl.offsetWidth/2, y1=fn.y+fEl.offsetHeight;
+    const x2=tn.x+tEl.offsetWidth/2, y2=tn.y;
+    const cy1=y1+(y2-y1)*0.45, cy2=y2-(y2-y1)*0.45;
+    const d=`M ${x1} ${y1} C ${x1} ${cy1} ${x2} ${cy2} ${x2} ${y2}`;
+    const isSel=selArrow===a.id;
+    const stroke=isSel?'#fff':'#58a6ff';
+
+    const hit=document.createElementNS('http://www.w3.org/2000/svg','path');
+    hit.setAttribute('d',d); hit.setAttribute('stroke','rgba(255,255,255,0.01)');
+    hit.setAttribute('stroke-width','16'); hit.setAttribute('fill','none');
+    hit.style.cursor='pointer'; hit.style.pointerEvents='stroke';
+    hit.addEventListener('click',ev=>{ ev.stopPropagation(); selArrow=a.id; selNode=null; document.getElementById('btn-del').disabled=false; renderArrows(); });
+    g.appendChild(hit);
+
+    const path=document.createElementNS('http://www.w3.org/2000/svg','path');
+    path.setAttribute('d',d); path.setAttribute('stroke',stroke);
+    path.setAttribute('stroke-width',isSel?2.5:1.8); path.setAttribute('fill','none');
+    path.setAttribute('marker-end',`url(#arr${isSel?'-sel':''})`);
+    path.style.pointerEvents='none';
+    g.appendChild(path);
+
+    // Si → Entonces label at midpoint
+    const mx=(x1+x2)/2, my=(y1+y2)/2;
+    const lbl=document.createElementNS('http://www.w3.org/2000/svg','text');
+    lbl.setAttribute('x',mx+6); lbl.setAttribute('y',my);
+    lbl.setAttribute('fill',stroke); lbl.setAttribute('font-size','9');
+    lbl.setAttribute('font-family','Inter,sans-serif'); lbl.setAttribute('font-weight','700');
+    lbl.setAttribute('opacity','0.7'); lbl.style.pointerEvents='none';
+    lbl.textContent='Si → Entonces'; g.appendChild(lbl);
+  });
+}
+
+// ── DELETE ────────────────────────────────────────────────────────────────
+function deleteNode(id){
+  nodes=nodes.filter(n=>n.id!==id);
+  arrows=arrows.filter(a=>a.from!==id&&a.to!==id);
+  document.getElementById(id)?.remove();
+  if(selNode===id) selNode=null;
+  renderArrows(); updatePanel();
+}
+function deleteSelected(){
+  if(selArrow){ arrows=arrows.filter(a=>a.id!==selArrow); selArrow=null; renderArrows(); updatePanel(); document.getElementById('btn-del').disabled=true; return; }
+  if(selNode) deleteNode(selNode);
+}
+
+// ── AUTO-LAYOUT ───────────────────────────────────────────────────────────
+function autoLayout(){
+  const area=document.getElementById('canvas-area');
+  const W=area.offsetWidth, nodeW=180, nodeH=70, gapX=220, gapY=130;
+  const levels={root:[], cause:[], problem:[], effect:[]};
+  nodes.forEach(n=>{ if(levels[n.type]) levels[n.type].push(n); });
+  const order=['effect','problem','cause','root'];
+  const startY=60;
+  order.forEach((type,row)=>{
+    const grp=levels[type];
+    const totalW=grp.length*gapX-(gapX-nodeW);
+    let startX=(W-totalW)/2/CAM.scale-CAM.x/CAM.scale;
+    grp.forEach((n,i)=>{
+      n.x=startX+i*gapX; n.y=startY+row*gapY;
+      const el=document.getElementById(n.id);
+      if(el){ el.style.left=n.x+'px'; el.style.top=n.y+'px'; }
+    });
+  });
+  renderArrows();
+}
+
+// ── PANEL ─────────────────────────────────────────────────────────────────
+function updatePanel(){
+  const roots=nodes.filter(n=>n.type==='root').length;
+  const ues=nodes.filter(n=>n.type==='effect').length;
+  document.getElementById('k-roots').textContent=roots;
+  document.getElementById('k-ue').textContent=ues;
+  document.getElementById('k-arrows').textContent=arrows.length;
+
+  const list=document.getElementById('ue-list');
+  list.innerHTML='';
+  nodes.forEach(n=>{
+    const d=document.createElement('div');
+    d.className=`ue-item ue-${n.type}`;
+    d.innerHTML=`<div class="ue-tag">${TYPE_META[n.type].label}</div><div>${n.text}</div>`;
+    list.appendChild(d);
+  });
+
+  const ll=document.getElementById('logic-list');
+  ll.innerHTML='';
+  arrows.forEach(a=>{
+    const fn=nodes.find(n=>n.id===a.from), tn=nodes.find(n=>n.id===a.to);
+    if(!fn||!tn) return;
+    const d=document.createElement('div');
+    d.className='logic-row';
+    d.innerHTML=`<span class="l-if">Si</span> "${fn.text}" <span class="l-then">→ Entonces</span> "${tn.text}"`;
+    ll.appendChild(d);
+  });
+}
+
+// ── SAVE / LOAD ───────────────────────────────────────────────────────────
+function saveDiagram(){
+  localStorage.setItem('crt-diagram',JSON.stringify({nodes,arrows,nodeIdCtr,arrowIdCtr}));
+  alert('✅ Diagrama guardado en el navegador.');
+}
+function loadDiagram(){
+  const d=localStorage.getItem('crt-diagram'); if(!d){alert('No hay diagrama guardado.');return;}
+  const data=JSON.parse(d);
+  nodes=[]; arrows=[];
+  document.getElementById('crt-canvas').innerHTML='';
+  nodeIdCtr=data.nodeIdCtr||1; arrowIdCtr=data.arrowIdCtr||1;
+  data.nodes.forEach(n=>{ nodes.push(n); renderNode(n); });
+  arrows=data.arrows||[];
+  renderArrows(); updatePanel();
+}
+function newDiagram(){
+  if(!confirm('¿Nuevo diagrama? Se perderán cambios no guardados.')) return;
+  nodes=[]; arrows=[]; nodeIdCtr=1; arrowIdCtr=1;
+  document.getElementById('crt-canvas').innerHTML='';
+  renderArrows(); updatePanel();
+}
+
+// ── EXPORT PNG ────────────────────────────────────────────────────────────
+function exportPNG(){
+  alert('Usa Ctrl+P o la función de impresión del navegador para exportar a PDF/PNG.');
+}
+
+// ── TABS ──────────────────────────────────────────────────────────────────
+function switchRTab(name,el){
+  document.querySelectorAll('.rp-tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.rp-section').forEach(s=>s.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('rp-'+name).classList.add('active');
+}
+
+// ── DEMO DATA ─────────────────────────────────────────────────────────────
+(function initDemo(){
+  const area=document.getElementById('canvas-area');
+  const W=area.offsetWidth||900;
+  const cx=W/2;
+
+  // Row layout: effect top, problem mid, cause lower, root bottom
+  const r1 = addNode('root',   cx-260, 480, 'Falta de mantenimiento preventivo');
+  const r2 = addNode('root',   cx+60,  480, 'Sin estándar de proceso definido');
+  const c1 = addNode('cause',  cx-260, 350, 'Equipos con averías frecuentes');
+  const c2 = addNode('cause',  cx+60,  350, 'Variabilidad en tiempo de ciclo');
+  const p1 = addNode('problem',cx-110, 220, 'Cuello de botella en línea A');
+  const e1 = addNode('effect', cx-240, 90,  'Retrasos en entregas al cliente');
+  const e2 = addNode('effect', cx+30,  90,  'Aumento de inventario en proceso');
+
+  addArrow(r1.id,c1.id); addArrow(r2.id,c2.id);
+  addArrow(c1.id,p1.id); addArrow(c2.id,p1.id);
+  addArrow(p1.id,e1.id); addArrow(p1.id,e2.id);
+
+  updatePanel();
+})();
+</script>
+<script src="branding.js"></script>
+</body>
+</html>
