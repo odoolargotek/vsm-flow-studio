@@ -1,11 +1,110 @@
-// ===== CANVAS ENGINE v4.4 — Gate node + Resource display =====
+// ===== CANVAS ENGINE v4.5 — Zoom + Pan + Gate + Resource =====
 
 let arrowMode      = null;
 let connectingFrom = null;
 let draggingNode   = null;
 let dragOffsetX    = 0, dragOffsetY = 0;
 
-// ─ DRAG FROM TOOLBOX ─────────────────────────────────────────────────
+// ─ ZOOM / PAN STATE ──────────────────────────────────────────────────────────
+const CAM = { scale: 1, x: 0, y: 0 };
+const ZOOM_MIN = 0.1, ZOOM_MAX = 3, ZOOM_STEP = 0.1;
+
+function applyCamera() {
+  const inner = document.getElementById('canvas-inner');
+  if (!inner) return;
+  inner.style.transform = `translate(${CAM.x}px,${CAM.y}px) scale(${CAM.scale})`;
+  inner.style.transformOrigin = '0 0';
+  updateZoomBadge();
+  renderAllArrows();
+}
+
+function updateZoomBadge() {
+  let b = document.getElementById('zoom-badge');
+  if (!b) {
+    b = document.createElement('div');
+    b.id = 'zoom-badge';
+    b.style.cssText = 'position:absolute;bottom:10px;left:10px;background:rgba(0,0,0,.55);' +
+      'color:#8b949e;font-size:11px;font-weight:700;padding:3px 8px;border-radius:5px;' +
+      'pointer-events:none;z-index:50;backdrop-filter:blur(4px);letter-spacing:.04em';
+    document.querySelector('.canvas-area')?.appendChild(b);
+  }
+  b.textContent = Math.round(CAM.scale * 100) + '%';
+}
+
+// ─ WHEEL ZOOM ────────────────────────────────────────────────────────────────
+function initZoom() {
+  const area = document.querySelector('.canvas-area');
+  area.addEventListener('wheel', e => {
+    e.preventDefault();
+    const rect   = area.getBoundingClientRect();
+    const mouseX = e.clientX - rect.left;
+    const mouseY = e.clientY - rect.top;
+    const delta    = e.deltaY < 0 ? ZOOM_STEP : -ZOOM_STEP;
+    const newScale = Math.min(ZOOM_MAX, Math.max(ZOOM_MIN, CAM.scale + delta));
+    const ratio    = newScale / CAM.scale;
+    CAM.x = mouseX - ratio * (mouseX - CAM.x);
+    CAM.y = mouseY - ratio * (mouseY - CAM.y);
+    CAM.scale = newScale;
+    applyCamera();
+  }, { passive: false });
+}
+
+// ─ SPACE+DRAG PAN ────────────────────────────────────────────────────────────
+let spaceDown = false, panStart = null, panOrigin = null;
+
+document.addEventListener('keydown', e => {
+  if (e.code === 'Space' && !e.target.matches('input,select,textarea')) {
+    e.preventDefault();
+    spaceDown = true;
+    document.querySelector('.canvas-area').style.cursor = 'grab';
+  }
+  if (e.key === 'Escape') { cancelArrowMode(); deselectArrow(); }
+  if ((e.key === 'Delete' || e.key === 'Backspace') && !e.target.matches('input,select,textarea')) {
+    if (selectedArrowId) confirmDeleteArrow(selectedArrowId);
+    else if (selectedNodeId) deleteSelected();
+  }
+  if ((e.ctrlKey || e.metaKey) && (e.key === '=' || e.key === '+')) { e.preventDefault(); zoomCenter(ZOOM_STEP); }
+  if ((e.ctrlKey || e.metaKey) && e.key === '-')                    { e.preventDefault(); zoomCenter(-ZOOM_STEP); }
+  if ((e.ctrlKey || e.metaKey) && e.key === '0')                    { e.preventDefault(); resetZoom(); }
+});
+
+document.addEventListener('keyup', e => {
+  if (e.code === 'Space') {
+    spaceDown = false;
+    panStart  = null;
+    document.querySelector('.canvas-area').style.cursor = 'default';
+  }
+});
+
+document.addEventListener('mousemove', e => {
+  if (spaceDown && panStart) {
+    CAM.x = panOrigin.x + (e.clientX - panStart.x);
+    CAM.y = panOrigin.y + (e.clientY - panStart.y);
+    applyCamera();
+  }
+});
+
+document.addEventListener('mouseup', () => {
+  if (spaceDown) panStart = null;
+});
+
+function zoomCenter(delta) {
+  const area = document.querySelector('.canvas-area');
+  const cx = area.offsetWidth / 2, cy = area.offsetHeight / 2;
+  const newScale = Math.min(ZOOM_MAX, Math.max(ZOOM_MIN, CAM.scale + delta));
+  const ratio = newScale / CAM.scale;
+  CAM.x = cx - ratio * (cx - CAM.x);
+  CAM.y = cy - ratio * (cy - CAM.y);
+  CAM.scale = newScale;
+  applyCamera();
+}
+
+function resetZoom() {
+  CAM.scale = 1; CAM.x = 0; CAM.y = 0;
+  applyCamera();
+}
+
+// ─ DRAG FROM TOOLBOX ─────────────────────────────────────────────────────────
 document.querySelectorAll('.tool-item[draggable]').forEach(item => {
   item.addEventListener('dragstart', e => e.dataTransfer.setData('node-type', item.dataset.type));
 });
@@ -14,17 +113,19 @@ function onDrop(e) {
   e.preventDefault();
   const type = e.dataTransfer.getData('node-type');
   if (!type) return;
-  const canvas = document.getElementById('canvas');
-  const rect   = canvas.getBoundingClientRect();
-  const node   = createNode(type, Math.max(0, e.clientX - rect.left - 65), Math.max(0, e.clientY - rect.top - 35));
+  const area  = document.querySelector('.canvas-area');
+  const rect  = area.getBoundingClientRect();
+  const canvasX = (e.clientX - rect.left - CAM.x) / CAM.scale - 65;
+  const canvasY = (e.clientY - rect.top  - CAM.y) / CAM.scale - 35;
+  const node = createNode(type, Math.max(0, canvasX), Math.max(0, canvasY));
   renderNode(node);
   document.getElementById('canvas-hint').style.display = 'none';
   renderAllArrows();
 }
 
-// ─ RENDER NODE ────────────────────────────────────────────────────
+// ─ RENDER NODE ────────────────────────────────────────────────────────────────
 function renderNode(node) {
-  const canvas = document.getElementById('canvas');
+  const inner = document.getElementById('canvas-inner');
   const el = document.createElement('div');
   el.id        = node.id;
   el.className = `vsm-node node-${node.type}`;
@@ -43,16 +144,13 @@ function renderNode(node) {
     cancelArrowMode();
   });
   bindPorts(el, node.id);
-  canvas.appendChild(el);
+  inner.appendChild(el);
 }
 
 function bindPorts(el, nodeId) {
   el.querySelectorAll('.node-port').forEach(port => {
     port.addEventListener('mousedown', e => e.stopPropagation());
-    port.addEventListener('click', e => {
-      e.stopPropagation();
-      onPortClick(nodeId);
-    });
+    port.addEventListener('click', e => { e.stopPropagation(); onPortClick(nodeId); });
   });
 }
 
@@ -80,7 +178,6 @@ function getNodeHTML(node) {
       <div class="node-ops">${ops}</div>
     </div>`;
   } else if (node.type === 'gate') {
-    // Show split percentages for outgoing arrows
     const outs = arrows.filter(a => a.fromId === node.id);
     const splitLines = outs.length
       ? outs.map(a => {
@@ -113,15 +210,14 @@ function refreshNodeElement(nodeId) {
   renderAllArrows();
 }
 
-// Refresh all gate nodes (needed when arrows change)
 function refreshAllGates() {
   nodes.filter(n => n.type === 'gate').forEach(n => refreshNodeElement(n.id));
 }
 
-// ─ DRAG TO MOVE ──────────────────────────────────────────────────
+// ─ DRAG TO MOVE ──────────────────────────────────────────────────────────────
 function startDrag(e, node) {
   if (e.target.classList.contains('node-port') || e.target.classList.contains('node-edit-btn')) return;
-  if (arrowMode) return;
+  if (arrowMode || spaceDown) return;
   draggingNode = node;
   const rect   = document.getElementById(node.id).getBoundingClientRect();
   dragOffsetX  = e.clientX - rect.left;
@@ -134,10 +230,12 @@ function startDrag(e, node) {
 
 function onDragMove(e) {
   if (!draggingNode) return;
-  const canvas = document.getElementById('canvas');
-  const rect   = canvas.getBoundingClientRect();
-  draggingNode.x = Math.max(0, e.clientX - rect.left - dragOffsetX);
-  draggingNode.y = Math.max(0, e.clientY - rect.top  - dragOffsetY);
+  const area = document.querySelector('.canvas-area');
+  const rect  = area.getBoundingClientRect();
+  const rawX  = (e.clientX - rect.left - CAM.x) / CAM.scale;
+  const rawY  = (e.clientY - rect.top  - CAM.y) / CAM.scale;
+  draggingNode.x = Math.max(0, rawX - dragOffsetX / CAM.scale);
+  draggingNode.y = Math.max(0, rawY - dragOffsetY / CAM.scale);
   const el = document.getElementById(draggingNode.id);
   el.style.left = draggingNode.x + 'px';
   el.style.top  = draggingNode.y + 'px';
@@ -150,7 +248,7 @@ function onDragEnd() {
   document.removeEventListener('mouseup',   onDragEnd);
 }
 
-// ─ NODE SELECTION ─────────────────────────────────────────────────
+// ─ NODE SELECTION ─────────────────────────────────────────────────────────────
 function selectNode(id) {
   deselectArrow();
   document.querySelectorAll('.vsm-node').forEach(el => el.classList.remove('selected'));
@@ -160,7 +258,8 @@ function selectNode(id) {
 }
 
 function onCanvasClick(e) {
-  if (e.target === document.getElementById('canvas')) {
+  const inner = document.getElementById('canvas-inner');
+  if (e.target === inner || e.target.classList.contains('canvas-bg-grid')) {
     document.querySelectorAll('.vsm-node').forEach(el => el.classList.remove('selected'));
     selectedNodeId = null;
     deselectArrow();
@@ -168,20 +267,21 @@ function onCanvasClick(e) {
   }
 }
 
-// ─ ARROW MODE ─────────────────────────────────────────────────────────
+// ─ ARROW MODE ─────────────────────────────────────────────────────────────────
 function setArrowMode(mode) {
   if (arrowMode === mode && !connectingFrom) { cancelArrowMode(); return; }
   arrowMode = mode;
   clearArrowModeUI();
   document.getElementById('btn-' + mode + '-arrow')?.classList.add('active');
-  document.getElementById('canvas').style.cursor = 'crosshair';
+  document.getElementById('canvas-inner').style.cursor = 'crosshair';
 }
 
 function cancelArrowMode() {
   arrowMode      = null;
   connectingFrom = null;
   clearArrowModeUI();
-  document.getElementById('canvas').style.cursor = 'default';
+  const inner = document.getElementById('canvas-inner');
+  if (inner) inner.style.cursor = 'default';
   showConnectHint(false);
   document.querySelectorAll('.vsm-node').forEach(el => el.classList.remove('selected'));
   selectedNodeId = null;
@@ -203,29 +303,23 @@ function showConnectHint(active, fromLabel) {
   hint.style.display = active ? 'block' : 'none';
 }
 
-// ─ PORT CLICK ───────────────────────────────────────────────────────────
+// ─ PORT CLICK ─────────────────────────────────────────────────────────────────
 function onPortClick(nodeId) {
   if (!arrowMode) setArrowMode('push');
-
   if (!connectingFrom) {
     connectingFrom = nodeId;
     selectNode(nodeId);
     showConnectHint(true, getNode(nodeId)?.props.label || nodeId);
     return;
   }
-
-  if (connectingFrom === nodeId) {
-    cancelArrowMode();
-    return;
-  }
-
+  if (connectingFrom === nodeId) { cancelArrowMode(); return; }
   addArrow(connectingFrom, nodeId, arrowMode);
   renderAllArrows();
   refreshAllGates();
   cancelArrowMode();
 }
 
-// ─ ARROW SELECTION & EDITING ──────────────────────────────────────────
+// ─ ARROW SELECTION & EDITING ──────────────────────────────────────────────────
 function selectArrow(arrowId) {
   deselectArrow();
   document.querySelectorAll('.vsm-node').forEach(el => el.classList.remove('selected'));
@@ -244,14 +338,18 @@ function showArrowToolbar(arrowId) {
   document.getElementById('arrow-toolbar')?.remove();
   const arrow = getArrow(arrowId); if (!arrow) return;
   const mid   = getArrowMidpoint(arrow.fromId, arrow.toId); if (!mid) return;
-  const fromNode = getNode(arrow.fromId);
+  const fromNode  = getNode(arrow.fromId);
   const isGateOut = fromNode && fromNode.type === 'gate';
+
+  // mid is canvas-space → project to screen-space
+  const screenX = mid.x * CAM.scale + CAM.x;
+  const screenY = mid.y * CAM.scale + CAM.y;
 
   const tb = document.createElement('div');
   tb.id = 'arrow-toolbar';
   tb.className = 'arrow-toolbar';
-  tb.style.left = (mid.x - 60) + 'px';
-  tb.style.top  = (mid.y - 40) + 'px';
+  tb.style.left = (screenX - 60) + 'px';
+  tb.style.top  = (screenY - 40) + 'px';
   const pctLabel = isGateOut ? ` · ${arrow.splitPct||0}%` : '';
   tb.innerHTML = `
     <span class="arrow-tb-label">${arrowTypeLabel(arrow.type)} • ${arrow.transportDays||0.5}d${pctLabel}</span>
@@ -283,28 +381,24 @@ function openArrowModal(arrowId) {
   const arrow=getArrow(arrowId); if(!arrow) return;
   const fromLbl=getNode(arrow.fromId)?.props?.label||arrow.fromId;
   const toLbl  =getNode(arrow.toId)?.props?.label  ||arrow.toId;
-  const fromNode = getNode(arrow.fromId);
+  const fromNode  = getNode(arrow.fromId);
   const isGateOut = fromNode && fromNode.type === 'gate';
 
-  // For gate outputs, collect sibling arrows to show all pcts
   const gateOutsHtml = isGateOut ? (() => {
     const siblings = arrows.filter(a => a.fromId === arrow.fromId);
     return `
       <hr class="prop-divider">
       <div class="prop-section-title">🔀 % Distribución del Gate</div>
-      <div style="font-size:10px;color:var(--text-muted);margin-bottom:8px">La suma de todos los % debe ser 100. Ajusta manualmente.</div>
+      <div style="font-size:10px;color:var(--text-muted);margin-bottom:8px">La suma debe ser 100.</div>
       ${siblings.map(s => {
         const sLbl = getNode(s.toId)?.props?.label || s.toId;
         const isThis = s.id === arrowId;
         return `<div class="prop-row" style="align-items:center;gap:8px">
           <div class="prop-group" style="flex:2">
-            <label style="font-weight:${isThis?700:400};color:${isThis?'var(--accent)':'inherit'}">
-              → ${sLbl}${isThis?' (esta)':''}
-            </label>
+            <label style="font-weight:${isThis?700:400};color:${isThis?'var(--accent)':'inherit'}">→ ${sLbl}${isThis?' (esta)':''}</label>
           </div>
           <div class="prop-group" style="flex:1">
-            <input type="number" id="gate-pct-${s.id}" value="${s.splitPct||0}" min="0" max="100"
-              oninput="updateGatePctPreview()">
+            <input type="number" id="gate-pct-${s.id}" value="${s.splitPct||0}" min="0" max="100" oninput="updateGatePctPreview()">
           </div>
           <span style="color:var(--text-muted);font-size:11px">%</span>
         </div>`;
@@ -317,9 +411,9 @@ function openArrowModal(arrowId) {
     <div class="prop-group">
       <label>Tipo de flujo</label>
       <select id="arrow-edit-type">
-        <option value="push" ${arrow.type==='push'?'selected':''}>⟶ Push (flujo empujado)</option>
-        <option value="pull" ${arrow.type==='pull'?'selected':''}>⇢ Pull (flujo jalado)</option>
-        <option value="info" ${arrow.type==='info'?'selected':''}>⤳ Flujo de información</option>
+        <option value="push" ${arrow.type==='push'?'selected':''}>⟶ Push</option>
+        <option value="pull" ${arrow.type==='pull'?'selected':''}>⇢ Pull</option>
+        <option value="info" ${arrow.type==='info'?'selected':''}>⤳ Info</option>
       </select>
     </div>
     <div class="prop-group">
@@ -343,14 +437,8 @@ function openArrowModal(arrowId) {
 
 function updateGatePctPreview() {
   const total = arrows
-    .filter(a => {
-      const inp = document.getElementById('gate-pct-'+a.id);
-      return inp !== null;
-    })
-    .reduce((sum, a) => {
-      const inp = document.getElementById('gate-pct-'+a.id);
-      return sum + (parseFloat(inp?.value)||0);
-    }, 0);
+    .filter(a => document.getElementById('gate-pct-'+a.id) !== null)
+    .reduce((sum, a) => sum + (parseFloat(document.getElementById('gate-pct-'+a.id)?.value)||0), 0);
   const el = document.getElementById('gate-pct-total');
   if (el) {
     el.textContent = `Total: ${total.toFixed(0)}%`;
@@ -363,7 +451,6 @@ function saveArrowProps(arrowId, isGateOut) {
   arrow.type          = document.getElementById('arrow-edit-type').value;
   arrow.transportDays = parseFloat(document.getElementById('arrow-edit-days').value)||0.5;
   if (isGateOut) {
-    // Save all sibling gate % values
     arrows.filter(a => a.fromId === arrow.fromId).forEach(a => {
       const inp = document.getElementById('gate-pct-'+a.id);
       if (inp) a.splitPct = parseFloat(inp.value)||0;
@@ -385,16 +472,7 @@ function confirmDeleteArrow(arrowId) {
   }
 }
 
-// ─ KEYBOARD ────────────────────────────────────────────────────────
-document.addEventListener('keydown', e => {
-  if (e.key==='Escape') { cancelArrowMode(); deselectArrow(); }
-  if ((e.key==='Delete'||e.key==='Backspace') && !e.target.matches('input,select,textarea')) {
-    if (selectedArrowId) confirmDeleteArrow(selectedArrowId);
-    else if (selectedNodeId) deleteSelected();
-  }
-});
-
-// ─ ARROWS SVG ──────────────────────────────────────────────────────────────
+// ─ ARROWS SVG ─────────────────────────────────────────────────────────────────
 function renderAllArrows() {
   const svg = document.getElementById('arrows-svg');
   svg.innerHTML = `
@@ -408,6 +486,11 @@ function renderAllArrows() {
       <marker id="arr-info-sel" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0,10 3.5,0 7" fill="#ffffff"/></marker>
       <marker id="arr-gate-sel" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0,10 3.5,0 7" fill="#ffffff"/></marker>
     </defs>`;
+
+  // Arrows drawn in canvas-space, scaled with same camera transform
+  const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+  g.setAttribute('transform', `translate(${CAM.x},${CAM.y}) scale(${CAM.scale})`);
+  svg.appendChild(g);
 
   arrows.forEach(arrow => {
     const fn=getNode(arrow.fromId), tn=getNode(arrow.toId); if(!fn||!tn) return;
@@ -432,7 +515,7 @@ function renderAllArrows() {
     hit.style.cursor = 'pointer'; hit.style.pointerEvents = 'stroke';
     hit.addEventListener('click',    ev => { ev.stopPropagation(); if (!connectingFrom) selectArrow(arrow.id); });
     hit.addEventListener('dblclick', ev => { ev.stopPropagation(); if (!connectingFrom) openArrowModal(arrow.id); });
-    svg.appendChild(hit);
+    g.appendChild(hit);
 
     const path = document.createElementNS('http://www.w3.org/2000/svg','path');
     path.setAttribute('id','arrow-path-'+arrow.id);
@@ -441,15 +524,11 @@ function renderAllArrows() {
     path.setAttribute('stroke-dasharray', dash);
     path.setAttribute('marker-end',`url(#arr-${markerKey}${mkSfx})`);
     path.style.pointerEvents = 'none';
-    svg.appendChild(path);
+    g.appendChild(path);
 
-    // Label: transport days OR gate %
     let labelText = null;
-    if (isGateOut && arrow.splitPct != null) {
-      labelText = arrow.splitPct + '%';
-    } else if (arrow.transportDays && arrow.transportDays !== 0.5) {
-      labelText = arrow.transportDays + 'd';
-    }
+    if (isGateOut && arrow.splitPct != null) labelText = arrow.splitPct + '%';
+    else if (arrow.transportDays && arrow.transportDays !== 0.5) labelText = arrow.transportDays + 'd';
     if (labelText) {
       const mx=0.125*x1+0.375*cx1+0.375*cx2+0.125*x2;
       const my=0.125*y1+0.375*y1 +0.375*y2 +0.125*y2;
@@ -459,9 +538,29 @@ function renderAllArrows() {
       lbl.setAttribute('font-size','10'); lbl.setAttribute('text-anchor','middle');
       lbl.setAttribute('font-family','monospace'); lbl.setAttribute('font-weight','700');
       lbl.textContent = labelText; lbl.style.pointerEvents='none';
-      svg.appendChild(lbl);
+      g.appendChild(lbl);
     }
   });
 
   if (selectedArrowId) showArrowToolbar(selectedArrowId);
 }
+
+// ─ INIT ───────────────────────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+  // Rename #canvas → #canvas-inner so we can apply camera transform to it
+  const canvas = document.getElementById('canvas');
+  if (canvas) canvas.id = 'canvas-inner';
+
+  // Pan mousedown on canvas-area
+  document.querySelector('.canvas-area').addEventListener('mousedown', e => {
+    if (spaceDown) {
+      panStart  = { x: e.clientX, y: e.clientY };
+      panOrigin = { x: CAM.x, y: CAM.y };
+      document.querySelector('.canvas-area').style.cursor = 'grabbing';
+      e.preventDefault();
+    }
+  });
+
+  initZoom();
+  applyCamera();
+});
