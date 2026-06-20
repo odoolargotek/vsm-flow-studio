@@ -1,17 +1,224 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>5 Porqués — Largotek</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300..700&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/styles.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>5 Porqués — Largotek</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300..700&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#0d1117;--surface:#161b22;--surface2:#21262d;--border:#30363d;--text:#e6edf3;--muted:#8b949e;--faint:#3d444d;--accent:#f78c3f;--green:#5fc97a;--red:#f85149;--radius:14px}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:13px 28px;border-bottom:1px solid var(--border);background:var(--surface)}
+.topbar-brand{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:var(--muted);text-decoration:none}
+.topbar-brand span{color:var(--accent)}
+.topbar-right{display:flex;align-items:center;gap:8px}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:7px 15px;border-radius:8px;border:1.5px solid var(--border);background:transparent;color:var(--muted);font-size:12px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;transition:all .18s}
+.btn:hover{border-color:var(--accent);color:var(--accent)}
+.btn-primary{background:var(--accent);color:#fff;border-color:var(--accent)}
+.btn-primary:hover{opacity:.88}
+.btn-danger:hover{border-color:var(--red);color:var(--red)}
+.hero{padding:32px 32px 20px;max-width:900px;margin:0 auto}
+.hero-eye{font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--accent);margin-bottom:8px}
+.hero h1{font-family:'Instrument Serif',serif;font-size:clamp(1.5rem,3vw,2.2rem);margin-bottom:6px}
+.hero-sub{font-size:13px;color:var(--muted);line-height:1.7}
+.wrap{max-width:900px;margin:0 auto;padding:0 32px 80px}
+.saved-bar{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px}
+.saved-label{font-size:11px;color:var(--muted)}
+.add-analysis-btn{display:inline-flex;align-items:center;gap:6px;padding:9px 18px;border-radius:8px;border:1.5px dashed var(--border);background:transparent;color:var(--muted);font-size:13px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;transition:all .18s;margin-bottom:24px}
+.add-analysis-btn:hover{border-color:var(--accent);color:var(--accent)}
+/* ANALYSIS CARD */
+.analysis{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:20px;overflow:hidden}
+.analysis-head{display:flex;align-items:center;gap:10px;padding:14px 18px;border-bottom:1px solid var(--faint);background:var(--surface2)}
+.analysis-num{font-family:'Instrument Serif',serif;font-size:1.4rem;color:var(--accent);width:32px;flex-shrink:0}
+.analysis-head-fields{flex:1;display:flex;gap:10px;flex-wrap:wrap}
+.analysis-head input{background:transparent;border:none;color:var(--text);font-family:'Inter',sans-serif;font-size:13px;font-weight:600;flex:1;min-width:180px;padding:2px 4px}
+.analysis-head input:focus{outline:1px solid var(--accent);border-radius:3px}
+.analysis-head input::placeholder{color:var(--faint);font-weight:400}
+.del-analysis{background:transparent;border:none;color:var(--faint);cursor:pointer;font-size:16px;padding:0 4px;transition:color .15s;margin-left:auto}
+.del-analysis:hover{color:var(--red)}
+/* PROBLEM FIELD */
+.prob-field{padding:14px 18px;border-bottom:1px solid var(--faint)}
+.prob-field label{font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:6px}
+.prob-field textarea{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:10px 13px;font-size:13px;color:var(--text);font-family:'Inter',sans-serif;resize:vertical;min-height:64px;line-height:1.65;transition:border-color .18s}
+.prob-field textarea:focus{outline:none;border-color:var(--accent)}
+.prob-field textarea::placeholder{color:var(--faint)}
+/* WHYS */
+.whys{padding:14px 18px}
+.why-row{display:flex;align-items:flex-start;gap:12px;margin-bottom:10px;position:relative}
+.why-row::before{content:'';position:absolute;left:19px;top:36px;bottom:-10px;width:2px;background:var(--faint);border-radius:99px}
+.why-row:last-child::before{display:none}
+.why-num{width:38px;height:38px;border-radius:50%;background:var(--surface2);border:2px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;color:var(--accent);flex-shrink:0;margin-top:2px}
+.why-content{flex:1;display:flex;flex-direction:column;gap:4px}
+.why-label{font-size:10px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--muted)}
+.why-input{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:9px 12px;font-size:13px;color:var(--text);font-family:'Inter',sans-serif;resize:vertical;min-height:52px;line-height:1.6;transition:border-color .18s}
+.why-input:focus{outline:none;border-color:var(--accent)}
+.why-input::placeholder{color:var(--faint)}
+/* ROOT CAUSE */
+.root-cause{margin:0 18px 18px;background:rgba(247,140,63,.07);border:1px solid rgba(247,140,63,.25);border-radius:10px;padding:14px 16px}
+.root-cause label{font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);display:block;margin-bottom:6px}
+.root-cause textarea{width:100%;background:transparent;border:none;color:var(--text);font-family:'Inter',sans-serif;font-size:13px;line-height:1.65;resize:vertical;min-height:56px}
+.root-cause textarea:focus{outline:none}
+.root-cause textarea::placeholder{color:rgba(247,140,63,.4)}
+/* COUNTER MEASURE */
+.countermeasure{margin:0 18px 18px;background:rgba(95,201,122,.06);border:1px solid rgba(95,201,122,.2);border-radius:10px;padding:14px 16px}
+.countermeasure label{font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--green);display:block;margin-bottom:6px}
+.countermeasure textarea{width:100%;background:transparent;border:none;color:var(--text);font-family:'Inter',sans-serif;font-size:13px;line-height:1.65;resize:vertical;min-height:56px}
+.countermeasure textarea:focus{outline:none}
+.countermeasure textarea::placeholder{color:rgba(95,201,122,.4)}
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:#1e3a2e;border:1px solid var(--green);color:var(--green);padding:10px 22px;border-radius:99px;font-size:13px;font-weight:600;opacity:0;transition:all .3s;z-index:999;white-space:nowrap}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+@media print{
+  .topbar,.btn,.add-analysis-btn,.del-analysis{display:none!important}
+  body{background:#fff;color:#111}
+  .analysis{border-color:#ccc;background:#fff;page-break-inside:avoid}
+  .analysis-head{background:#f3f3f3}
+  .why-input,.prob-field textarea,.root-cause textarea,.countermeasure textarea{background:#f9f9f9;color:#111}
+}
+</style>
 </head>
 <body>
-  <div id="app"></div>
-  <script src="js/5-porques.js"></script>
-  <script src="branding.js"></script>
+<div class="topbar">
+  <a href="index.html" class="topbar-brand">← <span>Largotek</span> Lean Suite</a>
+  <div class="topbar-right">
+    <span class="saved-label" id="saved-lbl"></span>
+    <button class="btn btn-danger" onclick="clearAll()">🗑 Limpiar</button>
+    <button class="btn" onclick="saveLocal()">💾 Guardar</button>
+    <button class="btn btn-primary" onclick="window.print()">🖨 PDF</button>
+  </div>
+</div>
+<div class="hero">
+  <div class="hero-eye">❓ 5 Porqués — Largotek Lean Suite</div>
+  <h1>Análisis de 5 Porqués</h1>
+  <p class="hero-sub">Herramienta de análisis de causa raíz. Pregunta «por qué» cinco veces consecutivas para llegar a la causa sistémica del problema, no solo al síntoma superficial. Podés agregar múltiples análisis para distintos problemas.</p>
+</div>
+<div class="wrap">
+  <div class="saved-bar">
+    <button class="add-analysis-btn" onclick="addAnalysis()">+ Nuevo análisis de 5 Porqués</button>
+    <span class="saved-label" id="saved-lbl2"></span>
+  </div>
+  <div id="analyses-container"></div>
+</div>
+<div class="toast" id="toast">✅ Guardado en caché</div>
+<script>
+const KEY = 'largotek_5porques';
+let analysisCount = 0;
+
+function addAnalysis(data = {}) {
+  analysisCount++;
+  const id = data.id || analysisCount;
+  const container = document.getElementById('analyses-container');
+  const div = document.createElement('div');
+  div.className = 'analysis';
+  div.dataset.id = id;
+
+  const whys = data.whys || ['','','','',''];
+  let whyRows = '';
+  const labels = ['\u00bfPor qu\u00e9 ocurre el problema?','\u00bfPor qu\u00e9 (causa 1)?','\u00bfPor qu\u00e9 (causa 2)?','\u00bfPor qu\u00e9 (causa 3)?','\u00bfPor qu\u00e9 (causa 4)?'];
+  const placeholders = [
+    'Describe la primera causa observable...',
+    'Profundiza en la causa anterior...',
+    'Sigue preguntando por qu\u00e9...',
+    'Cada por qu\u00e9 va m\u00e1s profundo...',
+    'Último porqu\u00e9 — aqu\u00ed suele estar la causa ra\u00edz sist\u00e9mica...'
+  ];
+  for (let i = 0; i < 5; i++) {
+    whyRows += `<div class="why-row">
+      <div class="why-num">${i+1}</div>
+      <div class="why-content">
+        <span class="why-label">${labels[i]}</span>
+        <textarea class="why-input" placeholder="${placeholders[i]}" oninput="autoSave()">${whys[i]||''}</textarea>
+      </div>
+    </div>`;
+  }
+
+  div.innerHTML = `
+    <div class="analysis-head">
+      <div class="analysis-num">#${id}</div>
+      <div class="analysis-head-fields">
+        <input class="a-title" placeholder="T\u00edtulo del an\u00e1lisis (ej: Entregas incorrectas)" value="${data.title||''}" oninput="autoSave()">
+        <input class="a-area" placeholder="\u00c1rea / proceso" value="${data.area||''}" oninput="autoSave()" style="max-width:200px">
+        <input class="a-date" type="date" value="${data.date||''}" oninput="autoSave()" style="max-width:140px">
+      </div>
+      <button class="del-analysis" onclick="deleteAnalysis(this)" title="Eliminar">✕</button>
+    </div>
+    <div class="prob-field">
+      <label>🚨 Enunciado del Problema</label>
+      <textarea class="a-problem" placeholder="Describe el problema espec\u00edfico que vas a analizar. Ej: Los pedidos llegan con productos incorrectos al cliente final." oninput="autoSave()">${data.problem||''}</textarea>
+    </div>
+    <div class="whys">${whyRows}</div>
+    <div class="root-cause">
+      <label>🎯 Causa Ra\u00edz Identificada</label>
+      <textarea class="a-rootcause" placeholder="Resume la causa ra\u00edz sist\u00e9mica encontrada al final de la cadena de porqu\u00e9s. Ej: Ausencia de est\u00e1ndares de ubicaci\u00f3n y responsable formal de gesti\u00f3n del almac\u00e9n." oninput="autoSave()">${data.rootcause||''}</textarea>
+    </div>
+    <div class="countermeasure">
+      <label>⚡ Contramedida Propuesta</label>
+      <textarea class="a-counter" placeholder="Acci\u00f3n concreta para atacar la causa ra\u00edz. Ej: Implementar S4 Seiketsu: dise\u00f1ar e implementar instructivo de ubicaciones fijas con responsable asignado." oninput="autoSave()">${data.counter||''}</textarea>
+    </div>`;
+  container.appendChild(div);
+}
+
+function deleteAnalysis(btn) {
+  if (!confirm('\u00bfEliminar este an\u00e1lisis?')) return;
+  btn.closest('.analysis').remove();
+  autoSave();
+}
+
+function getAnalysesData() {
+  const result = [];
+  document.querySelectorAll('.analysis').forEach(div => {
+    const whys = [];
+    div.querySelectorAll('.why-input').forEach(t => whys.push(t.value));
+    result.push({
+      id: div.dataset.id,
+      title: div.querySelector('.a-title')?.value || '',
+      area: div.querySelector('.a-area')?.value || '',
+      date: div.querySelector('.a-date')?.value || '',
+      problem: div.querySelector('.a-problem')?.value || '',
+      whys,
+      rootcause: div.querySelector('.a-rootcause')?.value || '',
+      counter: div.querySelector('.a-counter')?.value || ''
+    });
+  });
+  return result;
+}
+
+let saveTimer;
+function autoSave() { clearTimeout(saveTimer); saveTimer = setTimeout(saveLocal, 1000); }
+
+function saveLocal() {
+  const d = { analyses: getAnalysesData(), ts: new Date().toISOString() };
+  localStorage.setItem(KEY, JSON.stringify(d));
+  const t = new Date().toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' });
+  ['saved-lbl','saved-lbl2'].forEach(id => { const el = document.getElementById(id); if (el) el.textContent = '\u2713 Guardado ' + t; });
+  const toast = document.getElementById('toast');
+  toast.classList.add('show');
+  setTimeout(() => toast.classList.remove('show'), 2200);
+}
+
+function loadLocal() {
+  const raw = localStorage.getItem(KEY);
+  if (!raw) { addAnalysis(); return; }
+  try {
+    const d = JSON.parse(raw);
+    (d.analyses || []).forEach(a => addAnalysis(a));
+    if (!d.analyses || d.analyses.length === 0) addAnalysis();
+    if (d.ts) {
+      const t = new Date(d.ts).toLocaleString('es-AR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
+      ['saved-lbl','saved-lbl2'].forEach(id => { const el = document.getElementById(id); if (el) el.textContent = '\u00daltimo guardado: ' + t; });
+    }
+  } catch(e) { addAnalysis(); }
+}
+
+function clearAll() {
+  if (!confirm('\u00bfLimpiar todos los an\u00e1lisis?')) return;
+  localStorage.removeItem(KEY);
+  location.reload();
+}
+
+window.addEventListener('load', loadLocal);
+</script>
+<script src="branding.js"></script>
 </body>
 </html>
