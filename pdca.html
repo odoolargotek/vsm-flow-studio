@@ -1,17 +1,314 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Ciclo PDCA — Largotek</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300..700&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/styles.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>PDCA — Largotek</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300..700&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#0d1117;--surface:#161b22;--surface2:#21262d;--border:#30363d;--text:#e6edf3;--muted:#8b949e;--faint:#3d444d;--green:#5fc97a;--red:#f85149;--radius:14px;
+  --plan:#4f98a3;--do:#5fc97a;--check:#e8c44a;--act:#bc8cff}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:13px 28px;border-bottom:1px solid var(--border);background:var(--surface)}
+.topbar-brand{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:var(--muted);text-decoration:none}
+.topbar-brand span{color:var(--plan)}
+.topbar-right{display:flex;align-items:center;gap:8px}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:7px 15px;border-radius:8px;border:1.5px solid var(--border);background:transparent;color:var(--muted);font-size:12px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;transition:all .18s}
+.btn:hover{border-color:var(--plan);color:var(--plan)}
+.btn-primary{background:var(--plan);color:#fff;border-color:var(--plan)}
+.btn-primary:hover{opacity:.88}
+.btn-danger:hover{border-color:var(--red);color:var(--red)}
+.hero{padding:32px 32px 20px;max-width:960px;margin:0 auto}
+.hero-eye{font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--plan);margin-bottom:8px}
+.hero h1{font-family:'Instrument Serif',serif;font-size:clamp(1.5rem,3vw,2.2rem);margin-bottom:6px}
+.hero-sub{font-size:13px;color:var(--muted);line-height:1.7}
+.wrap{max-width:960px;margin:0 auto;padding:0 32px 80px}
+.saved-bar{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px}
+.saved-label{font-size:11px;color:var(--muted)}
+/* META */
+.meta-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:18px 20px;margin-bottom:20px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+@media(max-width:600px){.meta-card{grid-template-columns:1fr}}
+.field{display:flex;flex-direction:column;gap:5px}
+.field label{font-size:10px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--muted)}
+.field input,.field select,.field textarea{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:9px 12px;font-size:13px;color:var(--text);font-family:'Inter',sans-serif;transition:border-color .18s;width:100%}
+.field textarea{resize:vertical;min-height:64px;line-height:1.65}
+.field input:focus,.field select:focus,.field textarea:focus{outline:none;border-color:var(--plan)}
+.field input::placeholder,.field textarea::placeholder{color:var(--faint)}
+.field-full{grid-column:1/-1}
+/* WHEEL VISUAL */
+.wheel-wrap{display:flex;justify-content:center;margin-bottom:24px}
+svg.wheel{width:200px;height:200px}
+/* PDCA GRID */
+.pdca-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px}
+@media(max-width:600px){.pdca-grid{grid-template-columns:1fr}}
+.phase-card{border-radius:var(--radius);overflow:hidden;border:1px solid var(--border)}
+.phase-head{padding:16px 18px 12px;display:flex;align-items:center;gap:12px}
+.phase-letter{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Instrument Serif',serif;font-size:1.4rem;font-weight:700;flex-shrink:0}
+.phase-info{flex:1}
+.phase-name{font-size:14px;font-weight:700;margin-bottom:2px}
+.phase-desc{font-size:11px;color:var(--muted);line-height:1.5}
+.phase-body{padding:0 18px 18px;display:flex;flex-direction:column;gap:10px}
+.phase-field label{font-size:10px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;display:block;margin-bottom:5px}
+.phase-field textarea{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:9px 12px;font-size:12px;color:var(--text);font-family:'Inter',sans-serif;resize:vertical;min-height:72px;line-height:1.6;transition:border-color .18s}
+.phase-field textarea:focus{outline:none}
+.phase-field textarea::placeholder{color:var(--faint)}
+/* ACTION TABLE */
+.act-table{width:100%;border-collapse:collapse;font-size:12px}
+.act-table th{text-align:left;padding:7px 10px;background:var(--surface2);color:var(--muted);font-size:11px;font-weight:600;letter-spacing:.04em}
+.act-table td{padding:6px 8px;border-top:1px solid var(--faint);vertical-align:middle}
+.act-table td input,.act-table td select{width:100%;background:transparent;border:none;color:var(--text);font-size:12px;font-family:'Inter',sans-serif;padding:2px 4px}
+.act-table td input:focus{outline:1px solid var(--plan);border-radius:3px}
+.act-table td select{background:var(--surface2);border:1px solid var(--border);border-radius:4px;padding:3px 6px}
+.add-btn{display:inline-flex;align-items:center;gap:5px;margin-top:8px;padding:6px 12px;border-radius:6px;border:1px dashed var(--border);background:transparent;color:var(--muted);font-size:11px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;transition:all .18s}
+.add-btn:hover{border-color:var(--plan);color:var(--plan)}
+.del-btn{background:transparent;border:none;color:var(--faint);cursor:pointer;font-size:14px;padding:0 4px;transition:color .15s}
+.del-btn:hover{color:var(--red)}
+/* LESSONS */
+.lessons-box{background:rgba(188,140,255,.07);border:1px solid rgba(188,140,255,.25);border-radius:var(--radius);padding:16px 18px;margin-bottom:16px}
+.lessons-box label{font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--act);display:block;margin-bottom:8px}
+.lessons-box textarea{width:100%;background:transparent;border:none;color:var(--text);font-family:'Inter',sans-serif;font-size:13px;line-height:1.65;resize:vertical;min-height:70px}
+.lessons-box textarea:focus{outline:none}
+.lessons-box textarea::placeholder{color:rgba(188,140,255,.3)}
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:#1e3a2e;border:1px solid var(--green);color:var(--green);padding:10px 22px;border-radius:99px;font-size:13px;font-weight:600;opacity:0;transition:all .3s;z-index:999;white-space:nowrap}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+@media print{
+  .topbar,.btn,.add-btn,.del-btn{display:none!important}
+  body{background:#fff;color:#111}
+  .phase-card,.meta-card{border-color:#ccc;background:#fff}
+  .phase-head{background:#f5f5f5!important}
+  .field input,.field textarea,.phase-field textarea,.act-table td input,.lessons-box textarea{background:#f9f9f9!important;color:#111}
+}
+</style>
 </head>
 <body>
-  <div id="app"></div>
-  <script src="js/pdca.js"></script>
-  <script src="branding.js"></script>
+<div class="topbar">
+  <a href="index.html" class="topbar-brand">← <span>Largotek</span> Lean Suite</a>
+  <div class="topbar-right">
+    <span class="saved-label" id="saved-lbl"></span>
+    <button class="btn btn-danger" onclick="clearAll()">🗑 Limpiar</button>
+    <button class="btn" onclick="saveLocal()">💾 Guardar</button>
+    <button class="btn btn-primary" onclick="window.print()">🖨 PDF</button>
+  </div>
+</div>
+<div class="hero">
+  <div class="hero-eye">🔄 Ciclo PDCA — Largotek Lean Suite</div>
+  <h1>Ciclo PDCA — Plan · Do · Check · Act</h1>
+  <p class="hero-sub">Marco de mejora continua de Deming. Documenta cada fase del ciclo: planificación, ejecución, verificación y estandarización. Ideal para proyectos Kaizen y seguimiento de mejoras operativas.</p>
+</div>
+<div class="wrap">
+  <div class="saved-bar"><div></div><span class="saved-label" id="saved-lbl2"></span></div>
+
+  <!-- META -->
+  <div class="meta-card">
+    <div class="field"><label>Título del Ciclo</label><input id="m-title" placeholder="Ej: Reducción de errores de picking"></div>
+    <div class="field"><label>Área / Proceso</label><input id="m-area" placeholder="Ej: Almacén Central"></div>
+    <div class="field"><label>Responsable</label><input id="m-owner" placeholder="Nombre del líder"></div>
+    <div class="field"><label>Fecha Inicio</label><input id="m-start" type="date"></div>
+    <div class="field"><label>Fecha Cierre</label><input id="m-end" type="date"></div>
+    <div class="field"><label>Número de Ciclo</label><input id="m-cycle" placeholder="Ej: Ciclo 1 de 3"></div>
+    <div class="field field-full"><label>Problema / Oportunidad de Mejora</label>
+      <textarea id="m-problem" style="min-height:56px" placeholder="Describe brevemente el problema o la oportunidad que motiva este ciclo PDCA..."></textarea>
+    </div>
+  </div>
+
+  <!-- WHEEL -->
+  <div class="wheel-wrap">
+    <svg class="wheel" viewBox="0 0 200 200">
+      <circle cx="100" cy="100" r="90" fill="none" stroke="#30363d" stroke-width="2"/>
+      <!-- PLAN -->
+      <path d="M100,100 L100,10 A90,90 0 0,1 190,100 Z" fill="rgba(79,152,163,.25)" stroke="#4f98a3" stroke-width="1.5"/>
+      <text x="145" y="58" font-family="Inter,sans-serif" font-size="13" font-weight="700" fill="#4f98a3" text-anchor="middle">PLAN</text>
+      <!-- DO -->
+      <path d="M100,100 L190,100 A90,90 0 0,1 100,190 Z" fill="rgba(95,201,122,.2)" stroke="#5fc97a" stroke-width="1.5"/>
+      <text x="155" y="152" font-family="Inter,sans-serif" font-size="13" font-weight="700" fill="#5fc97a" text-anchor="middle">DO</text>
+      <!-- CHECK -->
+      <path d="M100,100 L100,190 A90,90 0 0,1 10,100 Z" fill="rgba(232,196,74,.2)" stroke="#e8c44a" stroke-width="1.5"/>
+      <text x="55" y="152" font-family="Inter,sans-serif" font-size="11" font-weight="700" fill="#e8c44a" text-anchor="middle">CHECK</text>
+      <!-- ACT -->
+      <path d="M100,100 L10,100 A90,90 0 0,1 100,10 Z" fill="rgba(188,140,255,.2)" stroke="#bc8cff" stroke-width="1.5"/>
+      <text x="48" y="56" font-family="Inter,sans-serif" font-size="13" font-weight="700" fill="#bc8cff" text-anchor="middle">ACT</text>
+      <!-- Center -->
+      <circle cx="100" cy="100" r="22" fill="#161b22" stroke="#30363d" stroke-width="1.5"/>
+      <text x="100" y="97" font-family="Inter,sans-serif" font-size="9" fill="#8b949e" text-anchor="middle">Mejora</text>
+      <text x="100" y="108" font-family="Inter,sans-serif" font-size="9" fill="#8b949e" text-anchor="middle">Continua</text>
+    </svg>
+  </div>
+
+  <!-- PDCA PHASES -->
+  <div class="pdca-grid">
+
+    <!-- PLAN -->
+    <div class="phase-card">
+      <div class="phase-head" style="background:rgba(79,152,163,.08);border-bottom:1px solid rgba(79,152,163,.2)">
+        <div class="phase-letter" style="background:rgba(79,152,163,.15);color:#4f98a3">P</div>
+        <div class="phase-info">
+          <div class="phase-name" style="color:#4f98a3">PLAN — Planificar</div>
+          <div class="phase-desc">¿Qué queremos mejorar? ¿Cuál es el objetivo y cómo lo vamos a lograr?</div>
+        </div>
+      </div>
+      <div class="phase-body">
+        <div class="phase-field"><label style="color:#4f98a3">Objetivo del ciclo</label>
+          <textarea id="p-goal" placeholder="Define el objetivo específico y medible de este ciclo PDCA..." oninput="autoSave()"></textarea>
+        </div>
+        <div class="phase-field"><label style="color:#4f98a3">Acciones planificadas</label>
+          <textarea id="p-actions" placeholder="Lista las acciones concretas planificadas, responsables y fechas..." oninput="autoSave()"></textarea>
+        </div>
+        <div class="phase-field"><label style="color:#4f98a3">KPIs / Métricas a medir</label>
+          <textarea id="p-kpis" style="min-height:52px" placeholder="¿Cómo vamos a medir el éxito? Ej: % errores picking, OTD, tiempo de ciclo..." oninput="autoSave()"></textarea>
+        </div>
+      </div>
+    </div>
+
+    <!-- DO -->
+    <div class="phase-card">
+      <div class="phase-head" style="background:rgba(95,201,122,.08);border-bottom:1px solid rgba(95,201,122,.2)">
+        <div class="phase-letter" style="background:rgba(95,201,122,.15);color:#5fc97a">D</div>
+        <div class="phase-info">
+          <div class="phase-name" style="color:#5fc97a">DO — Hacer</div>
+          <div class="phase-desc">¿Qué se ejecutó? Documenta lo que realmente se hizo, incluyendo desviaciones.</div>
+        </div>
+      </div>
+      <div class="phase-body">
+        <div class="phase-field"><label style="color:#5fc97a">Acciones ejecutadas</label>
+          <textarea id="d-done" placeholder="Describe las acciones que se ejecutaron concretamente durante este ciclo..." oninput="autoSave()"></textarea>
+        </div>
+        <div class="phase-field"><label style="color:#5fc97a">Desviaciones del plan</label>
+          <textarea id="d-deviations" placeholder="Qué no se pudo ejecutar según lo planificado y por qué..." oninput="autoSave()"></textarea>
+        </div>
+        <div class="phase-field"><label style="color:#5fc97a">Recursos utilizados</label>
+          <textarea id="d-resources" style="min-height:52px" placeholder="Tiempo, personas, materiales, herramientas utilizadas..." oninput="autoSave()"></textarea>
+        </div>
+      </div>
+    </div>
+
+    <!-- CHECK -->
+    <div class="phase-card">
+      <div class="phase-head" style="background:rgba(232,196,74,.08);border-bottom:1px solid rgba(232,196,74,.2)">
+        <div class="phase-letter" style="background:rgba(232,196,74,.15);color:#e8c44a">C</div>
+        <div class="phase-info">
+          <div class="phase-name" style="color:#e8c44a">CHECK — Verificar</div>
+          <div class="phase-desc">¿Los resultados fueron los esperados? Compara lo planificado vs lo obtenido.</div>
+        </div>
+      </div>
+      <div class="phase-body">
+        <div class="phase-field"><label style="color:#e8c44a">Resultados obtenidos (KPIs)</label>
+          <textarea id="c-results" placeholder="Compara los KPIs planificados vs los resultados reales obtenidos..." oninput="autoSave()"></textarea>
+        </div>
+        <div class="phase-field"><label style="color:#e8c44a">¿Se alcanzó el objetivo?</label>
+          <textarea id="c-achieved" placeholder="Sí / Parcialmente / No. Justifica con datos..." oninput="autoSave()"></textarea>
+        </div>
+        <div class="phase-field"><label style="color:#e8c44a">Hallazgos y observaciones</label>
+          <textarea id="c-findings" style="min-height:52px" placeholder="Qué aprendimos, qué fue inesperado, qué factores influyeron en los resultados..." oninput="autoSave()"></textarea>
+        </div>
+      </div>
+    </div>
+
+    <!-- ACT -->
+    <div class="phase-card">
+      <div class="phase-head" style="background:rgba(188,140,255,.08);border-bottom:1px solid rgba(188,140,255,.2)">
+        <div class="phase-letter" style="background:rgba(188,140,255,.15);color:#bc8cff">A</div>
+        <div class="phase-info">
+          <div class="phase-name" style="color:#bc8cff">ACT — Actuar</div>
+          <div class="phase-desc">¿Estandarizamos o ajustamos? Decide si se consolida la mejora o se reinicia el ciclo.</div>
+        </div>
+      </div>
+      <div class="phase-body">
+        <div class="phase-field"><label style="color:#bc8cff">Decisiones tomadas</label>
+          <textarea id="a-decision" placeholder="Estandarizar (Sí funcionó) / Ajustar y repetir ciclo / Escalar a otro proceso..." oninput="autoSave()"></textarea>
+        </div>
+        <div class="phase-field"><label style="color:#bc8cff">Estándares creados / actualizados</label>
+          <textarea id="a-standards" placeholder="Instructivos, SOPs, procedimientos, checklists creados o modificados..." oninput="autoSave()"></textarea>
+        </div>
+        <div class="phase-field"><label style="color:#bc8cff">Próximos pasos</label>
+          <textarea id="a-next" style="min-height:52px" placeholder="Si se inicia un nuevo ciclo PDCA, ¿cuál es el foco? ¿Qué queda pendiente?" oninput="autoSave()"></textarea>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- PLAN DE ACCIONES -->
+  <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:16px;overflow:hidden">
+    <div style="display:flex;align-items:center;gap:10px;padding:13px 18px;border-bottom:1px solid var(--faint);background:var(--surface2)">
+      <span style="font-size:15px">⚡</span>
+      <span style="font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)">Plan de Acciones del Ciclo</span>
+    </div>
+    <div style="padding:16px 18px">
+      <table class="act-table">
+        <thead><tr><th>#</th><th>Acción</th><th>Fase</th><th>Responsable</th><th>Fecha</th><th>Estado</th><th></th></tr></thead>
+        <tbody id="actions-body"></tbody>
+      </table>
+      <button class="add-btn" onclick="addAction()">+ Agregar acción</button>
+    </div>
+  </div>
+
+  <!-- LECCIONES APRENDIDAS -->
+  <div class="lessons-box">
+    <label>📖 Lecciones Aprendidas y Próximo Ciclo</label>
+    <textarea id="m-lessons" placeholder="Qué funcionó bien en este ciclo, qué haríamos diferente, qué mejoras se pueden replicar en otras áreas o procesos..."></textarea>
+  </div>
+
+</div>
+<div class="toast" id="toast">✅ Guardado en caché</div>
+<script>
+const KEY = 'largotek_pdca';
+const FIELDS = ['m-title','m-area','m-owner','m-start','m-end','m-cycle','m-problem','p-goal','p-actions','p-kpis','d-done','d-deviations','d-resources','c-results','c-achieved','c-findings','a-decision','a-standards','a-next','m-lessons'];
+
+function addAction(d={}) {
+  const tbody = document.getElementById('actions-body');
+  const n = tbody.querySelectorAll('tr').length + 1;
+  const tr = document.createElement('tr');
+  tr.innerHTML = `<td style="color:var(--muted);text-align:center;font-size:12px">${n}</td>
+    <td><input placeholder="Descripción de la acción" value="${d.action||''}" oninput="autoSave()"></td>
+    <td><select onchange="autoSave()">
+      <option ${d.phase==='Plan'?'selected':''}>Plan</option>
+      <option ${d.phase==='Do'?'selected':''}>Do</option>
+      <option ${d.phase==='Check'?'selected':''}>Check</option>
+      <option ${d.phase==='Act'?'selected':''}>Act</option>
+    </select></td>
+    <td><input placeholder="Nombre" value="${d.owner||''}" oninput="autoSave()"></td>
+    <td><input type="date" value="${d.date||''}" oninput="autoSave()"></td>
+    <td><select onchange="autoSave()">
+      <option ${d.status==='Pendiente'?'selected':''}>Pendiente</option>
+      <option ${d.status==='En curso'?'selected':''}>En curso</option>
+      <option ${d.status==='Completado'?'selected':''}>Completado</option>
+    </select></td>
+    <td><button class="del-btn" onclick="this.closest('tr').remove();autoSave()">✕</button></td>`;
+  tbody.appendChild(tr);
+}
+
+let saveTimer;
+function autoSave(){clearTimeout(saveTimer);saveTimer=setTimeout(saveLocal,1000);}
+
+function saveLocal(){
+  const d={fields:{},actions:[],ts:new Date().toISOString()};
+  FIELDS.forEach(id=>{const el=document.getElementById(id);if(el)d.fields[id]=el.value;});
+  document.querySelectorAll('#actions-body tr').forEach(tr=>{
+    const i=tr.querySelectorAll('input,select');
+    d.actions.push({action:i[0]?.value,phase:i[1]?.value,owner:i[2]?.value,date:i[3]?.value,status:i[4]?.value});
+  });
+  localStorage.setItem(KEY,JSON.stringify(d));
+  const t=new Date().toLocaleTimeString('es-AR',{hour:'2-digit',minute:'2-digit'});
+  ['saved-lbl','saved-lbl2'].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent='✓ Guardado '+t;});
+  const toast=document.getElementById('toast');toast.classList.add('show');setTimeout(()=>toast.classList.remove('show'),2200);
+}
+
+function loadLocal(){
+  const raw=localStorage.getItem(KEY);if(!raw)return;
+  try{
+    const d=JSON.parse(raw);
+    FIELDS.forEach(id=>{const el=document.getElementById(id);if(el&&d.fields[id]!=null)el.value=d.fields[id];});
+    (d.actions||[]).forEach(a=>addAction(a));
+    if(d.ts){const t=new Date(d.ts).toLocaleString('es-AR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});['saved-lbl','saved-lbl2'].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent='Último guardado: '+t;});}
+  }catch(e){}
+}
+
+function clearAll(){if(!confirm('¿Limpiar el ciclo PDCA?'))return;localStorage.removeItem(KEY);location.reload();}
+document.querySelectorAll('input,textarea,select').forEach(el=>el.addEventListener('input',autoSave));
+window.addEventListener('load',loadLocal);
+</script>
+<script src="branding.js"></script>
 </body>
 </html>
