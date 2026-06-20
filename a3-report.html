@@ -7,11 +7,445 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300..700&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/styles.css">
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{
+      --bg:#0d1117;--surface:#161b22;--surface2:#21262d;--border:#30363d;
+      --text:#e6edf3;--muted:#8b949e;--faint:#3d444d;
+      --accent:#4f98a3;--green:#5fc97a;--yellow:#e8c44a;--orange:#f78c3f;--purple:#bc8cff;--red:#f85149;
+      --radius:14px;
+    }
+    html{scroll-behavior:smooth}
+    body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+
+    /* TOPBAR */
+    .topbar{display:flex;align-items:center;justify-content:space-between;padding:14px 28px;border-bottom:1px solid var(--border);background:var(--surface)}
+    .topbar-brand{display:flex;align-items:center;gap:10px;font-size:13px;font-weight:600;color:var(--muted);text-decoration:none}
+    .topbar-brand span{color:var(--accent)}
+    .topbar-actions{display:flex;gap:8px}
+    .btn{display:inline-flex;align-items:center;gap:6px;padding:7px 16px;border-radius:8px;border:1.5px solid var(--border);background:transparent;color:var(--muted);font-size:12px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;transition:all .18s;text-decoration:none}
+    .btn:hover{border-color:var(--accent);color:var(--accent)}
+    .btn-primary{background:var(--accent);color:#fff;border-color:var(--accent)}
+    .btn-primary:hover{background:#3a7f8a}
+
+    /* HERO */
+    .hero{padding:36px 32px 24px;max-width:1100px;margin:0 auto}
+    .hero-eye{font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--accent);margin-bottom:10px}
+    .hero h1{font-family:'Instrument Serif',serif;font-size:clamp(1.6rem,3vw,2.4rem);margin-bottom:8px}
+    .hero-sub{font-size:13px;color:var(--muted);line-height:1.7;max-width:600px}
+
+    /* MAIN LAYOUT */
+    .a3-wrap{max-width:1100px;margin:0 auto;padding:0 32px 80px}
+
+    /* STATUS BAR */
+    .status-bar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:24px;align-items:center}
+    .status-badge{display:inline-flex;align-items:center;gap:5px;padding:5px 12px;border-radius:99px;font-size:11px;font-weight:700;border:1px solid}
+    .project-meta{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:18px 20px;margin-bottom:24px}
+    .meta-item label{display:block;font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:4px}
+    .meta-item input,.meta-item select{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:7px 10px;font-size:13px;color:var(--text);font-family:'Inter',sans-serif;transition:border-color .18s}
+    .meta-item input:focus,.meta-item select:focus{outline:none;border-color:var(--accent)}
+
+    /* A3 GRID */
+    .a3-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+    @media(max-width:700px){.a3-grid{grid-template-columns:1fr}}
+    .a3-grid-full{grid-column:1/-1}
+
+    /* CARDS */
+    .a3-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
+    .a3-card-header{display:flex;align-items:center;gap:10px;padding:14px 18px;border-bottom:1px solid var(--faint)}
+    .a3-card-icon{font-size:16px}
+    .a3-card-title{font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+    .a3-card-body{padding:16px 18px}
+    .a3-card textarea{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:10px 13px;font-size:13px;color:var(--text);font-family:'Inter',sans-serif;resize:vertical;min-height:90px;line-height:1.65;transition:border-color .18s}
+    .a3-card textarea:focus{outline:none;border-color:var(--accent)}
+    .a3-card textarea::placeholder{color:var(--faint)}
+    .field-label{font-size:11px;font-weight:600;color:var(--muted);margin-bottom:5px;display:block;margin-top:12px}
+    .field-label:first-child{margin-top:0}
+
+    /* ROWS TABLE */
+    .row-table{width:100%;border-collapse:collapse;font-size:12px}
+    .row-table th{text-align:left;padding:7px 10px;background:var(--surface2);color:var(--muted);font-weight:600;font-size:11px;letter-spacing:.04em;white-space:nowrap}
+    .row-table td{padding:6px 8px;border-top:1px solid var(--faint)}
+    .row-table td input,.row-table td select{width:100%;background:transparent;border:none;color:var(--text);font-size:12px;font-family:'Inter',sans-serif;padding:2px 4px}
+    .row-table td input:focus,.row-table td select:focus{outline:1px solid var(--accent);border-radius:3px}
+    .row-table select{background:var(--surface2);border:1px solid var(--border);border-radius:4px;padding:3px 6px;cursor:pointer}
+    .add-row-btn{display:inline-flex;align-items:center;gap:5px;margin-top:8px;padding:6px 12px;border-radius:6px;border:1px dashed var(--border);background:transparent;color:var(--muted);font-size:11px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;transition:all .18s}
+    .add-row-btn:hover{border-color:var(--accent);color:var(--accent)}
+    .del-btn{background:transparent;border:none;color:var(--faint);cursor:pointer;font-size:13px;padding:2px 5px;transition:color .15s}
+    .del-btn:hover{color:var(--red)}
+
+    /* KPI BARS */
+    .kpi-row{display:flex;flex-direction:column;gap:8px}
+    .kpi-item{display:grid;grid-template-columns:140px 1fr 56px 56px;gap:8px;align-items:center;font-size:12px}
+    .kpi-item input{background:var(--surface2);border:1px solid var(--border);border-radius:5px;padding:5px 8px;color:var(--text);font-family:'Inter',sans-serif;font-size:12px;width:100%}
+    .kpi-item input:focus{outline:none;border-color:var(--accent)}
+    .kpi-bar-wrap{background:var(--faint);border-radius:99px;height:6px;overflow:hidden}
+    .kpi-bar-fill{height:100%;border-radius:99px;background:var(--accent);transition:width .4s}
+    .kpi-add{display:inline-flex;align-items:center;gap:5px;margin-top:8px;padding:6px 12px;border-radius:6px;border:1px dashed var(--border);background:transparent;color:var(--muted);font-size:11px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;transition:all .18s}
+    .kpi-add:hover{border-color:var(--accent);color:var(--accent)}
+
+    /* FISHBONE MINI */
+    .cause-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+    .cause-cat{background:var(--surface2);border-radius:8px;padding:10px 12px}
+    .cause-cat-label{font-size:10px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;margin-bottom:6px}
+    .cause-cat textarea{width:100%;background:transparent;border:none;color:var(--muted);font-size:11px;font-family:'Inter',sans-serif;resize:none;min-height:52px;line-height:1.55}
+    .cause-cat textarea:focus{outline:none;color:var(--text)}
+
+    /* STATUS DOT */
+    .dot{width:8px;height:8px;border-radius:50%;display:inline-block;flex-shrink:0}
+
+    /* TOAST */
+    .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:#1e3a2e;border:1px solid var(--green);color:var(--green);padding:10px 20px;border-radius:99px;font-size:13px;font-weight:600;opacity:0;transition:all .3s;z-index:999;white-space:nowrap}
+    .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+    /* PRINT */
+    @media print{
+      .topbar,.topbar-actions,.btn,.add-row-btn,.del-btn,.kpi-add{display:none!important}
+      body{background:#fff;color:#1a1a1a}
+      .a3-card{border-color:#ccc;background:#fff}
+      .a3-card textarea,.meta-item input,.row-table td input{background:#f9f9f9;color:#1a1a1a}
+      .a3-card-header{background:#f3f3f3}
+    }
+  </style>
 </head>
 <body>
-  <div id="app"></div>
-  <script src="js/a3-report.js"></script>
-  <script src="branding.js"></script>
+
+<div class="topbar">
+  <a href="index.html" class="topbar-brand">← <span>Largotek</span> Lean Suite</a>
+  <div class="topbar-actions">
+    <button class="btn" onclick="clearAll()">🗑 Limpiar</button>
+    <button class="btn" onclick="saveLocal()">💾 Guardar</button>
+    <button class="btn btn-primary" onclick="window.print()">🖨 Imprimir / PDF</button>
+  </div>
+</div>
+
+<div class="hero">
+  <div class="hero-eye">📄 A3 Report — Largotek Lean Suite</div>
+  <h1>Reporte A3 de Mejora</h1>
+  <p class="hero-sub">Formato estándar Toyota A3 para documentar el análisis completo del problema: contexto, estado actual, causas raíz, contramedidas y plan de seguimiento.</p>
+</div>
+
+<div class="a3-wrap">
+
+  <!-- STATUS -->
+  <div class="status-bar">
+    <div class="status-badge" style="background:rgba(79,152,163,.1);border-color:rgba(79,152,163,.3);color:var(--accent)"><span class="dot" style="background:var(--accent)"></span> En progreso</div>
+    <span style="font-size:12px;color:var(--muted)" id="last-saved-label"></span>
+  </div>
+
+  <!-- METADATOS DEL PROYECTO -->
+  <div class="project-meta">
+    <div class="meta-item"><label>Título del proyecto</label><input id="m-title" placeholder="Ej: Reducción de errores de picking"></div>
+    <div class="meta-item"><label>Área / Proceso</label><input id="m-area" placeholder="Ej: Almacén Central"></div>
+    <div class="meta-item"><label>Responsable</label><input id="m-owner" placeholder="Nombre del líder"></div>
+    <div class="meta-item"><label>Equipo</label><input id="m-team" placeholder="Integrantes clave"></div>
+    <div class="meta-item"><label>Fecha inicio</label><input id="m-start" type="date"></div>
+    <div class="meta-item"><label>Fecha meta</label><input id="m-end" type="date"></div>
+    <div class="meta-item"><label>Estado</label>
+      <select id="m-status">
+        <option value="draft">🟡 Borrador</option>
+        <option value="active">🔵 En progreso</option>
+        <option value="review">🟠 En revisión</option>
+        <option value="closed">🟢 Cerrado</option>
+      </select>
+    </div>
+    <div class="meta-item"><label>Versión</label><input id="m-version" placeholder="v1.0"></div>
+  </div>
+
+  <!-- A3 GRID -->
+  <div class="a3-grid">
+
+    <!-- 1. BACKGROUND -->
+    <div class="a3-card">
+      <div class="a3-card-header">
+        <span class="a3-card-icon">📋</span>
+        <span class="a3-card-title">1 · Background (Contexto)</span>
+      </div>
+      <div class="a3-card-body">
+        <span class="field-label">¿Por qué este problema es importante? Contexto del negocio.</span>
+        <textarea id="f-background" placeholder="Ej: El almacén recibe quejas frecuentes por tiempos de entrega elevados en zona rural y una tasa significativa de entregas incorrectas e incompletas. Esto impacta la satisfacción del cliente y genera costos de re-entrega evitables..."></textarea>
+      </div>
+    </div>
+
+    <!-- 2. PROBLEMA -->
+    <div class="a3-card">
+      <div class="a3-card-header">
+        <span class="a3-card-icon">🚨</span>
+        <span class="a3-card-title">2 · Enunciado del Problema</span>
+      </div>
+      <div class="a3-card-body">
+        <span class="field-label">Descripción específica, cuantificada y delimitada del problema.</span>
+        <textarea id="f-problem" placeholder="Ej: El almacén presenta un X% de entregas fuera del plazo acordado (especialmente zona rural) y un Y% de pedidos con producto incorrecto o cantidad incompleta, en el período Enero–Mayo 2026..."></textarea>
+        <span class="field-label" style="margin-top:10px">Alcance (qué incluye y qué no)</span>
+        <textarea id="f-scope" style="min-height:60px" placeholder="Incluye: proceso de picking, verificación, despacho y transporte.&#10;Excluye: sistema de pedidos del cliente, proveedores."></textarea>
+      </div>
+    </div>
+
+    <!-- 3. ESTADO ACTUAL -->
+    <div class="a3-card a3-grid-full">
+      <div class="a3-card-header">
+        <span class="a3-card-icon">📊</span>
+        <span class="a3-card-title">3 · Estado Actual — Datos y KPIs</span>
+      </div>
+      <div class="a3-card-body">
+        <span class="field-label">Descripción del estado actual (VSM, hallazgos Gemba, auditoría 5S)</span>
+        <textarea id="f-current" style="min-height:70px" placeholder="Ej: VSM revela que los pedidos rurales se acumulan 2-3 días antes de salir. No existe paso de verificación formal antes del empaque. Puntaje 5S inicial: 38/125 (S2 Seiton: 1/25)..."></textarea>
+        <span class="field-label" style="margin-top:14px">KPIs del estado actual</span>
+        <div class="kpi-row" id="kpi-current-list"></div>
+        <button class="kpi-add" onclick="addKpi('kpi-current-list')">+ Agregar KPI</button>
+      </div>
+    </div>
+
+    <!-- 4. OBJETIVO -->
+    <div class="a3-card">
+      <div class="a3-card-header">
+        <span class="a3-card-icon">🎯</span>
+        <span class="a3-card-title">4 · Objetivo</span>
+      </div>
+      <div class="a3-card-body">
+        <span class="field-label">¿Qué resultado queremos lograr? Con meta cuantificada y plazo.</span>
+        <textarea id="f-goal" placeholder="Ej: Reducir el % de entregas tardías a menos del 5% y el error de picking a menos del 2%, en un plazo de 90 días desde el inicio del proyecto..."></textarea>
+        <span class="field-label">KPIs meta</span>
+        <div class="kpi-row" id="kpi-target-list"></div>
+        <button class="kpi-add" onclick="addKpi('kpi-target-list')">+ Agregar KPI meta</button>
+      </div>
+    </div>
+
+    <!-- 5. ANÁLISIS -->
+    <div class="a3-card">
+      <div class="a3-card-header">
+        <span class="a3-card-icon">🔍</span>
+        <span class="a3-card-title">5 · Análisis de Causa Raíz</span>
+      </div>
+      <div class="a3-card-body">
+        <span class="field-label">Causas raíz identificadas (Ishikawa + 5 Porqués)</span>
+        <textarea id="f-rootcause" style="min-height:70px" placeholder="Ej: Causa raíz principal: ausencia de estándar de ubicación y responsable formal de gestión del almacén (S4 Seiketsu). Causa secundaria: sin paso de verificación antes del empaque bajo presión de tiempo..."></textarea>
+        <span class="field-label" style="margin-top:14px">Resumen por categoría 6M</span>
+        <div class="cause-grid">
+          <div class="cause-cat"><div class="cause-cat-label" style="color:#f78c3f">Método</div><textarea placeholder="Causas de método..."></textarea></div>
+          <div class="cause-cat"><div class="cause-cat-label" style="color:#4f98a3">Mano de Obra</div><textarea placeholder="Causas de personas..."></textarea></div>
+          <div class="cause-cat"><div class="cause-cat-label" style="color:#e8c44a">Material</div><textarea placeholder="Causas de materiales..."></textarea></div>
+          <div class="cause-cat"><div class="cause-cat-label" style="color:#bc8cff">Máquina/Sistema</div><textarea placeholder="Causas de sistema/equipo..."></textarea></div>
+          <div class="cause-cat"><div class="cause-cat-label" style="color:#5fc97a">Medio Ambiente</div><textarea placeholder="Causas del entorno..."></textarea></div>
+          <div class="cause-cat"><div class="cause-cat-label" style="color:#f85149">Medición</div><textarea placeholder="Causas de falta de datos..."></textarea></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 6. CONTRAMEDIDAS -->
+    <div class="a3-card a3-grid-full">
+      <div class="a3-card-header">
+        <span class="a3-card-icon">⚡</span>
+        <span class="a3-card-title">6 · Contramedidas (Plan de Acción)</span>
+      </div>
+      <div class="a3-card-body">
+        <table class="row-table" id="actions-table">
+          <thead>
+            <tr>
+              <th style="width:32px">#</th>
+              <th style="min-width:200px">Acción</th>
+              <th style="min-width:120px">Responsable</th>
+              <th style="min-width:100px">Fecha límite</th>
+              <th style="min-width:90px">Estado</th>
+              <th style="min-width:140px">Resultado esperado</th>
+              <th style="width:28px"></th>
+            </tr>
+          </thead>
+          <tbody id="actions-body"></tbody>
+        </table>
+        <button class="add-row-btn" onclick="addAction()">+ Agregar acción</button>
+      </div>
+    </div>
+
+    <!-- 7. PLAN DE IMPLEMENTACIÓN -->
+    <div class="a3-card">
+      <div class="a3-card-header">
+        <span class="a3-card-icon">📅</span>
+        <span class="a3-card-title">7 · Plan de Implementación</span>
+      </div>
+      <div class="a3-card-body">
+        <span class="field-label">Cronograma y fases de ejecución</span>
+        <textarea id="f-plan" placeholder="Sem 1-2: Definir (Charter, Gemba)&#10;Sem 3-4: Medir (VSM, 5S, Pareto)&#10;Sem 5-6: Analizar (Ishikawa, 5 Porqués)&#10;Sem 7-10: Mejorar (5S, layout, instructivos)&#10;Sem 11-13: Controlar (KPIs, auditoría 5S)"></textarea>
+        <span class="field-label">Recursos necesarios</span>
+        <textarea id="f-resources" style="min-height:60px" placeholder="Ej: 2 días de consultor por semana · Materiales 5S (etiquetas, pintura, señalética) · Tiempo del equipo de almacén para capacitación..."></textarea>
+      </div>
+    </div>
+
+    <!-- 8. SEGUIMIENTO -->
+    <div class="a3-card">
+      <div class="a3-card-header">
+        <span class="a3-card-icon">📈</span>
+        <span class="a3-card-title">8 · Seguimiento y Resultados</span>
+      </div>
+      <div class="a3-card-body">
+        <span class="field-label">Resultados obtenidos vs. meta (completar en fase Controlar)</span>
+        <textarea id="f-results" placeholder="Ej: Al cierre del proyecto:&#10;- OTD zona rural: 96% (meta: 95%) ✅&#10;- Error-Free Rate: 98.5% (meta: 98%) ✅&#10;- Puntaje 5S: 82/125 (meta: 75) ✅&#10;- Lead Time rural: -38% (meta: -40%) 🔄"></textarea>
+        <span class="field-label">Lecciones aprendidas</span>
+        <textarea id="f-lessons" style="min-height:60px" placeholder="Qué funcionó bien, qué haríamos diferente, qué replicar en otras áreas..."></textarea>
+      </div>
+    </div>
+
+    <!-- 9. NOTAS -->
+    <div class="a3-card a3-grid-full">
+      <div class="a3-card-header">
+        <span class="a3-card-icon">📝</span>
+        <span class="a3-card-title">9 · Notas adicionales / Aprobaciones</span>
+      </div>
+      <div class="a3-card-body">
+        <textarea id="f-notes" style="min-height:70px" placeholder="Observaciones del equipo, aprobaciones del management, restricciones identificadas, riesgos del proyecto..."></textarea>
+      </div>
+    </div>
+
+  </div><!-- /a3-grid -->
+</div><!-- /a3-wrap -->
+
+<div class="toast" id="toast">✅ Guardado localmente</div>
+
+<script>
+const STORAGE_KEY = 'largotek_a3';
+
+function addKpi(containerId) {
+  const container = document.getElementById(containerId);
+  const idx = container.querySelectorAll('.kpi-item').length + 1;
+  const div = document.createElement('div');
+  div.className = 'kpi-item';
+  div.innerHTML = `
+    <input placeholder="KPI" oninput="autoSave()">
+    <div>
+      <div class="kpi-bar-wrap"><div class="kpi-bar-fill" style="width:0%"></div></div>
+    </div>
+    <input placeholder="Actual" oninput="updateBar(this);autoSave()" style="text-align:center">
+    <input placeholder="Meta" oninput="updateBar(this);autoSave()" style="text-align:center">
+    <button class="del-btn" onclick="this.closest('.kpi-item').remove();autoSave()">✕</button>
+  `;
+  container.appendChild(div);
+}
+
+function updateBar(input) {
+  const item = input.closest('.kpi-item');
+  const inputs = item.querySelectorAll('input');
+  const actual = parseFloat(inputs[1].value) || 0;
+  const meta = parseFloat(inputs[2].value) || 100;
+  const pct = Math.min(100, Math.round((actual / meta) * 100));
+  item.querySelector('.kpi-bar-fill').style.width = pct + '%';
+  const color = pct >= 95 ? '#5fc97a' : pct >= 70 ? '#e8c44a' : '#f85149';
+  item.querySelector('.kpi-bar-fill').style.background = color;
+}
+
+let actionCount = 0;
+function addAction() {
+  actionCount++;
+  const tbody = document.getElementById('actions-body');
+  const tr = document.createElement('tr');
+  tr.dataset.id = actionCount;
+  tr.innerHTML = `
+    <td style="color:var(--muted);text-align:center;font-weight:700">${actionCount}</td>
+    <td><input placeholder="Describir la acción concreta..." oninput="autoSave()"></td>
+    <td><input placeholder="Nombre" oninput="autoSave()"></td>
+    <td><input type="date" oninput="autoSave()"></td>
+    <td>
+      <select onchange="updateRowColor(this);autoSave()">
+        <option value="pending">⏳ Pendiente</option>
+        <option value="inprogress">🔵 En curso</option>
+        <option value="done">✅ Completado</option>
+        <option value="blocked">🔴 Bloqueado</option>
+      </select>
+    </td>
+    <td><input placeholder="Qué debe mejorar" oninput="autoSave()"></td>
+    <td><button class="del-btn" onclick="this.closest('tr').remove();autoSave()">✕</button></td>
+  `;
+  tbody.appendChild(tr);
+}
+
+function updateRowColor(sel) {
+  const colors = { pending: '', inprogress: 'rgba(79,152,163,.06)', done: 'rgba(95,201,122,.06)', blocked: 'rgba(248,81,73,.06)' };
+  sel.closest('tr').style.background = colors[sel.value] || '';
+}
+
+let saveTimer;
+function autoSave() { clearTimeout(saveTimer); saveTimer = setTimeout(saveLocal, 1200); }
+
+function saveLocal() {
+  const data = { meta: {}, fields: {}, kpiCurrent: [], kpiTarget: [], actions: [] };
+  ['m-title','m-area','m-owner','m-team','m-start','m-end','m-status','m-version'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) data.meta[id] = el.value;
+  });
+  ['f-background','f-problem','f-scope','f-current','f-goal','f-rootcause','f-plan','f-resources','f-results','f-lessons','f-notes'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) data.fields[id] = el.value;
+  });
+  document.querySelectorAll('#kpi-current-list .kpi-item').forEach(item => {
+    const inputs = item.querySelectorAll('input');
+    data.kpiCurrent.push({ name: inputs[0].value, actual: inputs[1].value, meta: inputs[2].value });
+  });
+  document.querySelectorAll('#kpi-target-list .kpi-item').forEach(item => {
+    const inputs = item.querySelectorAll('input');
+    data.kpiTarget.push({ name: inputs[0].value, actual: inputs[1].value, meta: inputs[2].value });
+  });
+  document.querySelectorAll('#actions-body tr').forEach(tr => {
+    const inputs = tr.querySelectorAll('input,select');
+    data.actions.push({ action: inputs[0]?.value, owner: inputs[1]?.value, date: inputs[2]?.value, status: inputs[3]?.value, result: inputs[4]?.value });
+  });
+  data.savedAt = new Date().toISOString();
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+  const lbl = document.getElementById('last-saved-label');
+  if (lbl) lbl.textContent = 'Guardado: ' + new Date().toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' });
+  const t = document.getElementById('toast');
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2200);
+}
+
+function loadLocal() {
+  const raw = localStorage.getItem(STORAGE_KEY);
+  if (!raw) return;
+  try {
+    const data = JSON.parse(raw);
+    if (data.meta) Object.entries(data.meta).forEach(([id, val]) => { const el = document.getElementById(id); if (el) el.value = val; });
+    if (data.fields) Object.entries(data.fields).forEach(([id, val]) => { const el = document.getElementById(id); if (el) el.value = val; });
+    (data.kpiCurrent || []).forEach(k => {
+      addKpi('kpi-current-list');
+      const items = document.querySelectorAll('#kpi-current-list .kpi-item');
+      const item = items[items.length - 1];
+      const inputs = item.querySelectorAll('input');
+      inputs[0].value = k.name || ''; inputs[1].value = k.actual || ''; inputs[2].value = k.meta || '';
+      updateBar(inputs[1]);
+    });
+    (data.kpiTarget || []).forEach(k => {
+      addKpi('kpi-target-list');
+      const items = document.querySelectorAll('#kpi-target-list .kpi-item');
+      const item = items[items.length - 1];
+      const inputs = item.querySelectorAll('input');
+      inputs[0].value = k.name || ''; inputs[1].value = k.actual || ''; inputs[2].value = k.meta || '';
+      updateBar(inputs[1]);
+    });
+    (data.actions || []).forEach(a => {
+      addAction();
+      const rows = document.querySelectorAll('#actions-body tr');
+      const tr = rows[rows.length - 1];
+      const inputs = tr.querySelectorAll('input,select');
+      if (inputs[0]) inputs[0].value = a.action || '';
+      if (inputs[1]) inputs[1].value = a.owner || '';
+      if (inputs[2]) inputs[2].value = a.date || '';
+      if (inputs[3]) { inputs[3].value = a.status || 'pending'; updateRowColor(inputs[3]); }
+      if (inputs[4]) inputs[4].value = a.result || '';
+    });
+    if (data.savedAt) {
+      const lbl = document.getElementById('last-saved-label');
+      if (lbl) lbl.textContent = 'Último guardado: ' + new Date(data.savedAt).toLocaleString('es-AR', { day:'2-digit', month:'2-digit', hour:'2-digit', minute:'2-digit' });
+    }
+  } catch(e) { console.warn('Error cargando A3:', e); }
+}
+
+function clearAll() {
+  if (!confirm('¿Limpiar todo el A3? Esta acción no se puede deshacer.')) return;
+  localStorage.removeItem(STORAGE_KEY);
+  location.reload();
+}
+
+document.querySelectorAll('input,textarea,select').forEach(el => el.addEventListener('input', autoSave));
+window.addEventListener('load', loadLocal);
+</script>
+<script src="branding.js"></script>
 </body>
 </html>
