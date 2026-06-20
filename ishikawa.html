@@ -1,17 +1,233 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Ishikawa — Largotek</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300..700&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/styles.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Ishikawa — Largotek</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300..700&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#0d1117;--surface:#161b22;--surface2:#21262d;--border:#30363d;--text:#e6edf3;--muted:#8b949e;--faint:#3d444d;--green:#5fc97a;--red:#f85149;--radius:14px;
+  --c1:#f78c3f;--c2:#4f98a3;--c3:#e8c44a;--c4:#bc8cff;--c5:#5fc97a;--c6:#f85149}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:13px 28px;border-bottom:1px solid var(--border);background:var(--surface)}
+.topbar-brand{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:var(--muted);text-decoration:none}
+.topbar-brand span{color:var(--c1)}
+.topbar-right{display:flex;align-items:center;gap:8px}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:7px 15px;border-radius:8px;border:1.5px solid var(--border);background:transparent;color:var(--muted);font-size:12px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;transition:all .18s}
+.btn:hover{border-color:var(--c1);color:var(--c1)}
+.btn-primary{background:var(--c1);color:#fff;border-color:var(--c1)}
+.btn-primary:hover{opacity:.88}
+.btn-danger:hover{border-color:var(--red);color:var(--red)}
+.hero{padding:32px 32px 20px;max-width:1000px;margin:0 auto}
+.hero-eye{font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--c1);margin-bottom:8px}
+.hero h1{font-family:'Instrument Serif',serif;font-size:clamp(1.5rem,3vw,2.2rem);margin-bottom:6px}
+.hero-sub{font-size:13px;color:var(--muted);line-height:1.7}
+.wrap{max-width:1000px;margin:0 auto;padding:0 32px 80px}
+.saved-bar{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:8px}
+.saved-label{font-size:11px;color:var(--muted)}
+/* META CARD */
+.meta-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:18px 20px;margin-bottom:20px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+@media(max-width:600px){.meta-card{grid-template-columns:1fr}}
+.field{display:flex;flex-direction:column;gap:5px}
+.field label{font-size:10px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--muted)}
+.field input,.field textarea{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:9px 12px;font-size:13px;color:var(--text);font-family:'Inter',sans-serif;transition:border-color .18s;width:100%}
+.field textarea{resize:vertical;min-height:64px;line-height:1.65}
+.field input:focus,.field textarea:focus{outline:none;border-color:var(--c1)}
+.field input::placeholder,.field textarea::placeholder{color:var(--faint)}
+.field-full{grid-column:1/-1}
+/* FISHBONE SVG DIAGRAM */
+.diagram-wrap{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px;margin-bottom:20px;overflow-x:auto}
+.diagram-title{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:14px}
+svg.fishbone{width:100%;min-width:700px;height:320px;display:block}
+/* 6M GRID */
+.causes-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-bottom:20px}
+@media(max-width:700px){.causes-grid{grid-template-columns:1fr 1fr}}
+@media(max-width:450px){.causes-grid{grid-template-columns:1fr}}
+.cause-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
+.cause-card-head{padding:11px 14px;display:flex;align-items:center;gap:8px}
+.cause-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.cause-card-title{font-size:11px;font-weight:700;letter-spacing:.07em;text-transform:uppercase}
+.cause-card-body{padding:0 14px 14px}
+.cause-card textarea{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:9px 11px;font-size:12px;color:var(--text);font-family:'Inter',sans-serif;resize:vertical;min-height:90px;line-height:1.6;transition:border-color .18s}
+.cause-card textarea:focus{outline:none}
+.cause-card textarea::placeholder{color:var(--faint)}
+/* ROOT / CONCLUSION */
+.conclusion-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:20px}
+@media(max-width:580px){.conclusion-grid{grid-template-columns:1fr}}
+.conclusion-box{border-radius:var(--radius);padding:16px 18px}
+.conclusion-box label{font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;display:block;margin-bottom:8px}
+.conclusion-box textarea{width:100%;background:transparent;border:none;color:var(--text);font-family:'Inter',sans-serif;font-size:13px;line-height:1.65;resize:vertical;min-height:72px}
+.conclusion-box textarea:focus{outline:none}
+.conclusion-box textarea::placeholder{color:rgba(255,255,255,.15)}
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:#1e3a2e;border:1px solid var(--green);color:var(--green);padding:10px 22px;border-radius:99px;font-size:13px;font-weight:600;opacity:0;transition:all .3s;z-index:999;white-space:nowrap}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+@media print{
+  .topbar,.btn{display:none!important}
+  body{background:#fff;color:#111}
+  .meta-card,.cause-card,.diagram-wrap{border-color:#ccc;background:#fff}
+  .cause-card-head{background:#f3f3f3}
+  .field input,.field textarea,.cause-card textarea,.conclusion-box textarea{background:#f9f9f9;color:#111}
+}
+</style>
 </head>
 <body>
-  <div id="app"></div>
-  <script src="js/ishikawa.js"></script>
-  <script src="branding.js"></script>
+<div class="topbar">
+  <a href="index.html" class="topbar-brand">← <span>Largotek</span> Lean Suite</a>
+  <div class="topbar-right">
+    <span class="saved-label" id="saved-lbl"></span>
+    <button class="btn btn-danger" onclick="clearAll()">🗑 Limpiar</button>
+    <button class="btn" onclick="saveLocal()">💾 Guardar</button>
+    <button class="btn btn-primary" onclick="window.print()">🖨 PDF</button>
+  </div>
+</div>
+<div class="hero">
+  <div class="hero-eye">🐟 Diagrama Ishikawa — Largotek Lean Suite</div>
+  <h1>Diagrama de Causa–Efecto (Ishikawa)</h1>
+  <p class="hero-sub">Herramienta visual para identificar y organizar las causas potenciales de un problema. Utiliza las 6M: Método, Mano de Obra, Material, Máquina, Medio Ambiente y Medición.</p>
+</div>
+<div class="wrap">
+  <div class="saved-bar">
+    <div></div>
+    <span class="saved-label" id="saved-lbl2"></span>
+  </div>
+
+  <!-- META -->
+  <div class="meta-card">
+    <div class="field"><label>Título del Análisis</label><input id="m-title" placeholder="Ej: Causas de errores de picking en almacén"></div>
+    <div class="field"><label>Área / Proceso</label><input id="m-area" placeholder="Ej: Almacén Central"></div>
+    <div class="field"><label>Fecha</label><input id="m-date" type="date"></div>
+    <div class="field field-full"><label>🚨 Efecto / Problema (cabeza del pez)</label>
+      <textarea id="m-effect" style="min-height:48px" placeholder="Ej: Alta tasa de pedidos entregados con producto incorrecto o cantidad incompleta al cliente final."></textarea>
+    </div>
+  </div>
+
+  <!-- FISHBONE SVG -->
+  <div class="diagram-wrap">
+    <div class="diagram-title">🐟 Vista del Diagrama (se actualiza con el efecto)</div>
+    <svg class="fishbone" viewBox="0 0 900 300" id="fishbone-svg">
+      <!-- Spine -->
+      <line x1="80" y1="150" x2="820" y2="150" stroke="#4f98a3" stroke-width="3"/>
+      <!-- Arrowhead -->
+      <polygon points="820,140 840,150 820,160" fill="#4f98a3"/>
+      <!-- Effect box -->
+      <rect x="840" y="118" width="52" height="64" rx="8" fill="#1a2535" stroke="#4f98a3" stroke-width="1.5"/>
+      <text x="866" y="148" font-family="Inter,sans-serif" font-size="9" fill="#e6edf3" text-anchor="middle" id="svg-effect-label">Efecto</text>
+      <!-- TOP BONES: Método, Material, Medición -->
+      <!-- Metodo -->
+      <line x1="180" y1="150" x2="260" y2="60" stroke="#f78c3f" stroke-width="2"/>
+      <text x="248" y="52" font-family="Inter,sans-serif" font-size="11" font-weight="700" fill="#f78c3f" text-anchor="middle">Método</text>
+      <!-- Material -->
+      <line x1="420" y1="150" x2="500" y2="60" stroke="#e8c44a" stroke-width="2"/>
+      <text x="490" y="52" font-family="Inter,sans-serif" font-size="11" font-weight="700" fill="#e8c44a" text-anchor="middle">Material</text>
+      <!-- Medicion -->
+      <line x1="640" y1="150" x2="720" y2="60" stroke="#f85149" stroke-width="2"/>
+      <text x="712" y="52" font-family="Inter,sans-serif" font-size="11" font-weight="700" fill="#f85149" text-anchor="middle">Medición</text>
+      <!-- BOTTOM BONES: Mano de Obra, Maquina, Medio Ambiente -->
+      <!-- Mano de Obra -->
+      <line x1="280" y1="150" x2="200" y2="240" stroke="#4f98a3" stroke-width="2"/>
+      <text x="188" y="254" font-family="Inter,sans-serif" font-size="11" font-weight="700" fill="#4f98a3" text-anchor="middle">Mano de Obra</text>
+      <!-- Maquina -->
+      <line x1="520" y1="150" x2="440" y2="240" stroke="#bc8cff" stroke-width="2"/>
+      <text x="430" y="254" font-family="Inter,sans-serif" font-size="11" font-weight="700" fill="#bc8cff" text-anchor="middle">Máquina</text>
+      <!-- Medio Ambiente -->
+      <line x1="720" y1="150" x2="660" y2="240" stroke="#5fc97a" stroke-width="2"/>
+      <text x="654" y="254" font-family="Inter,sans-serif" font-size="11" font-weight="700" fill="#5fc97a" text-anchor="middle">Medio Amb.</text>
+    </svg>
+  </div>
+
+  <!-- 6M CARDS -->
+  <div class="causes-grid">
+    <div class="cause-card">
+      <div class="cause-card-head" style="background:rgba(247,140,63,.08)"><div class="cause-dot" style="background:#f78c3f"></div><span class="cause-card-title" style="color:#f78c3f">Método</span></div>
+      <div class="cause-card-body"><textarea id="c-metodo" placeholder="Procedimientos incorrectos o ausentes&#10;Sin verificación antes del empaque&#10;Picking sin orden lógico de recorrido..." oninput="autoSave()"></textarea></div>
+    </div>
+    <div class="cause-card">
+      <div class="cause-card-head" style="background:rgba(79,152,163,.08)"><div class="cause-dot" style="background:#4f98a3"></div><span class="cause-card-title" style="color:#4f98a3">Mano de Obra</span></div>
+      <div class="cause-card-body"><textarea id="c-mano" placeholder="Falta de capacitación&#10;Alta rotación de personal&#10;Carga de trabajo excesiva..." oninput="autoSave()"></textarea></div>
+    </div>
+    <div class="cause-card">
+      <div class="cause-card-head" style="background:rgba(232,196,74,.08)"><div class="cause-dot" style="background:#e8c44a"></div><span class="cause-card-title" style="color:#e8c44a">Material</span></div>
+      <div class="cause-card-body"><textarea id="c-material" placeholder="Productos sin etiqueta clara&#10;Empaques similares confundibles&#10;Falta de controles de calidad..." oninput="autoSave()"></textarea></div>
+    </div>
+    <div class="cause-card">
+      <div class="cause-card-head" style="background:rgba(188,140,255,.08)"><div class="cause-dot" style="background:#bc8cff"></div><span class="cause-card-title" style="color:#bc8cff">Máquina / Sistema</span></div>
+      <div class="cause-card-body"><textarea id="c-maquina" placeholder="Sistema de pedidos desactualizado&#10;Sin alertas automáticas de stock&#10;Escaner averiado..." oninput="autoSave()"></textarea></div>
+    </div>
+    <div class="cause-card">
+      <div class="cause-card-head" style="background:rgba(95,201,122,.08)"><div class="cause-dot" style="background:#5fc97a"></div><span class="cause-card-title" style="color:#5fc97a">Medio Ambiente</span></div>
+      <div class="cause-card-body"><textarea id="c-medio" placeholder="Espacio reducido en almacén&#10;Iluminación deficiente&#10;Desorden en pasillos..." oninput="autoSave()"></textarea></div>
+    </div>
+    <div class="cause-card">
+      <div class="cause-card-head" style="background:rgba(248,81,73,.08)"><div class="cause-dot" style="background:#f85149"></div><span class="cause-card-title" style="color:#f85149">Medición</span></div>
+      <div class="cause-card-body"><textarea id="c-medicion" placeholder="Sin KPIs de error de picking&#10;Sin registro de reclamos&#10;Datos de entrega no monitoreados..." oninput="autoSave()"></textarea></div>
+    </div>
+  </div>
+
+  <!-- CONCLUSIONES -->
+  <div class="conclusion-grid">
+    <div class="conclusion-box" style="background:rgba(247,140,63,.07);border:1px solid rgba(247,140,63,.25)">
+      <label style="color:#f78c3f">🎯 Causas Raíz Principales</label>
+      <textarea id="c-rootcause" placeholder="Resume las causas raíz más probables y con mayor impacto identificadas en el diagrama..." oninput="autoSave()"></textarea>
+    </div>
+    <div class="conclusion-box" style="background:rgba(95,201,122,.06);border:1px solid rgba(95,201,122,.2)">
+      <label style="color:#5fc97a">⚡ Contramedidas Prioritarias</label>
+      <textarea id="c-counter" placeholder="Acciones concretas propuestas para atacar las causas raíz identificadas..." oninput="autoSave()"></textarea>
+    </div>
+  </div>
+
+</div>
+<div class="toast" id="toast">✅ Guardado en caché</div>
+<script>
+const KEY = 'largotek_ishikawa';
+const FIELDS = ['m-title','m-area','m-date','m-effect','c-metodo','c-mano','c-material','c-maquina','c-medio','c-medicion','c-rootcause','c-counter'];
+
+document.getElementById('m-effect').addEventListener('input', updateSvgEffect);
+function updateSvgEffect() {
+  const val = document.getElementById('m-effect').value.trim();
+  const label = document.getElementById('svg-effect-label');
+  if (!label) return;
+  const short = val.length > 18 ? val.substring(0, 16) + '...' : (val || 'Efecto');
+  label.textContent = short;
+}
+
+let saveTimer;
+function autoSave() { clearTimeout(saveTimer); saveTimer = setTimeout(saveLocal, 1000); }
+
+function saveLocal() {
+  const d = { fields: {}, ts: new Date().toISOString() };
+  FIELDS.forEach(id => { const el = document.getElementById(id); if (el) d.fields[id] = el.value; });
+  localStorage.setItem(KEY, JSON.stringify(d));
+  const t = new Date().toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' });
+  ['saved-lbl','saved-lbl2'].forEach(id => { const el = document.getElementById(id); if (el) el.textContent = '\u2713 Guardado ' + t; });
+  const toast = document.getElementById('toast');
+  toast.classList.add('show');
+  setTimeout(() => toast.classList.remove('show'), 2200);
+}
+
+function loadLocal() {
+  const raw = localStorage.getItem(KEY); if (!raw) return;
+  try {
+    const d = JSON.parse(raw);
+    FIELDS.forEach(id => { const el = document.getElementById(id); if (el && d.fields[id] != null) el.value = d.fields[id]; });
+    updateSvgEffect();
+    if (d.ts) {
+      const t = new Date(d.ts).toLocaleString('es-AR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
+      ['saved-lbl','saved-lbl2'].forEach(id => { const el = document.getElementById(id); if (el) el.textContent = '\u00daltimo guardado: ' + t; });
+    }
+  } catch(e) {}
+}
+
+function clearAll() {
+  if (!confirm('\u00bfLimpiar el diagrama Ishikawa?')) return;
+  localStorage.removeItem(KEY);
+  location.reload();
+}
+
+document.querySelectorAll('input,textarea').forEach(el => el.addEventListener('input', autoSave));
+window.addEventListener('load', loadLocal);
+</script>
+<script src="branding.js"></script>
 </body>
 </html>
