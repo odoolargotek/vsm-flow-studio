@@ -28,7 +28,7 @@
     <div class="topbar-sep"></div>
     <button class="btn btn-danger" onclick="deleteSelected()">&#128465; Borrar</button>
     <button class="btn btn-accent" onclick="runSimulation()">&#9654; Calcular</button>
-    <button class="btn" onclick="showReport()">&#128196; Reporte</button>
+    <button class="btn" onclick="openReport()">&#128196; Reporte</button>
   </div>
 </div>
 
@@ -96,8 +96,6 @@
 
       <!-- SIMULACIÓN -->
       <div class="panel-section" id="panel-sim">
-
-        <!-- Parámetros -->
         <div style="font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--text-muted);margin-bottom:8px">Parámetros</div>
         <div class="sim-controls">
           <div class="sim-row">
@@ -117,18 +115,10 @@
             <div class="sim-input-row"><input type="number" id="sim-days" value="5" min="1" max="30"></div>
           </div>
         </div>
-
-        <!-- Botón Calcular KPIs -->
         <button class="btn btn-accent" style="width:100%;margin-bottom:14px" onclick="runSimulation()">&#9654; Calcular KPIs</button>
-
         <pre id="sim-log" style="margin-bottom:14px">Agrega procesos al canvas y presiona CALCULAR.</pre>
 
-        <!-- ANIMACIÓN POR HORA -->
-        <div style="font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--text-muted);margin-bottom:8px;border-top:1px solid var(--border);padding-top:12px">
-          &#127910; Animación de Flujo
-        </div>
-
-        <!-- Velocidad -->
+        <div style="font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--text-muted);margin-bottom:8px;border-top:1px solid var(--border);padding-top:12px">&#127910; Animación de Flujo</div>
         <div style="display:flex;align-items:center;gap:6px;margin-bottom:10px">
           <span style="font-size:11px;color:var(--text-muted);width:60px">Velocidad</span>
           <button class="btn speed-btn active" data-speed="1" onclick="setAnimSpeed(1)">1X</button>
@@ -136,18 +126,12 @@
           <button class="btn speed-btn" data-speed="5" onclick="setAnimSpeed(5)">5X</button>
           <button class="btn speed-btn" data-speed="10" onclick="setAnimSpeed(10)">10X</button>
         </div>
-
-        <!-- Controles animación -->
         <div style="display:flex;gap:6px;margin-bottom:10px">
           <button class="btn btn-accent" id="btn-anim-start" onclick="startAnimation()" style="flex:1">&#9654; Iniciar</button>
           <button class="btn" id="btn-anim-stop" onclick="stopAnimation()" disabled style="flex:1">&#9646;&#9646; Detener</button>
           <button class="btn" onclick="resetAnimation()" title="Reiniciar">&#8635;</button>
         </div>
-
-        <!-- Stats en vivo -->
         <div id="anim-stats" style="font-size:10px;color:var(--accent);background:rgba(88,166,255,.06);border:1px solid rgba(88,166,255,.15);border-radius:6px;padding:8px 10px;min-height:28px;line-height:1.6;margin-bottom:8px"></div>
-
-        <!-- Log animación -->
         <div id="anim-log" style="font-size:11px;color:var(--text-muted);background:var(--surface2);border-radius:6px;padding:8px 10px;min-height:28px">Presiona &#9654; para iniciar.</div>
       </div>
 
@@ -170,19 +154,20 @@
   </div>
 </div>
 
-<!-- REPORT MODAL -->
-<div id="report-modal-overlay" class="hidden">
-  <div class="report-modal">
+<!-- REPORT MODAL — ID debe ser "report-overlay" para coincidir con report.js -->
+<div id="report-overlay" class="hidden" onclick="closeReport(event)">
+  <div class="report-modal" onclick="event.stopPropagation()">
     <div class="report-header">
-      <h3 style="font-size:14px;font-weight:700">&#128196; Reporte VSM</h3>
+      <h3 style="font-size:14px;font-weight:700">&#128196; Dashboard VSM</h3>
       <div style="display:flex;gap:8px">
+        <button class="btn" onclick="exportReportCSV()">&#8681; CSV</button>
         <button class="btn btn-accent" onclick="window.print()">&#128424; PDF</button>
-        <button class="modal-close" onclick="document.getElementById('report-modal-overlay').classList.add('hidden')">&times;</button>
+        <button class="modal-close" onclick="document.getElementById('report-overlay').classList.add('hidden')">&times;</button>
       </div>
     </div>
     <div class="report-body" id="report-body"></div>
     <div class="report-footer">
-      <button class="btn" onclick="document.getElementById('report-modal-overlay').classList.add('hidden')">Cerrar</button>
+      <button class="btn" onclick="document.getElementById('report-overlay').classList.add('hidden')">Cerrar</button>
     </div>
   </div>
 </div>
@@ -205,6 +190,49 @@ function sampleTriangular(a, c, b) {
   return r < F
     ? a + Math.sqrt(r * (b - a) * (c - a))
     : b - Math.sqrt((1 - r) * (b - a) * (b - c));
+}
+// bridge: simulation.js llama buildReport(), report.js usa saveReportData()
+function buildReport(procData, summary) {
+  const taktTime    = summary.taktTime;
+  const leadTimeDays= summary.leadTimeDays;
+  const pce         = summary.pce;
+  const totalVA     = summary.totalVA;
+  const demand      = summary.demand;
+  const bottleneck  = summary.bottleneck;
+  const hoursDay    = parseFloat(document.getElementById('sim-hours').value) || 8;
+  const availSec    = hoursDay * 3600;
+  const totalNVASec = procData.filter(d => d.p.isVA === false).reduce((s,d) => s + d.ct, 0);
+  const wipStats    = nodes.filter(n => n.type==='inventory').map(n => ({
+    label: n.props.label || 'WIP',
+    units: n.props.units || 0,
+    days:  n.props.units > 0 && demand > 0 ? n.props.units / demand : 0
+  }));
+  const arrowStats  = arrows.map(a => ({
+    from: getNode(a.fromId)?.props?.label || a.fromId,
+    to:   getNode(a.toId)?.props?.label   || a.toId,
+    days: a.transportDays || 0
+  }));
+  const procResults = procData.map(d => ({
+    label:      d.p.label,
+    ctMean:     d.ct,
+    ctP90:      d.ct * 1.2,
+    netCT:      d.netCT,
+    capacity:   d.capacity,
+    uptime:     d.p.uptime || 90,
+    operators:  d.p.operators || 1,
+    defectRate: d.p.defectRate || 0,
+    isVA:       d.p.isVA !== false,
+    distType:   d.p.distType || 'fixed',
+    batchSize:  d.p.batchSize || 1,
+    isBn:       d.node.id === bottleneck.node.id
+  }));
+  saveReportData({
+    ltMean: leadTimeDays, lt10: leadTimeDays*0.9, lt90: leadTimeDays*1.1,
+    hasStoch: procData.some(d => d.p.distType && d.p.distType!=='fixed'),
+    taktTime, totalVASec: totalVA, totalNVASec, pceMean: pce,
+    demand, availSec, wipDays: 0,
+    wipStats, arrowStats, procResults
+  });
 }
 </script>
 <script src="js/nodes.js"></script>
