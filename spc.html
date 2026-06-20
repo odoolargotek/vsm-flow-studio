@@ -1,17 +1,271 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Gráfica de Control SPC — Largotek</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300..700&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/styles.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>SPC — Largotek</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300..700&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#0d1117;--surface:#161b22;--surface2:#21262d;--border:#30363d;--text:#e6edf3;--muted:#8b949e;--faint:#3d444d;--green:#5fc97a;--yellow:#e8c44a;--red:#f85149;--cyan:#4f98a3;--violet:#bc8cff;--orange:#f78c3f;--radius:14px}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:13px 28px;border-bottom:1px solid var(--border);background:var(--surface)}
+.topbar-brand{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:var(--muted);text-decoration:none}.topbar-brand span{color:var(--cyan)}
+.topbar-right{display:flex;align-items:center;gap:8px}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:7px 15px;border-radius:8px;border:1.5px solid var(--border);background:transparent;color:var(--muted);font-size:12px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;transition:all .18s}.btn:hover{border-color:var(--cyan);color:var(--cyan)}.btn-primary{background:var(--cyan);color:#fff;border-color:var(--cyan)}.btn-primary:hover{opacity:.88}.btn-danger:hover{border-color:var(--red);color:var(--red)}
+.hero{padding:32px 32px 20px;max-width:1040px;margin:0 auto}.hero-eye{font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--cyan);margin-bottom:8px}.hero h1{font-family:'Instrument Serif',serif;font-size:clamp(1.5rem,3vw,2.2rem);margin-bottom:6px}.hero-sub{font-size:13px;color:var(--muted);line-height:1.7}
+.wrap{max-width:1040px;margin:0 auto;padding:0 32px 80px}.saved-bar{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px}.saved-label{font-size:11px;color:var(--muted)}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:16px;overflow:hidden}.card-head{display:flex;align-items:center;gap:10px;padding:13px 18px;border-bottom:1px solid var(--faint);background:var(--surface2)}.card-title{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}.card-body{padding:16px 18px}
+.meta-grid{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:12px}@media(max-width:700px){.meta-grid{grid-template-columns:1fr 1fr}}@media(max-width:420px){.meta-grid{grid-template-columns:1fr}}
+.field{display:flex;flex-direction:column;gap:5px}.field label{font-size:10px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--muted)}.field input,.field select,.field textarea{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:9px 12px;font-size:13px;color:var(--text);font-family:'Inter',sans-serif;transition:border-color .18s;width:100%}.field textarea{resize:vertical;min-height:60px;line-height:1.65}.field input:focus,.field select:focus,.field textarea:focus{outline:none;border-color:var(--cyan)}.field-full{grid-column:1/-1}
+/* STATS ROW */
+.stats-row{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:16px}@media(max-width:700px){.stats-row{grid-template-columns:repeat(3,1fr)}}@media(max-width:420px){.stats-row{grid-template-columns:1fr 1fr}}
+.stat-box{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px 16px}.stat-label{font-size:10px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);margin-bottom:6px}.stat-value{font-size:1.4rem;font-weight:800}
+/* CHART */
+.chart-wrap{position:relative;width:100%;height:340px}
+canvas#spc-chart{width:100%;height:100%}
+/* DATA TABLE */
+.data-table{width:100%;border-collapse:collapse;font-size:13px}
+.data-table th{text-align:left;padding:8px 10px;background:var(--surface2);color:var(--muted);font-size:11px;font-weight:600;letter-spacing:.04em}
+.data-table td{padding:7px 8px;border-top:1px solid var(--faint);vertical-align:middle}
+.data-table td input{width:100%;background:transparent;border:none;color:var(--text);font-size:13px;font-family:'Inter',sans-serif;padding:2px 4px}.data-table td input:focus{outline:1px solid var(--cyan);border-radius:3px}
+.data-table td.signal{color:var(--red);font-weight:700;font-size:12px;text-align:center}
+.data-table td.ok{color:var(--green);font-size:12px;text-align:center}
+.add-btn{display:inline-flex;align-items:center;gap:5px;margin-top:8px;padding:6px 12px;border-radius:6px;border:1px dashed var(--border);background:transparent;color:var(--muted);font-size:11px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;transition:all .18s}.add-btn:hover{border-color:var(--cyan);color:var(--cyan)}
+.del-btn{background:transparent;border:none;color:var(--faint);cursor:pointer;font-size:14px;padding:0 4px;transition:color .15s}.del-btn:hover{color:var(--red)}
+.alerts-wrap{margin-top:10px;display:flex;flex-direction:column;gap:6px}
+.alert-chip{display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border-radius:6px;font-size:12px;font-weight:600}
+.alert-chip.warn{background:rgba(248,81,73,.1);border:1px solid rgba(248,81,73,.3);color:var(--red)}
+.alert-chip.good{background:rgba(95,201,122,.1);border:1px solid rgba(95,201,122,.25);color:var(--green)}
+.conclusion{background:rgba(79,152,163,.08);border:1px solid rgba(79,152,163,.24);border-radius:var(--radius);padding:16px 18px;margin-top:16px}.conclusion label{font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--cyan);display:block;margin-bottom:8px}.conclusion textarea{width:100%;background:transparent;border:none;color:var(--text);font-family:'Inter',sans-serif;font-size:13px;line-height:1.65;resize:vertical;min-height:72px}.conclusion textarea:focus{outline:none}.conclusion textarea::placeholder{color:rgba(79,152,163,.3)}
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:#1e3a2e;border:1px solid var(--green);color:var(--green);padding:10px 22px;border-radius:99px;font-size:13px;font-weight:600;opacity:0;transition:all .3s;z-index:999;white-space:nowrap}.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+@media print{.topbar,.btn,.add-btn,.del-btn{display:none!important}body{background:#fff;color:#111}.card,.stat-box,.conclusion{border-color:#ccc;background:#fff}.field input,.field textarea,.conclusion textarea{background:#f9f9f9;color:#111}}
+</style>
 </head>
 <body>
-  <div id="app"></div>
-  <script src="js/spc.js"></script>
-  <script src="branding.js"></script>
+<div class="topbar">
+  <a href="index.html" class="topbar-brand">← <span>Largotek</span> Lean Suite</a>
+  <div class="topbar-right">
+    <span class="saved-label" id="saved-lbl"></span>
+    <button class="btn btn-danger" onclick="clearAll()">🗑 Limpiar</button>
+    <button class="btn" onclick="saveLocal()">💾 Guardar</button>
+    <button class="btn btn-primary" onclick="window.print()">🖨 PDF</button>
+  </div>
+</div>
+<div class="hero">
+  <div class="hero-eye">📉 SPC — Largotek Lean Suite</div>
+  <h1>Gráfica de Control SPC — X̄ Individual</h1>
+  <p class="hero-sub">Control Estadístico de Procesos. Ingresá tus mediciones individuales y el sistema calcula automáticamente la media (X̄), los límites de control (UCL / LCL) y detecta señales de proceso fuera de control.</p>
+</div>
+<div class="wrap">
+  <div class="saved-bar"><div></div><span class="saved-label" id="saved-lbl2"></span></div>
+
+  <!-- META -->
+  <div class="card">
+    <div class="card-head"><span>🏷️</span><span class="card-title">Datos del análisis</span></div>
+    <div class="card-body meta-grid">
+      <div class="field"><label>Variable medida</label><input id="m-var" placeholder="Ej: Peso neto (g)"></div>
+      <div class="field"><label>Equipo / Proceso</label><input id="m-proc" placeholder="Ej: Envasadora L2"></div>
+      <div class="field"><label>Unidad</label><input id="m-unit" placeholder="Ej: g, mm, seg"></div>
+      <div class="field"><label>Fecha</label><input id="m-date" type="date"></div>
+      <div class="field"><label>Límite Esp. Superior (USL)</label><input id="m-usl" type="number" step="any" placeholder="Opcional"></div>
+      <div class="field"><label>Límite Esp. Inferior (LSL)</label><input id="m-lsl" type="number" step="any" placeholder="Opcional"></div>
+      <div class="field"><label>Responsable</label><input id="m-owner" placeholder="Nombre"></div>
+      <div class="field"><label>Turno / Lote</label><input id="m-shift" placeholder="Ej: Turno A — Lote 042"></div>
+      <div class="field field-full"><label>Observaciones</label><textarea id="m-notes" placeholder="Contexto, condiciones del proceso, producto, equipo de medición utilizado..."></textarea></div>
+    </div>
+  </div>
+
+  <!-- STATS -->
+  <div class="stats-row">
+    <div class="stat-box"><div class="stat-label">N° muestras</div><div class="stat-value" id="s-n" style="color:var(--text)">0</div></div>
+    <div class="stat-box"><div class="stat-label">Media (X̄)</div><div class="stat-value" id="s-mean" style="color:var(--cyan)">—</div></div>
+    <div class="stat-box"><div class="stat-label">UCL (+3σ)</div><div class="stat-value" id="s-ucl" style="color:var(--red)">—</div></div>
+    <div class="stat-box"><div class="stat-label">LCL (−3σ)</div><div class="stat-value" id="s-lcl" style="color:var(--red)">—</div></div>
+    <div class="stat-box"><div class="stat-label">Desv. Est. (σ)</div><div class="stat-value" id="s-sd" style="color:var(--yellow)">—</div></div>
+  </div>
+
+  <!-- CHART -->
+  <div class="card">
+    <div class="card-head"><span>📈</span><span class="card-title">Gráfica de control X̄ — Individual</span></div>
+    <div class="card-body">
+      <div class="chart-wrap"><canvas id="spc-chart"></canvas></div>
+      <div class="alerts-wrap" id="alerts-wrap"></div>
+    </div>
+  </div>
+
+  <!-- DATA TABLE -->
+  <div class="card">
+    <div class="card-head"><span>📝</span><span class="card-title">Tabla de mediciones</span></div>
+    <div class="card-body">
+      <table class="data-table">
+        <thead><tr><th>#</th><th>Etiqueta / Subgrupo</th><th>Valor</th><th>Estado</th><th></th></tr></thead>
+        <tbody id="data-body"></tbody>
+      </table>
+      <button class="add-btn" onclick="addRow()">+ Agregar medición</button>
+    </div>
+  </div>
+
+  <!-- CONCLUSION -->
+  <div class="conclusion">
+    <label>🎯 Interpretación y acciones sugeridas</label>
+    <textarea id="m-conclusion" placeholder="Ej: El proceso muestra 2 señales fuera de control en los puntos 7 y 12. Se recomienda investigar causas asignables (cambio de operario, ajuste de máquina) e implementar carta de control permanente."></textarea>
+  </div>
+</div>
+<div class="toast" id="toast">✅ Guardado en caché</div>
+<script>
+const KEY='largotek_spc';
+const META=['m-var','m-proc','m-unit','m-date','m-usl','m-lsl','m-owner','m-shift','m-notes','m-conclusion'];
+let rows=[];
+
+function addRow(d={}){
+  rows.push(d);
+  renderTable();
+}
+
+function renderTable(){
+  const stats=calcStats();
+  const tbody=document.getElementById('data-body');
+  tbody.innerHTML='';
+  rows.forEach((r,i)=>{
+    const v=parseFloat(r.val);
+    const isOut=isFinite(v)&&stats.ucl!==null&&(v>stats.ucl||v<stats.lcl);
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td style="color:var(--muted);text-align:center;font-size:12px">${i+1}</td>
+      <td><input value="${esc(r.lbl||'')}" placeholder="Ej: M-${i+1}" oninput="rows[${i}].lbl=this.value;renderAll()"></td>
+      <td><input value="${r.val||''}" placeholder="0.00" style="max-width:110px" oninput="rows[${i}].val=this.value;renderAll()"></td>
+      <td class="${isOut?'signal':'ok'}">${!isFinite(v)?'—':isOut?'⚠ Señal':'✓ OK'}</td>
+      <td><button class="del-btn" onclick="rows.splice(${i},1);renderAll()">✕</button></td>`;
+    tbody.appendChild(tr);
+  });
+  updateStats(stats);
+  renderChart(stats);
+  renderAlerts(stats);
+  autoSave();
+}
+
+function calcStats(){
+  const vals=rows.map(r=>parseFloat(r.val)).filter(v=>isFinite(v));
+  if(vals.length<2)return{vals,mean:null,sd:null,ucl:null,lcl:null};
+  const mean=vals.reduce((s,v)=>s+v,0)/vals.length;
+  const sd=Math.sqrt(vals.reduce((s,v)=>s+(v-mean)**2,0)/(vals.length-1));
+  return{vals,mean,sd,ucl:mean+3*sd,lcl:mean-3*sd};
+}
+
+function updateStats(s){
+  setText('s-n',rows.length);
+  setText('s-mean',s.mean!==null?fmt(s.mean):'—');
+  setText('s-ucl',s.ucl!==null?fmt(s.ucl):'—');
+  setText('s-lcl',s.lcl!==null?fmt(s.lcl):'—');
+  setText('s-sd',s.sd!==null?fmt(s.sd):'—');
+}
+
+function renderAlerts(s){
+  const wrap=document.getElementById('alerts-wrap');
+  wrap.innerHTML='';
+  if(s.vals.length<2){wrap.innerHTML='<span style="font-size:12px;color:var(--muted)">Agrega al menos 2 mediciones para calcular límites de control.</span>';return;}
+  const signals=s.vals.filter(v=>v>s.ucl||v<s.lcl);
+  if(signals.length===0){
+    wrap.innerHTML='<span class="alert-chip good">✓ Proceso en control estadístico — No se detectan señales fuera de límites</span>';
+  } else {
+    wrap.innerHTML=`<span class="alert-chip warn">⚠ ${signals.length} punto${signals.length>1?'s':''} fuera de los límites de control (Regla 1: >±3σ)</span>`;
+  }
+  const usl=parseFloat(val('m-usl')), lsl=parseFloat(val('m-lsl'));
+  if(isFinite(usl)||isFinite(lsl)){
+    const outSpec=s.vals.filter(v=>(isFinite(usl)&&v>usl)||(isFinite(lsl)&&v<lsl));
+    if(outSpec.length>0) wrap.innerHTML+=`<span class="alert-chip warn">⚠ ${outSpec.length} punto${outSpec.length>1?'s':''} fuera de especificación (USL/LSL)</span>`;
+    else wrap.innerHTML+='<span class="alert-chip good">✓ Todos los puntos dentro de especificación</span>';
+  }
+}
+
+function renderChart(s){
+  const canvas=document.getElementById('spc-chart');
+  const ctx=canvas.getContext('2d');
+  canvas.width=(canvas.offsetWidth||800)*window.devicePixelRatio;
+  canvas.height=(canvas.offsetHeight||340)*window.devicePixelRatio;
+  ctx.scale(window.devicePixelRatio,window.devicePixelRatio);
+  const W=canvas.offsetWidth||800, H=canvas.offsetHeight||340;
+  ctx.clearRect(0,0,W,H);
+  if(s.vals.length<1){ctx.fillStyle='#8b949e';ctx.font='13px Inter,sans-serif';ctx.textAlign='center';ctx.fillText('Agrega mediciones para ver la gráfica de control',W/2,H/2);return;}
+  const pad={top:30,right:30,bottom:50,left:56};
+  const cW=W-pad.left-pad.right, cH=H-pad.top-pad.bottom;
+  const usl=parseFloat(val('m-usl')), lsl=parseFloat(val('m-lsl'));
+  const allVals=[...s.vals];
+  if(s.ucl)allVals.push(s.ucl,s.lcl);
+  if(isFinite(usl))allVals.push(usl);if(isFinite(lsl))allVals.push(lsl);
+  const minV=Math.min(...allVals), maxV=Math.max(...allVals);
+  const range=maxV-minV||1;
+  const yScale=(v)=>pad.top+cH-(((v-minV)/range)*cH);
+  const xScale=(i)=>pad.left+(i/(Math.max(s.vals.length-1,1)))*cW;
+
+  // Grid
+  ctx.strokeStyle='#30363d';ctx.lineWidth=1;
+  for(let i=0;i<=5;i++){const y=pad.top+(cH*i/5);ctx.beginPath();ctx.moveTo(pad.left,y);ctx.lineTo(pad.left+cW,y);ctx.stroke();const v=maxV-((range)*i/5);ctx.fillStyle='#8b949e';ctx.font='10px Inter,sans-serif';ctx.textAlign='right';ctx.fillText(fmt(v,2),pad.left-6,y+4);}
+
+  // USL/LSL
+  const drawSpec=(v,color,label)=>{if(!isFinite(v))return;const y=yScale(v);ctx.strokeStyle=color;ctx.lineWidth=1.5;ctx.setLineDash([8,4]);ctx.beginPath();ctx.moveTo(pad.left,y);ctx.lineTo(pad.left+cW,y);ctx.stroke();ctx.setLineDash([]);ctx.fillStyle=color;ctx.font='10px Inter,sans-serif';ctx.textAlign='right';ctx.fillText(label+' '+fmt(v,2),pad.left+cW,y-4);};
+  drawSpec(usl,'rgba(248,81,73,0.6)','USL');drawSpec(lsl,'rgba(248,81,73,0.6)','LSL');
+
+  // Control lines
+  if(s.ucl!==null){
+    [[s.ucl,'#f85149','UCL'],[s.mean,'#4f98a3','X̄'],[s.lcl,'#f85149','LCL']].forEach(([v,c,lbl])=>{
+      const y=yScale(v);ctx.strokeStyle=c;ctx.lineWidth=1.5;ctx.setLineDash([5,3]);ctx.beginPath();ctx.moveTo(pad.left,y);ctx.lineTo(pad.left+cW,y);ctx.stroke();ctx.setLineDash([]);ctx.fillStyle=c;ctx.font='bold 10px Inter,sans-serif';ctx.textAlign='left';ctx.fillText(lbl+' '+fmt(v,2),pad.left+4,y-4);
+    });
+  }
+
+  // Line
+  ctx.strokeStyle='#4f98a3';ctx.lineWidth=2;ctx.setLineDash([]);ctx.beginPath();
+  s.vals.forEach((v,i)=>{const x=xScale(i),y=yScale(v);i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);});ctx.stroke();
+
+  // Points
+  s.vals.forEach((v,i)=>{
+    const x=xScale(i),y=yScale(v);
+    const isOut=s.ucl!==null&&(v>s.ucl||v<s.lcl);
+    ctx.beginPath();ctx.arc(x,y,5,0,Math.PI*2);ctx.fillStyle=isOut?'#f85149':'#4f98a3';ctx.fill();
+    if(isOut){ctx.strokeStyle='#f85149';ctx.lineWidth=2;ctx.beginPath();ctx.arc(x,y,8,0,Math.PI*2);ctx.stroke();}
+    // label
+    const lbl=(rows[i]?.lbl||String(i+1));
+    ctx.fillStyle='#8b949e';ctx.font='10px Inter,sans-serif';ctx.textAlign='center';
+    ctx.fillText(lbl.length>6?lbl.substring(0,5)+'…':lbl,x,pad.top+cH+15);
+  });
+}
+
+function renderAll(){renderTable();}
+function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;');}
+function fmt(v,d=2){return (parseFloat(v)||0).toFixed(d);}
+function val(id){return (document.getElementById(id)||{}).value||'';}
+function setText(id,t){const el=document.getElementById(id);if(el)el.textContent=t;}
+
+let timer;function autoSave(){clearTimeout(timer);timer=setTimeout(saveLocal,1000);}
+function saveLocal(){
+  const d={fields:{},rows,ts:new Date().toISOString()};
+  META.forEach(id=>{const el=document.getElementById(id);if(el)d.fields[id]=el.value;});
+  localStorage.setItem(KEY,JSON.stringify(d));
+  const t=new Date().toLocaleTimeString('es-AR',{hour:'2-digit',minute:'2-digit'});
+  ['saved-lbl','saved-lbl2'].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent='✓ Guardado '+t;});
+  const toast=document.getElementById('toast');toast.classList.add('show');setTimeout(()=>toast.classList.remove('show'),2200);
+}
+function loadLocal(){
+  const raw=localStorage.getItem(KEY);
+  if(!raw){
+    // demo data
+    ['498','502','499','501','503','497','510','500','498','501','499','502'].forEach((v,i)=>rows.push({lbl:'M-'+(i+1),val:v}));
+    renderTable();return;
+  }
+  try{
+    const d=JSON.parse(raw);
+    META.forEach(id=>{const el=document.getElementById(id);if(el&&d.fields[id]!=null)el.value=d.fields[id];});
+    rows=d.rows||[];
+    renderTable();
+    if(d.ts){const t=new Date(d.ts).toLocaleString('es-AR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});['saved-lbl','saved-lbl2'].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent='Último guardado: '+t;});}
+  }catch(e){renderTable();}
+}
+function clearAll(){if(!confirm('¿Limpiar el análisis SPC?'))return;localStorage.removeItem(KEY);location.reload();}
+document.querySelectorAll('input,textarea,select').forEach(el=>el.addEventListener('input',()=>{autoSave();renderAll();}));
+window.addEventListener('load',loadLocal);
+window.addEventListener('resize',()=>{renderChart(calcStats());});
+</script>
+<script src="branding.js"></script>
 </body>
 </html>
