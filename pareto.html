@@ -1,17 +1,311 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Pareto 80/20 — Largotek</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300..700&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/styles.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Pareto — Largotek</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300..700&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#0d1117;--surface:#161b22;--surface2:#21262d;--border:#30363d;--text:#e6edf3;--muted:#8b949e;--faint:#3d444d;--accent:#e8c44a;--green:#5fc97a;--red:#f85149;--radius:14px}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:13px 28px;border-bottom:1px solid var(--border);background:var(--surface)}
+.topbar-brand{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:var(--muted);text-decoration:none}
+.topbar-brand span{color:var(--accent)}
+.topbar-right{display:flex;align-items:center;gap:8px}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:7px 15px;border-radius:8px;border:1.5px solid var(--border);background:transparent;color:var(--muted);font-size:12px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;transition:all .18s}
+.btn:hover{border-color:var(--accent);color:var(--accent)}
+.btn-primary{background:var(--accent);color:#111;border-color:var(--accent)}
+.btn-primary:hover{opacity:.88}
+.btn-danger:hover{border-color:var(--red);color:var(--red)}
+.hero{padding:32px 32px 20px;max-width:960px;margin:0 auto}
+.hero-eye{font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--accent);margin-bottom:8px}
+.hero h1{font-family:'Instrument Serif',serif;font-size:clamp(1.5rem,3vw,2.2rem);margin-bottom:6px}
+.hero-sub{font-size:13px;color:var(--muted);line-height:1.7}
+.wrap{max-width:960px;margin:0 auto;padding:0 32px 80px}
+.saved-bar{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px}
+.saved-label{font-size:11px;color:var(--muted)}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:16px;overflow:hidden}
+.card-head{display:flex;align-items:center;gap:10px;padding:13px 18px;border-bottom:1px solid var(--faint);background:var(--surface2)}
+.card-icon{font-size:15px}
+.card-title{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.card-body{padding:16px 18px}
+.meta-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:0}
+@media(max-width:600px){.meta-grid{grid-template-columns:1fr}}
+.field{display:flex;flex-direction:column;gap:5px}
+.field label{font-size:10px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--muted)}
+.field input,.field textarea,.field select{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:9px 12px;font-size:13px;color:var(--text);font-family:'Inter',sans-serif;transition:border-color .18s;width:100%}
+.field input:focus,.field textarea:focus,.field select:focus{outline:none;border-color:var(--accent)}
+.field input::placeholder,.field textarea::placeholder{color:var(--faint)}
+/* TABLE */
+.data-table{width:100%;border-collapse:collapse;font-size:13px;margin-bottom:10px}
+.data-table th{text-align:left;padding:8px 10px;background:var(--surface2);color:var(--muted);font-size:11px;font-weight:600;letter-spacing:.04em}
+.data-table td{padding:7px 8px;border-top:1px solid var(--faint);vertical-align:middle}
+.data-table td input{width:100%;background:transparent;border:none;color:var(--text);font-size:13px;font-family:'Inter',sans-serif;padding:2px 4px}
+.data-table td input:focus{outline:1px solid var(--accent);border-radius:3px}
+.data-table td.pct{color:var(--muted);font-size:12px;text-align:right;padding-right:12px}
+.data-table td.cum{font-weight:700;text-align:right;padding-right:12px}
+.data-table td.vital{color:var(--accent);font-weight:700}
+.add-btn{display:inline-flex;align-items:center;gap:5px;margin-top:8px;padding:6px 12px;border-radius:6px;border:1px dashed var(--border);background:transparent;color:var(--muted);font-size:11px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;transition:all .18s}
+.add-btn:hover{border-color:var(--accent);color:var(--accent)}
+.del-btn{background:transparent;border:none;color:var(--faint);cursor:pointer;font-size:14px;padding:0 4px;transition:color .15s}
+.del-btn:hover{color:var(--red)}
+/* CHART */
+.chart-wrap{position:relative;width:100%;height:340px}
+canvas#pareto-chart{width:100%;height:100%}
+/* INSIGHT */
+.insight-box{background:rgba(232,196,74,.07);border:1px solid rgba(232,196,74,.25);border-radius:10px;padding:14px 18px;margin-top:14px}
+.insight-box label{font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);display:block;margin-bottom:6px}
+.insight-box textarea{width:100%;background:transparent;border:none;color:var(--text);font-family:'Inter',sans-serif;font-size:13px;line-height:1.65;resize:vertical;min-height:60px}
+.insight-box textarea:focus{outline:none}
+.insight-box textarea::placeholder{color:rgba(232,196,74,.3)}
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:#1e3a2e;border:1px solid var(--green);color:var(--green);padding:10px 22px;border-radius:99px;font-size:13px;font-weight:600;opacity:0;transition:all .3s;z-index:999;white-space:nowrap}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+@media print{
+  .topbar,.btn,.add-btn,.del-btn{display:none!important}
+  body{background:#fff;color:#111}
+  .card{border-color:#ccc;background:#fff}
+  .card-head{background:#f3f3f3}
+  .field input,.field textarea,.data-table td input,.insight-box textarea{background:#f9f9f9;color:#111}
+}
+</style>
 </head>
 <body>
-  <div id="app"></div>
-  <script src="js/pareto.js"></script>
-  <script src="branding.js"></script>
+<div class="topbar">
+  <a href="index.html" class="topbar-brand">← <span>Largotek</span> Lean Suite</a>
+  <div class="topbar-right">
+    <span class="saved-label" id="saved-lbl"></span>
+    <button class="btn btn-danger" onclick="clearAll()">🗑 Limpiar</button>
+    <button class="btn" onclick="saveLocal()">💾 Guardar</button>
+    <button class="btn btn-primary" onclick="window.print()">🖨 PDF</button>
+  </div>
+</div>
+<div class="hero">
+  <div class="hero-eye">📊 Análisis de Pareto — Largotek Lean Suite</div>
+  <h1>Diagrama de Pareto (80/20)</h1>
+  <p class="hero-sub">Identificar los pocos factores vitales que causan la mayoría de los problemas. Ingresá las categorías y sus frecuencias — el gráfico y la tabla se actualizan automáticamente y resaltan el 80% acumulado.</p>
+</div>
+<div class="wrap">
+  <div class="saved-bar"><div></div><span class="saved-label" id="saved-lbl2"></span></div>
+
+  <!-- META -->
+  <div class="card">
+    <div class="card-head"><span class="card-icon">🏷️</span><span class="card-title">Datos del Análisis</span></div>
+    <div class="card-body">
+      <div class="meta-grid">
+        <div class="field"><label>Título</label><input id="m-title" placeholder="Ej: Causas de reclamos de clientes"></div>
+        <div class="field"><label>Área / Proceso</label><input id="m-area" placeholder="Ej: Almacén Central"></div>
+        <div class="field"><label>Fecha</label><input id="m-date" type="date"></div>
+        <div class="field" style="grid-column:1/-1"><label>Descripción / Contexto</label>
+          <textarea id="m-desc" style="min-height:52px" placeholder="Ej: Análisis de los principales tipos de reclamos recibidos en el período Enero–Mayo 2026 (n=124 reclamos)."></textarea>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DATA TABLE -->
+  <div class="card">
+    <div class="card-head"><span class="card-icon">📝</span><span class="card-title">Tabla de Datos (orden descendente automático)</span></div>
+    <div class="card-body">
+      <table class="data-table">
+        <thead><tr><th>#</th><th>Categoría / Causa</th><th style="text-align:right">Frecuencia</th><th style="text-align:right">% Individual</th><th style="text-align:right">% Acumulado</th><th>Vital / Útil</th><th></th></tr></thead>
+        <tbody id="data-body"></tbody>
+      </table>
+      <button class="add-btn" onclick="addRow()">+ Agregar categoría</button>
+    </div>
+  </div>
+
+  <!-- CHART -->
+  <div class="card">
+    <div class="card-head"><span class="card-icon">📈</span><span class="card-title">Gráfico de Pareto</span></div>
+    <div class="card-body">
+      <div class="chart-wrap"><canvas id="pareto-chart"></canvas></div>
+      <div class="insight-box">
+        <label>💡 Conclusión / Insight del Análisis</label>
+        <textarea id="m-insight" placeholder="Ej: El 80% de los reclamos proviene de 3 causas principales: error de picking (38%), retraso zona rural (27%) y producto dañado (16%). Estas son las causas vitales a atacar prioritariamente."></textarea>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="toast" id="toast">✅ Guardado en caché</div>
+<script>
+const KEY = 'largotek_pareto';
+const META = ['m-title','m-area','m-date','m-desc','m-insight'];
+let rows = [];
+
+function addRow(data = {}) {
+  rows.push(data);
+  renderTable();
+}
+
+function renderTable() {
+  // Sort by freq desc
+  const data = getData();
+  const sorted = [...data].sort((a,b) => b.freq - a.freq);
+  const total = sorted.reduce((s,r) => s + r.freq, 0);
+  let cum = 0;
+  const tbody = document.getElementById('data-body');
+  tbody.innerHTML = '';
+  sorted.forEach((r, i) => {
+    cum += r.freq;
+    const pct = total > 0 ? (r.freq / total * 100).toFixed(1) : '0.0';
+    const cumPct = total > 0 ? (cum / total * 100).toFixed(1) : '0.0';
+    const isVital = parseFloat(cumPct) - parseFloat(pct) < 80;
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td style="color:var(--muted);text-align:center;font-size:12px">${i+1}</td>
+      <td><input value="${escHtml(r.cat||'')}" placeholder="Describir causa..." oninput="updateData(this,${r._idx},'cat');renderChart()"></td>
+      <td style="text-align:right"><input value="${r.freq||''}" placeholder="0" style="text-align:right;max-width:80px" oninput="updateData(this,${r._idx},'freq');renderTable()"></td>
+      <td class="pct">${pct}%</td>
+      <td class="cum" style="color:${parseFloat(cumPct)<=80?'var(--accent)':'var(--muted)'}">${cumPct}%</td>
+      <td class="vital">${isVital?'\u2605 Vital':'\u25e6 \u00datil'}</td>
+      <td><button class="del-btn" onclick="deleteRow(${r._idx})">\u2715</button></td>`;
+    tbody.appendChild(tr);
+  });
+  renderChart();
+}
+
+function getData() {
+  return rows.map((r, i) => ({...r, _idx: i, freq: parseFloat(r.freq) || 0}));
+}
+
+function updateData(input, idx, field) {
+  if (rows[idx] !== undefined) rows[idx][field] = input.value;
+  autoSave();
+}
+
+function deleteRow(idx) {
+  rows.splice(idx, 1);
+  renderTable();
+  autoSave();
+}
+
+function escHtml(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;'); }
+
+function renderChart() {
+  const canvas = document.getElementById('pareto-chart');
+  const ctx = canvas.getContext('2d');
+  canvas.width = canvas.offsetWidth * window.devicePixelRatio || 800;
+  canvas.height = canvas.offsetHeight * window.devicePixelRatio || 340;
+  ctx.scale(window.devicePixelRatio || 1, window.devicePixelRatio || 1);
+  const W = canvas.offsetWidth, H = canvas.offsetHeight;
+  ctx.clearRect(0, 0, W, H);
+
+  const data = getData().sort((a,b) => b.freq - a.freq);
+  if (data.length === 0) {
+    ctx.fillStyle = '#8b949e';
+    ctx.font = '13px Inter, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('Agrega categor\u00edas y frecuencias para ver el gr\u00e1fico', W/2, H/2);
+    return;
+  }
+  const total = data.reduce((s,r) => s + r.freq, 0);
+  if (total === 0) return;
+
+  const pad = {top:30, right:60, bottom:60, left:50};
+  const cW = W - pad.left - pad.right;
+  const cH = H - pad.top - pad.bottom;
+  const barW = cW / data.length * 0.72;
+  const barGap = cW / data.length;
+
+  // Grid lines
+  ctx.strokeStyle = '#30363d'; ctx.lineWidth = 1;
+  for (let i = 0; i <= 5; i++) {
+    const y = pad.top + cH - (cH * i / 5);
+    ctx.beginPath(); ctx.moveTo(pad.left, y); ctx.lineTo(pad.left + cW, y); ctx.stroke();
+    ctx.fillStyle = '#8b949e'; ctx.font = '10px Inter,sans-serif'; ctx.textAlign = 'right';
+    ctx.fillText(Math.round(data[0].freq * i / 5 / data[0].freq * total / 5 * i) || '', pad.left - 6, y + 4);
+  }
+
+  // Bars
+  data.forEach((r, i) => {
+    const barH = (r.freq / total) * cH * (total / data[0].freq) * (data[0].freq / total);
+    const bH = (r.freq / (Math.max(...data.map(d=>d.freq)) || 1)) * cH;
+    const x = pad.left + i * barGap + (barGap - barW) / 2;
+    const y = pad.top + cH - bH;
+    ctx.fillStyle = parseFloat(((data.slice(0,i+1).reduce((s,d)=>s+d.freq,0))/total*100).toFixed(1)) <= 80.5 ? '#e8c44a' : '#3d444d';
+    ctx.beginPath();
+    ctx.roundRect ? ctx.roundRect(x, y, barW, bH, [4,4,0,0]) : ctx.rect(x, y, barW, bH);
+    ctx.fill();
+    // Label
+    ctx.fillStyle = '#8b949e'; ctx.font = '10px Inter,sans-serif'; ctx.textAlign = 'center';
+    const labelText = (r.cat||'').length > 10 ? (r.cat||'').substring(0,9)+'\u2026' : (r.cat||'Sin nombre');
+    ctx.fillText(labelText, x + barW/2, pad.top + cH + 14);
+    ctx.fillStyle = '#e6edf3'; ctx.font = 'bold 11px Inter,sans-serif';
+    if (bH > 16) ctx.fillText(r.freq, x + barW/2, y + (bH > 24 ? 16 : bH/2+4));
+  });
+
+  // Cumulative line
+  let cum = 0;
+  ctx.strokeStyle = '#f85149'; ctx.lineWidth = 2; ctx.setLineDash([]);
+  ctx.beginPath();
+  data.forEach((r, i) => {
+    cum += r.freq;
+    const cumPct = cum / total;
+    const x = pad.left + i * barGap + barGap / 2;
+    const y = pad.top + cH * (1 - cumPct);
+    i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+    // Dot
+    ctx.save(); ctx.beginPath(); ctx.arc(x, y, 4, 0, Math.PI*2); ctx.fillStyle='#f85149'; ctx.fill(); ctx.restore();
+    // % label
+    ctx.fillStyle = '#f85149'; ctx.font = 'bold 10px Inter,sans-serif'; ctx.textAlign = 'center';
+    ctx.fillText((cumPct*100).toFixed(0)+'%', x, y - 8);
+  });
+  ctx.stroke();
+
+  // 80% line
+  const y80 = pad.top + cH * 0.2;
+  ctx.strokeStyle = 'rgba(232,196,74,0.4)'; ctx.lineWidth = 1.5; ctx.setLineDash([6,4]);
+  ctx.beginPath(); ctx.moveTo(pad.left, y80); ctx.lineTo(pad.left + cW, y80); ctx.stroke();
+  ctx.setLineDash([]);
+  ctx.fillStyle = '#e8c44a'; ctx.font = '10px Inter,sans-serif'; ctx.textAlign = 'left';
+  ctx.fillText('80%', pad.left + cW + 4, y80 + 4);
+
+  // Y axis label
+  ctx.save(); ctx.translate(12, pad.top + cH/2); ctx.rotate(-Math.PI/2);
+  ctx.fillStyle = '#8b949e'; ctx.font = '10px Inter,sans-serif'; ctx.textAlign = 'center';
+  ctx.fillText('Frecuencia', 0, 0); ctx.restore();
+}
+
+let saveTimer;
+function autoSave() { clearTimeout(saveTimer); saveTimer = setTimeout(saveLocal, 1000); }
+
+function saveLocal() {
+  const d = { fields: {}, rows: rows, ts: new Date().toISOString() };
+  META.forEach(id => { const el = document.getElementById(id); if(el) d.fields[id] = el.value; });
+  localStorage.setItem(KEY, JSON.stringify(d));
+  const t = new Date().toLocaleTimeString('es-AR', { hour:'2-digit', minute:'2-digit' });
+  ['saved-lbl','saved-lbl2'].forEach(id => { const el = document.getElementById(id); if(el) el.textContent = '\u2713 Guardado ' + t; });
+  const toast = document.getElementById('toast');
+  toast.classList.add('show'); setTimeout(()=>toast.classList.remove('show'), 2200);
+}
+
+function loadLocal() {
+  const raw = localStorage.getItem(KEY);
+  if (!raw) { addRow({cat:'Ejemplo A',freq:'45'}); addRow({cat:'Ejemplo B',freq:'30'}); addRow({cat:'Ejemplo C',freq:'15'}); addRow({cat:'Ejemplo D',freq:'7'}); addRow({cat:'Ejemplo E',freq:'3'}); return; }
+  try {
+    const d = JSON.parse(raw);
+    META.forEach(id => { const el = document.getElementById(id); if(el && d.fields[id]!=null) el.value = d.fields[id]; });
+    rows = d.rows || [];
+    if (rows.length === 0) { addRow({cat:'Ejemplo A',freq:'45'}); return; }
+    renderTable();
+    if (d.ts) {
+      const t = new Date(d.ts).toLocaleString('es-AR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});
+      ['saved-lbl','saved-lbl2'].forEach(id => { const el = document.getElementById(id); if(el) el.textContent = '\u00daltimo guardado: ' + t; });
+    }
+  } catch(e) { addRow({cat:'Error al cargar',freq:'1'}); }
+}
+
+function clearAll() {
+  if (!confirm('\u00bfLimpiar todo el an\u00e1lisis de Pareto?')) return;
+  localStorage.removeItem(KEY); location.reload();
+}
+
+document.querySelectorAll('input,textarea').forEach(el => el.addEventListener('input', autoSave));
+window.addEventListener('load', loadLocal);
+window.addEventListener('resize', renderChart);
+</script>
+<script src="branding.js"></script>
 </body>
 </html>
