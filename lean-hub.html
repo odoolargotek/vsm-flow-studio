@@ -166,10 +166,10 @@
         <span class="card-arrow">→</span>
       </div>
     </a>
-    <a class="tool-card locked" href="#" style="--card-accent:#d29922" onclick="return false">
+    <a class="tool-card" href="ishikawa.html" style="--card-accent:#d29922">
       <div class="card-top">
         <div class="card-icon">🐟</div>
-        <div class="card-status status-locked">Próximamente</div>
+        <div class="card-status status-active">Disponible</div>
       </div>
       <div class="card-title">Diagrama Ishikawa</div>
       <div class="card-desc">Diagrama de espina de pescado (6M) para análisis visual de causas raíz. Categorías: Máquina, Mano de Obra, Método, Material, Medio, Medición.</div>
@@ -178,15 +178,27 @@
         <span class="card-arrow">→</span>
       </div>
     </a>
-    <a class="tool-card locked" href="#" style="--card-accent:#d29922" onclick="return false">
+    <a class="tool-card" href="5-porques.html" style="--card-accent:#d29922">
       <div class="card-top">
         <div class="card-icon">❓</div>
-        <div class="card-status status-locked">Próximamente</div>
+        <div class="card-status status-active">Disponible</div>
       </div>
       <div class="card-title">5 Porqués</div>
-      <div class="card-desc">Drill-down iterativo de causa raíz. Parte del síntoma y pregunta "¿por qué?" cinco veces hasta llegar a la causa fundamental.</div>
+      <div class="card-desc">Drill-down iterativo de causa raíz. Parte del síntoma y pregunta «¿por qué?» cinco veces hasta llegar a la causa fundamental.</div>
       <div class="card-footer">
         <span class="card-tag">Root Cause</span>
+        <span class="card-arrow">→</span>
+      </div>
+    </a>
+    <a class="tool-card" href="arbol-causa-efecto.html" style="--card-accent:#bc8cff">
+      <div class="card-top">
+        <div class="card-icon">🌳</div>
+        <div class="card-status status-active" style="background:rgba(188,140,255,.15);color:#bc8cff">Disponible</div>
+      </div>
+      <div class="card-title">Árbol Causa-Efecto</div>
+      <div class="card-desc">Current Reality Tree de Goldratt. Nodos arrastrables, flechas «Si → Entonces», niveles Causa Raíz → Causa → Problema → Efecto.</div>
+      <div class="card-footer">
+        <span class="card-tag">Goldratt · TOC</span>
         <span class="card-arrow">→</span>
       </div>
     </a>
@@ -237,7 +249,7 @@
     </a>
     <a class="tool-card locked" href="#" style="--card-accent:#3fb950" onclick="return false">
       <div class="card-top">
-        <div class="card-icon">5️⃣S</div>
+        <div class="card-icon">5️S</div>
         <div class="card-status status-locked">Próximamente</div>
       </div>
       <div class="card-title">Auditoría 5S</div>
@@ -287,7 +299,6 @@
 <footer>Lean Analysis Suite · VSM Flow Studio · v1.0</footer>
 
 <script>
-// Load project header from localStorage
 function loadHubState() {
   const caso = JSON.parse(localStorage.getItem('lean-caso') || 'null');
   const a3   = JSON.parse(localStorage.getItem('lean-a3')   || 'null');
@@ -303,7 +314,7 @@ function loadHubState() {
   if (a3)   setStatus('status-a3',   'done', '✔ Completo');
   if (pdca) setStatus('status-pdca', 'done', '✔ Completo');
 
-  const done = [caso, a3, pdca].filter(Boolean).length + 1; // VSM always available
+  const done = [caso, a3, pdca].filter(Boolean).length + 1;
   const total = 4;
   document.getElementById('prog-label').textContent = `${done} / ${total} completos`;
   document.getElementById('prog-fill').style.width  = (done / total * 100) + '%';
