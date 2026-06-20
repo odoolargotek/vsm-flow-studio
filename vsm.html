@@ -154,7 +154,7 @@
   </div>
 </div>
 
-<!-- REPORT MODAL — ID debe ser "report-overlay" para coincidir con report.js -->
+<!-- REPORT OVERLAY — id="report-overlay" requerido por report.js -->
 <div id="report-overlay" class="hidden" onclick="closeReport(event)">
   <div class="report-modal" onclick="event.stopPropagation()">
     <div class="report-header">
@@ -172,6 +172,15 @@
   </div>
 </div>
 
+<!-- SCRIPTS: orden estricto -->
+<script src="js/nodes.js"></script>
+<script src="js/canvas.js"></script>
+<script src="js/ui.js"></script>
+<script src="js/report.js"></script>
+<script src="js/report-bridge.js"></script>
+<script src="js/simulation.js"></script>
+<script src="js/animator.js"></script>
+<script src="branding.js"></script>
 <script>
 function switchTab(name, el) {
   document.querySelectorAll('.panel-tab').forEach(t => t.classList.remove('active'));
@@ -180,67 +189,15 @@ function switchTab(name, el) {
   document.getElementById('panel-' + name).classList.add('active');
 }
 function deleteSelected() {
-  if (selectedArrowId) { confirmDeleteArrow(selectedArrowId); return; }
-  if (!selectedNodeId) return;
-  if (confirm('\u00bfEliminar nodo?')) { deleteNode(selectedNodeId); document.getElementById(selectedNodeId)?.remove(); selectedNodeId=null; renderAllArrows(); }
-}
-function sampleTriangular(a, c, b) {
-  const F = (c - a) / (b - a);
-  const r = Math.random();
-  return r < F
-    ? a + Math.sqrt(r * (b - a) * (c - a))
-    : b - Math.sqrt((1 - r) * (b - a) * (b - c));
-}
-// bridge: simulation.js llama buildReport(), report.js usa saveReportData()
-function buildReport(procData, summary) {
-  const taktTime    = summary.taktTime;
-  const leadTimeDays= summary.leadTimeDays;
-  const pce         = summary.pce;
-  const totalVA     = summary.totalVA;
-  const demand      = summary.demand;
-  const bottleneck  = summary.bottleneck;
-  const hoursDay    = parseFloat(document.getElementById('sim-hours').value) || 8;
-  const availSec    = hoursDay * 3600;
-  const totalNVASec = procData.filter(d => d.p.isVA === false).reduce((s,d) => s + d.ct, 0);
-  const wipStats    = nodes.filter(n => n.type==='inventory').map(n => ({
-    label: n.props.label || 'WIP',
-    units: n.props.units || 0,
-    days:  n.props.units > 0 && demand > 0 ? n.props.units / demand : 0
-  }));
-  const arrowStats  = arrows.map(a => ({
-    from: getNode(a.fromId)?.props?.label || a.fromId,
-    to:   getNode(a.toId)?.props?.label   || a.toId,
-    days: a.transportDays || 0
-  }));
-  const procResults = procData.map(d => ({
-    label:      d.p.label,
-    ctMean:     d.ct,
-    ctP90:      d.ct * 1.2,
-    netCT:      d.netCT,
-    capacity:   d.capacity,
-    uptime:     d.p.uptime || 90,
-    operators:  d.p.operators || 1,
-    defectRate: d.p.defectRate || 0,
-    isVA:       d.p.isVA !== false,
-    distType:   d.p.distType || 'fixed',
-    batchSize:  d.p.batchSize || 1,
-    isBn:       d.node.id === bottleneck.node.id
-  }));
-  saveReportData({
-    ltMean: leadTimeDays, lt10: leadTimeDays*0.9, lt90: leadTimeDays*1.1,
-    hasStoch: procData.some(d => d.p.distType && d.p.distType!=='fixed'),
-    taktTime, totalVASec: totalVA, totalNVASec, pceMean: pce,
-    demand, availSec, wipDays: 0,
-    wipStats, arrowStats, procResults
-  });
+  if (typeof selectedArrowId !== 'undefined' && selectedArrowId) { confirmDeleteArrow(selectedArrowId); return; }
+  if (typeof selectedNodeId === 'undefined' || !selectedNodeId) return;
+  if (confirm('\u00bfEliminar nodo?')) {
+    deleteNode(selectedNodeId);
+    document.getElementById(selectedNodeId)?.remove();
+    selectedNodeId = null;
+    renderAllArrows();
+  }
 }
 </script>
-<script src="js/nodes.js"></script>
-<script src="js/canvas.js"></script>
-<script src="js/ui.js"></script>
-<script src="js/simulation.js"></script>
-<script src="js/animator.js"></script>
-<script src="js/report.js"></script>
-<script src="branding.js"></script>
 </body>
 </html>
