@@ -17,7 +17,7 @@
     <div class="topbar-brand">VSM Flow Studio <small>by Largotek</small></div>
   </a>
   <div class="topbar-actions">
-    <button class="btn" onclick="newDiagram()">&#43; Nuevo</button>
+    <button class="btn" onclick="newDiagram()">+ Nuevo</button>
     <button class="btn" onclick="saveDiagram()">&#128190; Guardar</button>
     <button class="btn" onclick="loadDiagram()">&#128194; Cargar</button>
     <button class="btn" onclick="exportJSON()">&#8681; JSON</button>
@@ -45,12 +45,7 @@
     <div class="tool-item" draggable="true" data-type="kaizen"><span class="tool-icon">&#10040;</span> Kaizen</div>
     <div class="tool-item" draggable="true" data-type="gate"><span class="tool-icon">&#128256;</span> Gate</div>
     <div class="toolbox-sep"></div>
-    <div class="tool-hint">
-      <b>Drag</b> al canvas.<br>
-      <b>Doble click</b> para editar.<br>
-      <b>Port</b> para conectar.<br>
-      <b>Delete</b> para borrar.
-    </div>
+    <div class="tool-hint"><b>Drag</b> al canvas.<br><b>Doble click</b> para editar.<br><b>Port</b> para conectar.<br><b>Delete</b> para borrar.</div>
   </div>
 
   <!-- CANVAS -->
@@ -73,6 +68,7 @@
       <div class="panel-tab" onclick="switchTab('sim',this)">Simulación</div>
     </div>
     <div class="panel-body">
+
       <!-- KPIs -->
       <div class="panel-section active" id="panel-kpis">
         <div class="kpi-grid">
@@ -92,12 +88,17 @@
           <span><span class="tl-dot" style="background:rgba(188,140,255,.5)"></span>Lote</span>
         </div>
       </div>
+
       <!-- PROCESOS -->
       <div class="panel-section" id="panel-procs">
         <div id="process-list"></div>
       </div>
+
       <!-- SIMULACIÓN -->
       <div class="panel-section" id="panel-sim">
+
+        <!-- Parámetros -->
+        <div style="font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--text-muted);margin-bottom:8px">Parámetros</div>
         <div class="sim-controls">
           <div class="sim-row">
             <span class="sim-label">Demanda/día</span>
@@ -116,11 +117,40 @@
             <div class="sim-input-row"><input type="number" id="sim-days" value="5" min="1" max="30"></div>
           </div>
         </div>
-        <button class="btn btn-accent" style="width:100%;margin-bottom:8px" onclick="runSimulation()">&#9654; Calcular KPIs</button>
-        <button class="btn" style="width:100%;margin-bottom:12px" onclick="startAnimation()">&#127910; Animar flujo</button>
-        <button class="btn" style="width:100%;margin-bottom:12px" onclick="stopAnimation()">&#9646;&#9646; Detener</button>
-        <pre id="sim-log">Agrega procesos al canvas y presiona CALCULAR.</pre>
+
+        <!-- Botón Calcular KPIs -->
+        <button class="btn btn-accent" style="width:100%;margin-bottom:14px" onclick="runSimulation()">&#9654; Calcular KPIs</button>
+
+        <pre id="sim-log" style="margin-bottom:14px">Agrega procesos al canvas y presiona CALCULAR.</pre>
+
+        <!-- ANIMACIÓN POR HORA -->
+        <div style="font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--text-muted);margin-bottom:8px;border-top:1px solid var(--border);padding-top:12px">
+          &#127910; Animación de Flujo
+        </div>
+
+        <!-- Velocidad -->
+        <div style="display:flex;align-items:center;gap:6px;margin-bottom:10px">
+          <span style="font-size:11px;color:var(--text-muted);width:60px">Velocidad</span>
+          <button class="btn speed-btn active" data-speed="1" onclick="setAnimSpeed(1)">1X</button>
+          <button class="btn speed-btn" data-speed="2" onclick="setAnimSpeed(2)">2X</button>
+          <button class="btn speed-btn" data-speed="5" onclick="setAnimSpeed(5)">5X</button>
+          <button class="btn speed-btn" data-speed="10" onclick="setAnimSpeed(10)">10X</button>
+        </div>
+
+        <!-- Controles animación -->
+        <div style="display:flex;gap:6px;margin-bottom:10px">
+          <button class="btn btn-accent" id="btn-anim-start" onclick="startAnimation()" style="flex:1">&#9654; Iniciar</button>
+          <button class="btn" id="btn-anim-stop" onclick="stopAnimation()" disabled style="flex:1">&#9646;&#9646; Detener</button>
+          <button class="btn" onclick="resetAnimation()" title="Reiniciar">&#8635;</button>
+        </div>
+
+        <!-- Stats en vivo -->
+        <div id="anim-stats" style="font-size:10px;color:var(--accent);background:rgba(88,166,255,.06);border:1px solid rgba(88,166,255,.15);border-radius:6px;padding:8px 10px;min-height:28px;line-height:1.6;margin-bottom:8px"></div>
+
+        <!-- Log animación -->
+        <div id="anim-log" style="font-size:11px;color:var(--text-muted);background:var(--surface2);border-radius:6px;padding:8px 10px;min-height:28px">Presiona &#9654; para iniciar.</div>
       </div>
+
     </div>
   </div>
 </div>
@@ -168,6 +198,13 @@ function deleteSelected() {
   if (selectedArrowId) { confirmDeleteArrow(selectedArrowId); return; }
   if (!selectedNodeId) return;
   if (confirm('\u00bfEliminar nodo?')) { deleteNode(selectedNodeId); document.getElementById(selectedNodeId)?.remove(); selectedNodeId=null; renderAllArrows(); }
+}
+function sampleTriangular(a, c, b) {
+  const F = (c - a) / (b - a);
+  const r = Math.random();
+  return r < F
+    ? a + Math.sqrt(r * (b - a) * (c - a))
+    : b - Math.sqrt((1 - r) * (b - a) * (b - c));
 }
 </script>
 <script src="js/nodes.js"></script>
