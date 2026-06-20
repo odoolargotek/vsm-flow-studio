@@ -1,22 +1,367 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>VSM Flow Studio — Largotek</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300..700&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/styles.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>VSM Flow Studio — Largotek</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300..700&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<style>
+/* ===== RESET ===== */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0d1117;--surface:#161b22;--surface2:#21262d;
+  --border:#30363d;--border2:#3d444d;
+  --text:#e6edf3;--text-muted:#8b949e;--text-faint:#484f58;
+  --accent:#58a6ff;--success:#3fb950;--warning:#d29922;--danger:#f85149;
+  --c-muted:#8b949e;--c-gate:#bc8cff;
+  --node-process:#1a2535;--node-inv:#1a2520;--node-sup:#1e1a24;--node-cust:#1a2020;
+  --node-kai:#2a1f1a;
+  --radius:10px;
+}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);height:100vh;overflow:hidden;display:flex;flex-direction:column}
+
+/* ===== TOPBAR ===== */
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:10px 20px;background:var(--surface);border-bottom:1px solid var(--border);flex-shrink:0;gap:8px;flex-wrap:wrap}
+.topbar-brand{font-family:'Instrument Serif',serif;font-size:1.1rem;color:var(--accent);white-space:nowrap}
+.topbar-brand small{font-family:'Inter',sans-serif;font-size:11px;color:var(--text-muted);font-style:normal}
+.topbar-actions{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.btn{display:inline-flex;align-items:center;gap:5px;padding:6px 13px;border-radius:7px;border:1.5px solid var(--border);background:transparent;color:var(--text-muted);font-size:12px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;transition:all .15s;white-space:nowrap}
+.btn:hover{border-color:var(--accent);color:var(--accent)}
+.btn.active{border-color:var(--accent);color:var(--accent);background:rgba(88,166,255,.1)}
+.btn.btn-push:hover,.btn.btn-push.active{border-color:var(--accent);color:var(--accent);background:rgba(88,166,255,.1)}
+.btn.btn-pull:hover,.btn.btn-pull.active{border-color:var(--success);color:var(--success);background:rgba(63,185,80,.1)}
+.btn.btn-info:hover,.btn.btn-info.active{border-color:var(--warning);color:var(--warning);background:rgba(210,153,34,.1)}
+.btn.btn-accent{background:var(--accent);color:#fff;border-color:var(--accent)}
+.btn.btn-accent:hover{opacity:.88}
+.btn.btn-danger{color:var(--danger);border-color:transparent}
+.btn.btn-danger:hover{border-color:var(--danger);background:rgba(248,81,73,.1)}
+.topbar-sep{width:1px;height:22px;background:var(--border);flex-shrink:0}
+
+/* ===== MAIN LAYOUT ===== */
+.app-body{display:flex;flex:1;overflow:hidden}
+
+/* ===== TOOLBOX ===== */
+.toolbox{width:180px;background:var(--surface);border-right:1px solid var(--border);padding:12px 10px;overflow-y:auto;flex-shrink:0}
+.toolbox-title{font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text-muted);margin-bottom:10px;padding:0 2px}
+.tool-item{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:7px;border:1.5px solid var(--border);background:var(--surface2);color:var(--text);font-size:12px;font-weight:600;cursor:grab;margin-bottom:6px;transition:all .15s;user-select:none}
+.tool-item:hover{border-color:var(--accent);color:var(--accent)}
+.tool-icon{font-size:16px;width:20px;text-align:center}
+.toolbox-sep{height:1px;background:var(--border);margin:10px 0}
+.tool-hint{font-size:10px;color:var(--text-muted);line-height:1.5;padding:0 2px}
+
+/* ===== CANVAS AREA ===== */
+.canvas-area{flex:1;position:relative;overflow:hidden;background:var(--bg)}
+.canvas-area .canvas-bg-grid{position:absolute;inset:0;background-image:radial-gradient(circle,#30363d 1px,transparent 1px);background-size:28px 28px;pointer-events:none;opacity:.5}
+#canvas{position:absolute;inset:0;overflow:hidden}
+#arrows-svg{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:1}
+#canvas-hint{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center;pointer-events:none;z-index:0}
+#canvas-hint .hint-icon{font-size:3rem;margin-bottom:8px;opacity:.4}
+#canvas-hint p{color:var(--text-muted);font-size:13px}
+.connect-hint{position:absolute;top:12px;left:50%;transform:translateX(-50%);background:rgba(88,166,255,.15);border:1px solid var(--accent);color:var(--accent);padding:6px 16px;border-radius:99px;font-size:12px;font-weight:600;z-index:20;pointer-events:none}
+
+/* ===== VSM NODES ===== */
+.vsm-node{position:absolute;z-index:10;cursor:move;user-select:none;transition:box-shadow .15s}
+.vsm-node.selected .node-body{box-shadow:0 0 0 2px var(--accent)}
+
+.node-body{border-radius:var(--radius);padding:10px 12px;min-width:130px;position:relative;border:1.5px solid var(--border);background:var(--node-process)}
+.node-process .node-body{background:var(--node-process);border-color:#2a4060}
+.node-supplier .node-body,.node-customer .node-body{background:var(--surface2);border-color:var(--border);border-radius:4px;min-width:90px;text-align:center}
+.node-inventory .node-body{background:transparent;border:none;text-align:center;min-width:80px}
+.node-kaizen .node-body{background:var(--node-kai);border-color:#6a3a2a;border-radius:50%;width:60px;height:60px;min-width:unset;display:flex;align-items:center;justify-content:center;font-size:1.4rem}
+.node-gate .node-body{background:#1d1a2e;border-color:rgba(188,140,255,.35);border-radius:50%;width:64px;height:64px;min-width:unset;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px}
+
+.node-title{font-size:12px;font-weight:700;color:var(--text);margin-bottom:4px}
+.node-stats{font-size:10px;color:var(--text-muted);line-height:1.6}
+.node-stats span{color:var(--text)}
+.node-ops{display:flex;gap:4px;margin-top:6px;flex-wrap:wrap}
+.node-op{width:14px;height:14px;border-radius:50%;background:var(--accent);opacity:.7}
+.node-dist-badge{display:inline-block;font-size:9px;font-weight:700;background:rgba(88,166,255,.2);color:var(--accent);padding:1px 5px;border-radius:4px;margin-left:4px;vertical-align:middle}
+.node-resource-badge{font-size:10px;color:var(--c-gate);margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:140px}
+.node-entity-icon{font-size:1.4rem;margin-bottom:4px}
+.node-entity-name{font-size:11px;font-weight:700;color:var(--text)}
+.node-triangle{width:0;height:0;border-left:28px solid transparent;border-right:28px solid transparent;border-bottom:48px solid rgba(63,185,80,.35);margin:0 auto 4px}
+.node-inv-label{font-size:11px;font-weight:700;color:var(--success)}
+.node-inv-units{font-size:12px;color:var(--text)}
+.gate-icon{font-size:1.2rem}
+.gate-body .node-title{font-size:10px;color:var(--c-gate);font-weight:700}
+.gate-splits{font-size:9px;color:var(--c-gate)}
+.gate-split-line,.gate-split-hint{font-size:9px}
+
+.node-edit-btn{position:absolute;top:4px;right:4px;background:transparent;border:none;color:var(--text-muted);cursor:pointer;font-size:13px;padding:2px;opacity:0;transition:opacity .15s;z-index:5}
+.vsm-node:hover .node-edit-btn{opacity:1}
+.node-port{position:absolute;width:10px;height:10px;border-radius:50%;background:var(--border2);border:2px solid var(--surface);cursor:crosshair;z-index:6;opacity:0;transition:opacity .15s}
+.vsm-node:hover .node-port{opacity:1}
+.node-port:hover{opacity:1!important;background:var(--accent)}
+.port-right{right:-5px;top:50%;transform:translateY(-50%)}
+.port-left{left:-5px;top:50%;transform:translateY(-50%)}
+.port-bottom{bottom:-5px;left:50%;transform:translateX(-50%)}
+.port-top{top:-5px;left:50%;transform:translateX(-50%)}
+
+/* ===== ARROW TOOLBAR ===== */
+.arrow-toolbar{position:absolute;z-index:30;display:flex;align-items:center;gap:6px;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:6px 10px;box-shadow:0 4px 20px rgba(0,0,0,.4)}
+.arrow-tb-label{font-size:11px;color:var(--text-muted);white-space:nowrap}
+.arrow-toolbar button{background:transparent;border:1px solid var(--border);color:var(--text-muted);cursor:pointer;padding:3px 8px;border-radius:5px;font-size:12px}
+.arrow-toolbar button:hover{border-color:var(--accent);color:var(--accent)}
+.arrow-toolbar button.danger:hover{border-color:var(--danger);color:var(--danger)}
+
+/* ===== SIDE PANEL ===== */
+.side-panel{width:300px;background:var(--surface);border-left:1px solid var(--border);overflow-y:auto;flex-shrink:0;display:flex;flex-direction:column}
+.panel-tabs{display:flex;border-bottom:1px solid var(--border);flex-shrink:0}
+.panel-tab{flex:1;padding:10px;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--text-muted);cursor:pointer;text-align:center;border-bottom:2px solid transparent;transition:all .15s}
+.panel-tab.active{color:var(--accent);border-bottom-color:var(--accent)}
+.panel-body{padding:14px;flex:1;overflow-y:auto}
+.panel-section{display:none}.panel-section.active{display:block}
+
+/* KPIs */
+.kpi-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px}
+.kpi-card{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:10px 12px}
+.kpi-label{font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--text-muted);margin-bottom:4px}
+.kpi-value{font-size:1.2rem;font-weight:800;color:var(--accent)}
+.kpi-unit{font-size:10px;color:var(--text-muted);margin-top:2px}
+
+/* TIMELINE */
+.timeline-wrap{overflow-x:auto;margin-bottom:12px}
+.timeline-bar{display:flex;height:20px;border-radius:4px;overflow:hidden;min-width:200px}
+.tl-va{background:var(--success);height:100%}
+.tl-nva{background:var(--danger);height:100%}
+.tl-inv{background:var(--warning);height:100%}
+.timeline-legend{display:flex;gap:10px;margin-top:6px;font-size:10px;color:var(--text-muted)}
+.tl-dot{width:8px;height:8px;border-radius:2px;display:inline-block;margin-right:3px}
+
+/* PROCESS TABLE */
+.proc-table{width:100%;border-collapse:collapse;font-size:11px}
+.proc-table th{text-align:left;padding:6px 8px;background:var(--surface2);color:var(--text-muted);font-size:10px;font-weight:700;letter-spacing:.05em}
+.proc-table td{padding:5px 8px;border-top:1px solid var(--border)}
+.proc-table .tag-va{color:var(--success);font-weight:700}
+.proc-table .tag-nva{color:var(--danger);font-weight:700}
+
+/* SIM */
+.sim-controls{display:flex;flex-direction:column;gap:8px;margin-bottom:14px}
+.sim-row{display:flex;align-items:center;gap:8px}
+.sim-label{font-size:11px;color:var(--text-muted);flex-shrink:0;width:90px}
+.sim-input-row{display:flex;align-items:center;gap:6px}
+.sim-input-row input{flex:1;background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:6px 9px;font-size:12px;color:var(--text);font-family:'Inter',sans-serif}
+.sim-input-row input:focus{outline:none;border-color:var(--accent)}
+.sim-unit{font-size:11px;color:var(--text-muted);white-space:nowrap}
+#sim-log{font-size:11px;color:var(--text-muted);background:var(--surface2);border-radius:6px;padding:10px;line-height:1.65;min-height:60px;white-space:pre-wrap;word-break:break-word}
+
+/* ===== MODAL ===== */
+#modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:100;display:flex;align-items:center;justify-content:center}
+#modal-overlay.hidden{display:none}
+.modal{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);width:min(520px,95vw);max-height:85vh;display:flex;flex-direction:column;box-shadow:0 8px 40px rgba(0,0,0,.6)}
+.modal-header{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid var(--border)}
+.modal-header h3{font-size:14px;font-weight:700}
+.modal-close{background:transparent;border:none;color:var(--text-muted);font-size:18px;cursor:pointer;padding:2px 6px}
+.modal-close:hover{color:var(--text)}
+.modal-scroll{overflow-y:auto;padding:16px 18px;flex:1}
+.modal-footer{padding:12px 18px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:8px}
+/* form elements inside modal */
+.prop-group{display:flex;flex-direction:column;gap:5px;margin-bottom:12px}
+.prop-group label{font-size:10px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--text-muted)}
+.prop-group input,.prop-group select,.prop-group textarea{background:var(--surface2);border:1px solid var(--border);border-radius:7px;padding:8px 10px;font-size:13px;color:var(--text);font-family:'Inter',sans-serif;width:100%}
+.prop-group input:focus,.prop-group select:focus{outline:none;border-color:var(--accent)}
+.prop-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.prop-divider{border:none;border-top:1px solid var(--border);margin:12px 0}
+.prop-section-title{font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--text-muted);margin-bottom:10px}
+.prop-calc{font-size:11px;color:var(--text-muted);background:rgba(88,166,255,.06);border:1px solid rgba(88,166,255,.15);border-radius:6px;padding:10px 12px;line-height:1.8}
+.prop-calc span{color:var(--accent);font-weight:600}
+
+/* ===== REPORT MODAL ===== */
+#report-modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:200;display:flex;align-items:center;justify-content:center}
+#report-modal-overlay.hidden{display:none}
+.report-modal{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);width:min(700px,96vw);max-height:90vh;display:flex;flex-direction:column;box-shadow:0 8px 40px rgba(0,0,0,.6)}
+.report-header{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid var(--border)}
+.report-body{overflow-y:auto;padding:18px 20px;flex:1;font-size:13px;line-height:1.7}
+.report-footer{padding:12px 18px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:8px}
+.report-section{margin-bottom:18px}
+.report-section h4{font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--text-muted);margin-bottom:8px}
+.report-kpi-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px}
+.report-kpi{background:var(--surface2);border:1px solid var(--border);border-radius:7px;padding:10px 12px;text-align:center}
+.report-kpi .label{font-size:9px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.07em}
+.report-kpi .value{font-size:1.15rem;font-weight:800;color:var(--accent)}
+.report-table{width:100%;border-collapse:collapse;font-size:11px;margin-top:6px}
+.report-table th{text-align:left;padding:6px 8px;background:var(--surface2);color:var(--text-muted);font-size:10px;font-weight:700}
+.report-table td{padding:5px 8px;border-top:1px solid var(--border)}
+</style>
 </head>
 <body>
-  <div id="app"></div>
-  <script src="js/nodes.js"></script>
-  <script src="js/canvas.js"></script>
-  <script src="js/ui.js"></script>
-  <script src="js/simulation.js"></script>
-  <script src="js/animator.js"></script>
-  <script src="js/report.js"></script>
-  <script src="branding.js"></script>
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <a href="index.html" style="text-decoration:none">
+    <div class="topbar-brand">VSM Flow Studio <small>by Largotek</small></div>
+  </a>
+  <div class="topbar-actions">
+    <button class="btn" onclick="newDiagram()" title="Nuevo">&#43; Nuevo</button>
+    <button class="btn" onclick="saveDiagram()">&#128190; Guardar</button>
+    <button class="btn" onclick="loadDiagram()">&#128194; Cargar</button>
+    <button class="btn" onclick="exportJSON()">&#8681; JSON</button>
+    <div class="topbar-sep"></div>
+    <button class="btn btn-push" id="btn-push-arrow" onclick="setArrowMode('push')" title="Flecha Push">&#10230; Push</button>
+    <button class="btn btn-pull" id="btn-pull-arrow" onclick="setArrowMode('pull')" title="Flecha Pull">&#8680; Pull</button>
+    <button class="btn btn-info" id="btn-info-arrow" onclick="setArrowMode('info')" title="Flujo Info">&#8626; Info</button>
+    <div class="topbar-sep"></div>
+    <button class="btn btn-danger" onclick="deleteSelected()" title="Eliminar seleccionado">&#128465; Borrar</button>
+    <button class="btn btn-accent" onclick="runSimulation()">&#9654; Calcular</button>
+    <button class="btn" onclick="showReport()">&#128196; Reporte</button>
+  </div>
+</div>
+
+<!-- APP BODY -->
+<div class="app-body">
+
+  <!-- TOOLBOX -->
+  <div class="toolbox">
+    <div class="toolbox-title">Nodos VSM</div>
+    <div class="tool-item" draggable="true" data-type="process"><span class="tool-icon">&#9700;</span> Proceso</div>
+    <div class="tool-item" draggable="true" data-type="inventory"><span class="tool-icon">&#9650;</span> Inventario</div>
+    <div class="tool-item" draggable="true" data-type="supplier"><span class="tool-icon">&#127981;</span> Proveedor</div>
+    <div class="tool-item" draggable="true" data-type="customer"><span class="tool-icon">&#127978;</span> Cliente</div>
+    <div class="tool-item" draggable="true" data-type="kaizen"><span class="tool-icon">&#10040;</span> Kaizen</div>
+    <div class="tool-item" draggable="true" data-type="gate"><span class="tool-icon">&#128256;</span> Gate</div>
+    <div class="toolbox-sep"></div>
+    <div class="tool-hint">
+      <b>Drag</b> al canvas.<br>
+      <b>Doble click</b> para editar.<br>
+      <b>Port</b> para conectar.<br>
+      <b>Delete</b> para borrar.
+    </div>
+  </div>
+
+  <!-- CANVAS -->
+  <div class="canvas-area" ondragover="event.preventDefault()" ondrop="onDrop(event)" onclick="onCanvasClick(event)">
+    <div class="canvas-bg-grid"></div>
+    <div id="canvas">
+      <div id="canvas-hint">
+        <div class="hint-icon">&#9700;</div>
+        <p>Arrastrá nodos desde el panel izquierdo<br>para construir tu mapa de valor.</p>
+      </div>
+    </div>
+    <svg id="arrows-svg"></svg>
+  </div>
+
+  <!-- SIDE PANEL -->
+  <div class="side-panel">
+    <div class="panel-tabs">
+      <div class="panel-tab active" onclick="switchTab('kpis',this)">KPIs</div>
+      <div class="panel-tab" onclick="switchTab('procs',this)">Procesos</div>
+      <div class="panel-tab" onclick="switchTab('sim',this)">Simulación</div>
+    </div>
+    <div class="panel-body">
+      <!-- KPIs -->
+      <div class="panel-section active" id="panel-kpis">
+        <div class="kpi-grid">
+          <div class="kpi-card" id="kpi-takt"><div class="kpi-label">Takt Time</div><div class="kpi-value">&mdash;</div><div class="kpi-unit">seg/u</div></div>
+          <div class="kpi-card" id="kpi-lt"><div class="kpi-label">Lead Time</div><div class="kpi-value">&mdash;</div><div class="kpi-unit">días</div></div>
+          <div class="kpi-card" id="kpi-pt"><div class="kpi-label">Process Time</div><div class="kpi-value">&mdash;</div><div class="kpi-unit">seg</div></div>
+          <div class="kpi-card" id="kpi-pce"><div class="kpi-label">PCE %</div><div class="kpi-value">&mdash;</div><div class="kpi-unit">valor/lead</div></div>
+          <div class="kpi-card" id="kpi-bn"><div class="kpi-label">Cuello botella</div><div class="kpi-value">&mdash;</div><div class="kpi-unit">proceso</div></div>
+          <div class="kpi-card" id="kpi-avail"><div class="kpi-label">Disponibilidad</div><div class="kpi-value">&mdash;</div><div class="kpi-unit">promedio %</div></div>
+        </div>
+        <div style="font-size:11px;color:var(--text-muted);margin-bottom:8px;font-weight:700">TIMELINE</div>
+        <div class="timeline-wrap"><div id="timeline-content"></div></div>
+        <div class="timeline-legend">
+          <span><span class="tl-dot" style="background:var(--success)"></span>VA</span>
+          <span><span class="tl-dot" style="background:var(--danger)"></span>NVA</span>
+          <span><span class="tl-dot" style="background:var(--warning)"></span>Inventario</span>
+        </div>
+      </div>
+      <!-- PROCESOS -->
+      <div class="panel-section" id="panel-procs">
+        <table class="proc-table">
+          <thead><tr><th>Proceso</th><th>CT</th><th>Tipo</th></tr></thead>
+          <tbody id="process-list"></tbody>
+        </table>
+      </div>
+      <!-- SIMULACIÓN -->
+      <div class="panel-section" id="panel-sim">
+        <div class="sim-controls">
+          <div class="sim-row">
+            <span class="sim-label">Demanda/día</span>
+            <div class="sim-input-row">
+              <input type="number" id="sim-demand" value="100" min="1">
+              <span class="sim-unit">u/día</span>
+            </div>
+          </div>
+          <div class="sim-row">
+            <span class="sim-label">Turnos/día</span>
+            <div class="sim-input-row">
+              <input type="number" id="sim-shifts" value="1" min="1" max="3">
+            </div>
+          </div>
+          <div class="sim-row">
+            <span class="sim-label">Horas/turno</span>
+            <div class="sim-input-row">
+              <input type="number" id="sim-hours" value="8" min="1" max="24">
+            </div>
+          </div>
+          <div class="sim-row">
+            <span class="sim-label">Das anim.</span>
+            <div class="sim-input-row">
+              <input type="number" id="sim-days" value="5" min="1" max="30">
+            </div>
+          </div>
+        </div>
+        <button class="btn btn-accent" style="width:100%;margin-bottom:10px" onclick="runSimulation()">&#9654; Calcular KPIs</button>
+        <button class="btn" style="width:100%;margin-bottom:12px" onclick="startAnimation()">&#127910; Animar flujo</button>
+        <pre id="sim-log">Agrega procesos al canvas y presiona CALCULAR.</pre>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- NODE MODAL -->
+<div id="modal-overlay" class="hidden" onclick="closeModal(event)">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="modal-header">
+      <h3 id="modal-title">Editar nodo</h3>
+      <button class="modal-close" onclick="closeModal()">&times;</button>
+    </div>
+    <div class="modal-scroll" id="modal-body"></div>
+    <div class="modal-footer">
+      <button class="btn" onclick="closeModal()">Cancelar</button>
+      <button class="btn btn-accent" onclick="saveNodeProps()">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- REPORT MODAL -->
+<div id="report-modal-overlay" class="hidden">
+  <div class="report-modal">
+    <div class="report-header">
+      <h3 style="font-size:14px;font-weight:700">&#128196; Reporte VSM</h3>
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-accent" onclick="window.print()">&#128424; PDF</button>
+        <button class="modal-close" onclick="document.getElementById('report-modal-overlay').classList.add('hidden')">&times;</button>
+      </div>
+    </div>
+    <div class="report-body" id="report-body"></div>
+    <div class="report-footer">
+      <button class="btn" onclick="document.getElementById('report-modal-overlay').classList.add('hidden')">Cerrar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+function switchTab(name, el) {
+  document.querySelectorAll('.panel-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.panel-section').forEach(s => s.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('panel-' + name).classList.add('active');
+}
+function deleteSelected() {
+  if (selectedArrowId) { confirmDeleteArrow(selectedArrowId); return; }
+  if (!selectedNodeId) return;
+  if (confirm('\u00bfEliminar nodo?')) { deleteNode(selectedNodeId); document.getElementById(selectedNodeId)?.remove(); selectedNodeId=null; renderAllArrows(); }
+}
+</script>
+<script src="js/nodes.js"></script>
+<script src="js/canvas.js"></script>
+<script src="js/ui.js"></script>
+<script src="js/simulation.js"></script>
+<script src="js/animator.js"></script>
+<script src="js/report.js"></script>
+<script src="branding.js"></script>
 </body>
 </html>
