@@ -1,0 +1,803 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Trabajo Estandarizado — Largotek</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300..700&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{
+      --bg:#0d1117;--surface:#161b22;--surface2:#21262d;--border:#30363d;
+      --text:#e6edf3;--muted:#8b949e;--faint:#484f58;
+      --accent:#4f98a3;--accent2:#3fb950;--warn:#d29922;--danger:#f85149;
+      --purple:#bc8cff;--orange:#ffa657;
+      --radius:14px;--radius-sm:8px;
+    }
+    body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;flex-direction:column}
+    header{padding:18px 28px;border-bottom:1px solid var(--border);background:var(--surface);display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+    .back-btn{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border:1px solid var(--border);border-radius:99px;font-size:12px;color:var(--muted);text-decoration:none;transition:all .2s}
+    .back-btn:hover{border-color:var(--accent);color:var(--accent)}
+    .header-title{font-size:15px;font-weight:700;flex:1}
+    .header-title span{color:var(--accent)}
+    .header-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+    .btn{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:99px;font-size:12px;font-weight:600;cursor:pointer;border:none;transition:all .2s;white-space:nowrap}
+    .btn-ghost{background:transparent;color:var(--muted);border:1px solid var(--border)}
+    .btn-ghost:hover{border-color:var(--accent);color:var(--accent)}
+    .btn-primary{background:var(--accent);color:#fff}
+    .btn-primary:hover{background:#3a7f8a}
+    .btn-warn{background:var(--warn);color:#000}
+    .btn-danger{background:transparent;color:var(--danger);border:1px solid var(--danger)}
+    .btn-danger:hover{background:var(--danger);color:#fff}
+    .main{display:flex;flex:1;overflow:hidden;height:calc(100vh - 61px)}
+    /* --- SIDEBAR --- */
+    .sidebar{width:220px;flex-shrink:0;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow-y:auto}
+    .sidebar-section{padding:14px 12px 6px;font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--border)}
+    .sym-palette{padding:10px;display:flex;flex-direction:column;gap:8px}
+    .sym-item{display:flex;align-items:center;gap:10px;padding:8px 10px;border:1px solid var(--border);border-radius:var(--radius-sm);cursor:grab;background:var(--surface2);transition:all .2s;user-select:none}
+    .sym-item:hover{border-color:var(--accent);background:#1c2b30}
+    .sym-item:active{cursor:grabbing}
+    .sym-icon{width:36px;height:36px;flex-shrink:0;display:flex;align-items:center;justify-content:center}
+    .sym-icon svg{width:100%;height:100%}
+    .sym-label{font-size:11px;font-weight:600;color:var(--text);line-height:1.3}
+    .sym-sublabel{font-size:9.5px;color:var(--muted);margin-top:1px}
+    .prop-panel{border-top:1px solid var(--border);padding:12px}
+    .prop-title{font-size:10px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);margin-bottom:10px}
+    .prop-field{margin-bottom:10px}
+    .prop-field label{display:block;font-size:10px;color:var(--muted);margin-bottom:4px;font-weight:600}
+    .prop-field input,.prop-field textarea,.prop-field select{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:inherit;font-size:12px;padding:6px 8px;outline:none;resize:vertical}
+    .prop-field input:focus,.prop-field textarea:focus,.prop-field select:focus{border-color:var(--accent)}
+    .prop-field textarea{min-height:56px;max-height:100px}
+    .no-selection{font-size:11px;color:var(--faint);text-align:center;padding:16px 8px;line-height:1.7}
+    /* --- CANVAS AREA --- */
+    .canvas-wrap{flex:1;position:relative;overflow:hidden;background:var(--bg)}
+    #grid-canvas{position:absolute;inset:0;pointer-events:none;z-index:0}
+    #arrow-svg{position:absolute;inset:0;pointer-events:none;z-index:2}
+    #node-layer{position:absolute;inset:0;z-index:3}
+    .toolbar-float{position:absolute;bottom:18px;left:50%;transform:translateX(-50%);display:flex;gap:8px;background:var(--surface);border:1px solid var(--border);border-radius:99px;padding:6px 14px;z-index:10;box-shadow:0 6px 24px rgba(0,0,0,.4)}
+    .tf-btn{background:transparent;border:none;color:var(--muted);font-size:13px;cursor:pointer;padding:4px 8px;border-radius:6px;display:flex;align-items:center;gap:4px;font-family:inherit;font-size:11px;font-weight:600;transition:all .15s}
+    .tf-btn:hover{background:var(--surface2);color:var(--accent)}
+    .tf-btn.active{color:var(--accent);background:rgba(79,152,163,.12)}
+    /* --- NODES --- */
+    .process-node{position:absolute;cursor:pointer;user-select:none;display:flex;flex-direction:column;align-items:center;z-index:3}
+    .process-node .node-body{position:relative;display:flex;align-items:center;justify-content:center}
+    .process-node .node-lbl{font-size:10px;font-weight:600;color:var(--text);text-align:center;max-width:90px;line-height:1.3;margin-top:5px;white-space:pre-wrap;word-break:break-word}
+    .process-node .node-sub{font-size:9px;color:var(--muted);text-align:center;max-width:90px;line-height:1.2;margin-top:2px}
+    .process-node.selected .node-ring{outline:2.5px solid var(--accent);outline-offset:3px;border-radius:3px}
+    /* connection ports */
+    .port{position:absolute;width:10px;height:10px;border-radius:50%;background:var(--accent);border:2px solid var(--bg);cursor:crosshair;opacity:0;transition:opacity .15s;z-index:5}
+    .process-node:hover .port{opacity:1}
+    .port.port-r{right:-6px;top:50%;transform:translateY(-50%)}
+    .port.port-l{left:-6px;top:50%;transform:translateY(-50%)}
+    .port.port-t{top:-6px;left:50%;transform:translateX(-50%)}
+    .port.port-b{bottom:-6px;left:50%;transform:translateX(-50%)}
+    /* step number badge */
+    .step-badge{position:absolute;top:-10px;left:-10px;width:18px;height:18px;border-radius:50%;background:var(--accent);color:#fff;font-size:9px;font-weight:700;display:flex;align-items:center;justify-content:center;line-height:1;z-index:6}
+    /* tooltips */
+    .node-tooltip{position:absolute;bottom:calc(100% + 6px);left:50%;transform:translateX(-50%);background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:5px 8px;font-size:10px;color:var(--text);white-space:nowrap;pointer-events:none;opacity:0;transition:opacity .15s;z-index:20;max-width:160px;white-space:normal;line-height:1.4}
+    .process-node:hover .node-tooltip{opacity:1}
+    /* mode indicator */
+    #mode-badge{position:absolute;top:12px;right:16px;padding:4px 12px;border-radius:99px;font-size:10px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;z-index:10}
+    .mode-select{background:rgba(79,152,163,.15);color:var(--accent);border:1px solid var(--accent)}
+    .mode-connect{background:rgba(210,153,34,.15);color:var(--warn);border:1px solid var(--warn)}
+    /* instructions */
+    #instructions{position:absolute;top:12px;left:12px;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:10px 14px;font-size:11px;color:var(--muted);max-width:220px;line-height:1.7;z-index:10}
+    #instructions strong{color:var(--text)}
+    /* legend */
+    .legend{position:absolute;bottom:70px;right:16px;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:10px 14px;z-index:10}
+    .legend-title{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-bottom:8px}
+    .legend-item{display:flex;align-items:center;gap:8px;margin-bottom:6px;font-size:10px;color:var(--text)}
+    .legend-item:last-child{margin-bottom:0}
+    .legend-sym{width:24px;height:24px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+    /* zoom controls */
+    .zoom-ctrl{position:absolute;bottom:18px;right:16px;display:flex;flex-direction:column;gap:4px;z-index:10}
+    .zoom-btn{width:30px;height:30px;background:var(--surface);border:1px solid var(--border);border-radius:6px;color:var(--muted);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s}
+    .zoom-btn:hover{border-color:var(--accent);color:var(--accent)}
+    /* export modal */
+    .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:100;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .2s}
+    .modal-overlay.open{opacity:1;pointer-events:all}
+    .modal{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:28px;max-width:440px;width:90%;max-height:80vh;overflow-y:auto}
+    .modal h2{font-size:16px;margin-bottom:6px}
+    .modal p{font-size:12px;color:var(--muted);margin-bottom:18px}
+    .modal-actions{display:flex;gap:10px;flex-wrap:wrap}
+    @media(max-width:700px){.sidebar{display:none}.main{flex-direction:column}}
+  </style>
+</head>
+<body>
+
+<header>
+  <a class="back-btn" href="index.html">← Volver</a>
+  <div class="header-title">📋 <span>Trabajo Estandarizado</span> — Diagrama de Proceso</div>
+  <div class="header-actions">
+    <span id="node-count-badge" style="font-size:11px;color:var(--muted)">0 pasos</span>
+    <button class="btn btn-ghost" id="btn-clear" title="Limpiar todo">🗑 Limpiar</button>
+    <button class="btn btn-ghost" id="btn-export-img" title="Exportar PNG">📷 PNG</button>
+    <button class="btn btn-ghost" id="btn-export-json" title="Guardar JSON">💾 Guardar</button>
+    <button class="btn btn-ghost" id="btn-import-json" title="Cargar JSON">📂 Cargar</button>
+    <input type="file" id="file-input" accept=".json" style="display:none">
+    <button class="btn btn-primary" id="btn-print">🖨 Imprimir</button>
+  </div>
+</header>
+
+<div class="main">
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-section">Símbolos ANSI / ISO 5807</div>
+    <div class="sym-palette" id="palette">
+
+      <div class="sym-item" draggable="true" data-type="operacion">
+        <div class="sym-icon">
+          <svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
+            <rect x="4" y="4" width="32" height="32" rx="3" fill="none" stroke="#4f98a3" stroke-width="2.5"/>
+          </svg>
+        </div>
+        <div><div class="sym-label">Operación</div><div class="sym-sublabel">Cuadrado · Proceso</div></div>
+      </div>
+
+      <div class="sym-item" draggable="true" data-type="inspeccion">
+        <div class="sym-icon">
+          <svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
+            <polygon points="20,3 37,37 3,37" fill="none" stroke="#d29922" stroke-width="2.5" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <div><div class="sym-label">Inspección</div><div class="sym-sublabel">Triángulo · Control</div></div>
+      </div>
+
+      <div class="sym-item" draggable="true" data-type="inventario">
+        <div class="sym-icon">
+          <svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
+            <polygon points="20,3 37,20 20,37 3,20" fill="none" stroke="#bc8cff" stroke-width="2.5" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <div><div class="sym-label">Inventario</div><div class="sym-sublabel">Rombo · Espera/Stock</div></div>
+      </div>
+
+      <div class="sym-item" draggable="true" data-type="transporte">
+        <div class="sym-icon">
+          <svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
+            <ellipse cx="20" cy="20" rx="17" ry="11" fill="none" stroke="#ffa657" stroke-width="2.5"/>
+            <line x1="3" y1="20" x2="37" y2="20" stroke="#ffa657" stroke-width="1.5" stroke-dasharray="3 2"/>
+          </svg>
+        </div>
+        <div><div class="sym-label">Transporte</div><div class="sym-sublabel">Ovalo · Movimiento</div></div>
+      </div>
+
+      <div class="sym-item" draggable="true" data-type="decision">
+        <div class="sym-icon">
+          <svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
+            <polygon points="20,3 37,20 20,37 3,20" fill="none" stroke="#3fb950" stroke-width="2.5" stroke-linejoin="round"/>
+            <text x="20" y="24" text-anchor="middle" fill="#3fb950" font-size="12" font-weight="bold">?</text>
+          </svg>
+        </div>
+        <div><div class="sym-label">Decisión</div><div class="sym-sublabel">Rombo · Sí/No</div></div>
+      </div>
+
+      <div class="sym-item" draggable="true" data-type="inicio">
+        <div class="sym-icon">
+          <svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
+            <ellipse cx="20" cy="20" rx="17" ry="10" fill="#3fb950" opacity="0.25"/>
+            <ellipse cx="20" cy="20" rx="17" ry="10" fill="none" stroke="#3fb950" stroke-width="2.5"/>
+          </svg>
+        </div>
+        <div><div class="sym-label">Inicio / Fin</div><div class="sym-sublabel">Oval relleno · Terminal</div></div>
+      </div>
+
+      <div class="sym-item" draggable="true" data-type="documento">
+        <div class="sym-icon">
+          <svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
+            <path d="M4,4 H36 V30 Q20,38 4,30 Z" fill="none" stroke="#8b949e" stroke-width="2.5" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <div><div class="sym-label">Documento</div><div class="sym-sublabel">Página · Registro</div></div>
+      </div>
+
+    </div>
+
+    <!-- Properties Panel -->
+    <div class="prop-panel" id="prop-panel">
+      <div class="prop-title">Propiedades</div>
+      <div class="no-selection" id="no-sel-msg">Selecciona un paso<br>para editar sus propiedades</div>
+      <div id="prop-fields" style="display:none">
+        <div class="prop-field">
+          <label>Nombre del paso</label>
+          <input type="text" id="prop-name" placeholder="Ej: Verificar pieza">
+        </div>
+        <div class="prop-field">
+          <label>Detalle / Instrucción</label>
+          <textarea id="prop-detail" placeholder="Descripción del paso…"></textarea>
+        </div>
+        <div class="prop-field">
+          <label>Tiempo (seg)</label>
+          <input type="number" id="prop-time" placeholder="0" min="0">
+        </div>
+        <div class="prop-field">
+          <label>Responsable</label>
+          <input type="text" id="prop-resp" placeholder="Operador / Área">
+        </div>
+        <div class="prop-field">
+          <label>Color nodo</label>
+          <select id="prop-color">
+            <option value="default">Automático</option>
+            <option value="#3fb950">Verde</option>
+            <option value="#d29922">Amarillo</option>
+            <option value="#f85149">Rojo</option>
+            <option value="#bc8cff">Morado</option>
+            <option value="#ffa657">Naranja</option>
+          </select>
+        </div>
+        <button class="btn btn-danger" id="btn-del-node" style="width:100%;justify-content:center">🗑 Eliminar paso</button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- CANVAS -->
+  <div class="canvas-wrap" id="canvas-wrap">
+    <canvas id="grid-canvas"></canvas>
+    <svg id="arrow-svg" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <marker id="arrowhead" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+          <polygon points="0 0, 8 3, 0 6" fill="#4f98a3"/>
+        </marker>
+        <marker id="arrowhead-sel" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+          <polygon points="0 0, 8 3, 0 6" fill="#ffa657"/>
+        </marker>
+      </defs>
+    </svg>
+    <div id="node-layer"></div>
+
+    <div id="mode-badge" class="mode-select">Modo: Selección</div>
+
+    <div id="instructions">
+      <strong>🖱 Instrucciones:</strong><br>
+      • <strong>Arrastrar</strong> símbolo al lienzo<br>
+      • <strong>Click</strong> nodo → editar props<br>
+      • <strong>Modo Conectar</strong> → click puerto de salida → click nodo destino<br>
+      • <strong>Doble click</strong> flecha → eliminar
+    </div>
+
+    <!-- Legend -->
+    <div class="legend">
+      <div class="legend-title">Leyenda</div>
+      <div class="legend-item"><div class="legend-sym"><svg width="24" height="24" viewBox="0 0 40 40"><rect x="4" y="4" width="32" height="32" rx="3" fill="none" stroke="#4f98a3" stroke-width="3"/></svg></div>Operación</div>
+      <div class="legend-item"><div class="legend-sym"><svg width="24" height="24" viewBox="0 0 40 40"><polygon points="20,3 37,37 3,37" fill="none" stroke="#d29922" stroke-width="3" stroke-linejoin="round"/></svg></div>Inspección</div>
+      <div class="legend-item"><div class="legend-sym"><svg width="24" height="24" viewBox="0 0 40 40"><polygon points="20,3 37,20 20,37 3,20" fill="none" stroke="#bc8cff" stroke-width="3" stroke-linejoin="round"/></svg></div>Inventario</div>
+      <div class="legend-item"><div class="legend-sym"><svg width="24" height="24" viewBox="0 0 40 40"><ellipse cx="20" cy="20" rx="17" ry="11" fill="none" stroke="#ffa657" stroke-width="3"/></svg></div>Transporte</div>
+      <div class="legend-item"><div class="legend-sym"><svg width="24" height="24" viewBox="0 0 40 40"><polygon points="20,3 37,20 20,37 3,20" fill="none" stroke="#3fb950" stroke-width="3" stroke-linejoin="round"/></svg></div>Decisión</div>
+    </div>
+
+    <!-- Zoom controls -->
+    <div class="zoom-ctrl">
+      <button class="zoom-btn" id="btn-zoom-in" title="Acercar">+</button>
+      <button class="zoom-btn" id="btn-zoom-reset" title="Restablecer" style="font-size:10px">1:1</button>
+      <button class="zoom-btn" id="btn-zoom-out" title="Alejar">−</button>
+    </div>
+
+    <!-- Floating toolbar -->
+    <div class="toolbar-float">
+      <button class="tf-btn active" id="mode-select-btn" onclick="setMode('select')">🖱 Selección</button>
+      <button class="tf-btn" id="mode-connect-btn" onclick="setMode('connect')">🔗 Conectar</button>
+      <span style="width:1px;background:var(--border);align-self:stretch;margin:0 4px"></span>
+      <button class="tf-btn" onclick="autoLayout()">⚡ Auto-layout</button>
+      <button class="tf-btn" onclick="toggleGrid()">⊞ Grid</button>
+    </div>
+  </div>
+</div>
+
+<!-- Export Modal -->
+<div class="modal-overlay" id="modal-overlay">
+  <div class="modal">
+    <h2>Exportar Diagrama</h2>
+    <p>Selecciona el formato de exportación para tu diagrama de trabajo estandarizado.</p>
+    <div class="modal-actions">
+      <button class="btn btn-primary" onclick="doExportPNG()">📷 Exportar PNG</button>
+      <button class="btn btn-ghost" onclick="doExportSVG()">🖼 Exportar SVG</button>
+      <button class="btn btn-ghost" onclick="document.getElementById('modal-overlay').classList.remove('open')">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════
+let nodes = [];
+let arrows = [];
+let selectedNode = null;
+let selectedArrow = null;
+let mode = 'select'; // 'select' | 'connect'
+let connectSource = null;
+let nodeIdCounter = 0;
+let arrowIdCounter = 0;
+let gridVisible = true;
+let scale = 1;
+let panX = 0, panY = 0;
+let isDraggingNode = false;
+let dragOffX = 0, dragOffY = 0;
+
+const SYM_COLORS = {
+  operacion: '#4f98a3',
+  inspeccion: '#d29922',
+  inventario: '#bc8cff',
+  transporte: '#ffa657',
+  decision: '#3fb950',
+  inicio: '#3fb950',
+  documento: '#8b949e'
+};
+
+const SYM_LABELS = {
+  operacion: 'Operación',
+  inspeccion: 'Inspección',
+  inventario: 'Inventario',
+  transporte: 'Transporte',
+  decision: 'Decisión',
+  inicio: 'Inicio/Fin',
+  documento: 'Documento'
+};
+
+// ═══════════════════════════════════════════════
+// GRID
+// ═══════════════════════════════════════════════
+const canvasWrap = document.getElementById('canvas-wrap');
+const gridCanvas = document.getElementById('grid-canvas');
+const ctx = gridCanvas.getContext('2d');
+
+function drawGrid() {
+  const w = canvasWrap.clientWidth, h = canvasWrap.clientHeight;
+  gridCanvas.width = w; gridCanvas.height = h;
+  ctx.clearRect(0,0,w,h);
+  if (!gridVisible) return;
+  const step = 30 * scale;
+  ctx.strokeStyle = 'rgba(255,255,255,0.04)';
+  ctx.lineWidth = 1;
+  for (let x = (panX % step); x < w; x += step) { ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,h); ctx.stroke(); }
+  for (let y = (panY % step); y < h; y += step) { ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(w,y); ctx.stroke(); }
+}
+
+function toggleGrid() { gridVisible = !gridVisible; drawGrid(); }
+window.addEventListener('resize', drawGrid);
+drawGrid();
+
+// ═══════════════════════════════════════════════
+// MODE
+// ═══════════════════════════════════════════════
+function setMode(m) {
+  mode = m;
+  connectSource = null;
+  document.getElementById('mode-badge').textContent = m === 'select' ? 'Modo: Selección' : 'Modo: Conectar';
+  document.getElementById('mode-badge').className = 'mode-badge ' + (m === 'select' ? 'mode-select' : 'mode-connect');
+  document.getElementById('mode-select-btn').classList.toggle('active', m === 'select');
+  document.getElementById('mode-connect-btn').classList.toggle('active', m === 'connect');
+  document.querySelectorAll('.port').forEach(p => p.style.display = m === 'connect' ? 'block' : '');
+}
+
+// ═══════════════════════════════════════════════
+// NODE CREATION
+// ═══════════════════════════════════════════════
+function makeSVG(type, color) {
+  const c = color || SYM_COLORS[type] || '#4f98a3';
+  const svgs = {
+    operacion: `<svg width="60" height="60" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg"><rect x="6" y="6" width="48" height="48" rx="4" fill="rgba(79,152,163,0.1)" stroke="${c}" stroke-width="3"/></svg>`,
+    inspeccion: `<svg width="60" height="60" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg"><polygon points="30,4 56,56 4,56" fill="rgba(210,153,34,0.1)" stroke="${c}" stroke-width="3" stroke-linejoin="round"/></svg>`,
+    inventario: `<svg width="60" height="60" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg"><polygon points="30,4 56,30 30,56 4,30" fill="rgba(188,140,255,0.1)" stroke="${c}" stroke-width="3" stroke-linejoin="round"/></svg>`,
+    transporte: `<svg width="70" height="50" viewBox="0 0 70 50" xmlns="http://www.w3.org/2000/svg"><ellipse cx="35" cy="25" rx="32" ry="20" fill="rgba(255,166,87,0.1)" stroke="${c}" stroke-width="3"/><line x1="3" y1="25" x2="67" y2="25" stroke="${c}" stroke-width="1.5" stroke-dasharray="4 3"/></svg>`,
+    decision: `<svg width="60" height="60" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg"><polygon points="30,4 56,30 30,56 4,30" fill="rgba(63,185,80,0.1)" stroke="${c}" stroke-width="3" stroke-linejoin="round"/><text x="30" y="35" text-anchor="middle" fill="${c}" font-size="18" font-weight="bold" font-family="Inter,sans-serif">?</text></svg>`,
+    inicio: `<svg width="70" height="44" viewBox="0 0 70 44" xmlns="http://www.w3.org/2000/svg"><ellipse cx="35" cy="22" rx="32" ry="18" fill="rgba(63,185,80,0.25)" stroke="${c}" stroke-width="3"/></svg>`,
+    documento: `<svg width="54" height="60" viewBox="0 0 54 60" xmlns="http://www.w3.org/2000/svg"><path d="M4,4 H50 V46 Q27,58 4,46 Z" fill="rgba(139,148,158,0.1)" stroke="${c}" stroke-width="3" stroke-linejoin="round"/></svg>`
+  };
+  return svgs[type] || svgs.operacion;
+}
+
+function createNode(type, x, y) {
+  const id = 'n' + (++nodeIdCounter);
+  const stepNum = nodes.length + 1;
+  const node = { id, type, x, y, label: SYM_LABELS[type], detail: '', time: '', resp: '', color: 'default', step: stepNum };
+  nodes.push(node);
+  renderNode(node);
+  updateNodeCount();
+  return node;
+}
+
+function getNodeColor(node) {
+  return node.color !== 'default' ? node.color : (SYM_COLORS[node.type] || '#4f98a3');
+}
+
+function renderNode(node) {
+  let el = document.getElementById(node.id);
+  if (!el) {
+    el = document.createElement('div');
+    el.className = 'process-node';
+    el.id = node.id;
+    document.getElementById('node-layer').appendChild(el);
+    setupNodeEvents(el, node);
+  }
+  const c = getNodeColor(node);
+  el.style.left = node.x + 'px';
+  el.style.top = node.y + 'px';
+  el.innerHTML = `
+    <div class="node-ring" style="position:relative;display:inline-block">
+      <div class="node-body">${makeSVG(node.type, c)}</div>
+      <span class="step-badge" style="background:${c}">${node.step}</span>
+      <div class="port port-r" data-dir="r"></div>
+      <div class="port port-l" data-dir="l"></div>
+      <div class="port port-t" data-dir="t"></div>
+      <div class="port port-b" data-dir="b"></div>
+      ${node.detail ? `<div class="node-tooltip">${node.detail}</div>` : ''}
+    </div>
+    <div class="node-lbl">${node.label || SYM_LABELS[node.type]}</div>
+    ${node.time ? `<div class="node-sub">⏱ ${node.time}s ${node.resp ? '· '+node.resp : ''}</div>` : (node.resp ? `<div class="node-sub">${node.resp}</div>` : '')}
+  `;
+  setupPortEvents(el, node);
+}
+
+function setupNodeEvents(el, node) {
+  let startX, startY, moved = false;
+  el.addEventListener('mousedown', e => {
+    if (e.target.classList.contains('port')) return;
+    if (mode === 'connect') return;
+    isDraggingNode = true;
+    moved = false;
+    startX = e.clientX - node.x;
+    startY = e.clientY - node.y;
+    selectNode(node);
+    e.stopPropagation();
+  });
+  el.addEventListener('click', e => {
+    if (e.target.classList.contains('port')) return;
+    if (mode === 'connect') {
+      // click body to connect
+      if (connectSource && connectSource.id !== node.id) {
+        createArrow(connectSource.id, node.id);
+        connectSource = null;
+        setMode('connect');
+        return;
+      }
+    }
+    selectNode(node);
+  });
+  document.addEventListener('mousemove', e => {
+    if (!isDraggingNode || selectedNode !== node) return;
+    moved = true;
+    node.x = e.clientX - startX;
+    node.y = e.clientY - startY;
+    el.style.left = node.x + 'px';
+    el.style.top = node.y + 'px';
+    renderArrows();
+  });
+  document.addEventListener('mouseup', () => { if (selectedNode === node) isDraggingNode = false; });
+}
+
+function setupPortEvents(el, node) {
+  el.querySelectorAll('.port').forEach(port => {
+    port.addEventListener('click', e => {
+      e.stopPropagation();
+      if (mode !== 'connect') { setMode('connect'); }
+      if (!connectSource) {
+        connectSource = node;
+        port.style.background = '#ffa657';
+      } else if (connectSource.id !== node.id) {
+        createArrow(connectSource.id, node.id);
+        connectSource = null;
+        el.querySelectorAll('.port').forEach(p => p.style.background = '');
+        setMode('connect');
+      }
+    });
+  });
+}
+
+function getNodeCenter(node) {
+  const el = document.getElementById(node.id);
+  if (!el) return {x: node.x+35, y: node.y+35};
+  const bodyEl = el.querySelector('.node-body');
+  if (!bodyEl) return {x: node.x+35, y: node.y+35};
+  const bodyRect = bodyEl.getBoundingClientRect();
+  const wrapRect = canvasWrap.getBoundingClientRect();
+  return {
+    x: bodyRect.left - wrapRect.left + bodyRect.width/2,
+    y: bodyRect.top - wrapRect.top + bodyRect.height/2
+  };
+}
+
+// ═══════════════════════════════════════════════
+// ARROWS
+// ═══════════════════════════════════════════════
+function createArrow(fromId, toId) {
+  if (fromId === toId) return;
+  if (arrows.find(a => a.from === fromId && a.to === toId)) return;
+  const id = 'a' + (++arrowIdCounter);
+  arrows.push({id, from: fromId, to: toId, label: ''});
+  renderArrows();
+}
+
+function renderArrows() {
+  const svg = document.getElementById('arrow-svg');
+  // remove old paths
+  svg.querySelectorAll('path.arrow-path,text.arrow-lbl,circle.arrow-hit').forEach(e => e.remove());
+  arrows.forEach(arrow => {
+    const fromNode = nodes.find(n => n.id === arrow.from);
+    const toNode = nodes.find(n => n.id === arrow.to);
+    if (!fromNode || !toNode) return;
+    const s = getNodeCenter(fromNode);
+    const e2 = getNodeCenter(toNode);
+    const dx = e2.x - s.x, dy = e2.y - s.y;
+    const cx = s.x + dx/2, cy = s.y + dy/2;
+    const d = `M ${s.x} ${s.y} Q ${cx} ${cy - Math.abs(dx)*0.15} ${e2.x} ${e2.y}`;
+    const isSelected = selectedArrow && selectedArrow.id === arrow.id;
+    const path = document.createElementNS('http://www.w3.org/2000/svg','path');
+    path.setAttribute('class','arrow-path');
+    path.setAttribute('d', d);
+    path.setAttribute('fill','none');
+    path.setAttribute('stroke', isSelected ? '#ffa657' : '#4f98a3');
+    path.setAttribute('stroke-width', isSelected ? '2.5' : '2');
+    path.setAttribute('stroke-dasharray', isSelected ? '' : '');
+    path.setAttribute('marker-end', isSelected ? 'url(#arrowhead-sel)' : 'url(#arrowhead)');
+    path.style.cursor = 'pointer';
+    path.addEventListener('click', e => { e.stopPropagation(); selectedArrow = arrow; renderArrows(); });
+    path.addEventListener('dblclick', e => { e.stopPropagation(); deleteArrow(arrow.id); });
+    svg.appendChild(path);
+    // hit area
+    const hit = document.createElementNS('http://www.w3.org/2000/svg','path');
+    hit.setAttribute('d', d); hit.setAttribute('fill','none'); hit.setAttribute('stroke','transparent'); hit.setAttribute('stroke-width','14');
+    hit.style.cursor='pointer';
+    hit.addEventListener('click', ev => { ev.stopPropagation(); selectedArrow = arrow; renderArrows(); });
+    hit.addEventListener('dblclick', ev => { ev.stopPropagation(); deleteArrow(arrow.id); });
+    svg.appendChild(hit);
+  });
+}
+
+function deleteArrow(id) {
+  arrows = arrows.filter(a => a.id !== id);
+  if (selectedArrow && selectedArrow.id === id) selectedArrow = null;
+  renderArrows();
+}
+
+// ═══════════════════════════════════════════════
+// SELECTION & PROPERTIES
+// ═══════════════════════════════════════════════
+function selectNode(node) {
+  selectedNode = node;
+  selectedArrow = null;
+  document.querySelectorAll('.process-node').forEach(el => el.classList.remove('selected'));
+  document.getElementById(node.id)?.classList.add('selected');
+  showProps(node);
+  renderArrows();
+}
+
+function deselectAll() {
+  selectedNode = null; selectedArrow = null;
+  document.querySelectorAll('.process-node').forEach(el => el.classList.remove('selected'));
+  document.getElementById('no-sel-msg').style.display = '';
+  document.getElementById('prop-fields').style.display = 'none';
+  renderArrows();
+}
+
+canvasWrap.addEventListener('click', e => {
+  if (e.target === canvasWrap || e.target.id === 'node-layer' || e.target.id === 'grid-canvas' || e.target.id === 'arrow-svg') {
+    if (connectSource) { connectSource = null; return; }
+    deselectAll();
+  }
+});
+
+function showProps(node) {
+  document.getElementById('no-sel-msg').style.display = 'none';
+  document.getElementById('prop-fields').style.display = '';
+  document.getElementById('prop-name').value = node.label || '';
+  document.getElementById('prop-detail').value = node.detail || '';
+  document.getElementById('prop-time').value = node.time || '';
+  document.getElementById('prop-resp').value = node.resp || '';
+  document.getElementById('prop-color').value = node.color || 'default';
+}
+
+['prop-name','prop-detail','prop-time','prop-resp','prop-color'].forEach(id => {
+  document.getElementById(id).addEventListener('input', () => {
+    if (!selectedNode) return;
+    selectedNode.label = document.getElementById('prop-name').value;
+    selectedNode.detail = document.getElementById('prop-detail').value;
+    selectedNode.time = document.getElementById('prop-time').value;
+    selectedNode.resp = document.getElementById('prop-resp').value;
+    selectedNode.color = document.getElementById('prop-color').value;
+    renderNode(selectedNode);
+    renderArrows();
+  });
+});
+
+document.getElementById('btn-del-node').addEventListener('click', () => {
+  if (!selectedNode) return;
+  arrows = arrows.filter(a => a.from !== selectedNode.id && a.to !== selectedNode.id);
+  nodes = nodes.filter(n => n.id !== selectedNode.id);
+  document.getElementById(selectedNode.id)?.remove();
+  // renumber steps
+  nodes.forEach((n,i) => { n.step = i+1; renderNode(n); });
+  deselectAll();
+  renderArrows();
+  updateNodeCount();
+});
+
+function updateNodeCount() {
+  document.getElementById('node-count-badge').textContent = nodes.length + ' paso' + (nodes.length !== 1 ? 's' : '');
+}
+
+// ═══════════════════════════════════════════════
+// DRAG FROM PALETTE
+// ═══════════════════════════════════════════════
+document.querySelectorAll('.sym-item[draggable]').forEach(item => {
+  item.addEventListener('dragstart', e => {
+    e.dataTransfer.setData('sym-type', item.dataset.type);
+  });
+});
+
+const nodeLayer = document.getElementById('node-layer');
+nodeLayer.addEventListener('dragover', e => e.preventDefault());
+nodeLayer.addEventListener('drop', e => {
+  e.preventDefault();
+  const type = e.dataTransfer.getData('sym-type');
+  if (!type) return;
+  const rect = canvasWrap.getBoundingClientRect();
+  const x = e.clientX - rect.left - 40;
+  const y = e.clientY - rect.top - 40;
+  createNode(type, Math.max(0,x), Math.max(0,y));
+});
+
+// ═══════════════════════════════════════════════
+// AUTO LAYOUT
+// ═══════════════════════════════════════════════
+function autoLayout() {
+  const cols = Math.ceil(Math.sqrt(nodes.length)) || 1;
+  const gapX = 160, gapY = 140, startX = 60, startY = 60;
+  nodes.forEach((node, i) => {
+    node.x = startX + (i % cols) * gapX;
+    node.y = startY + Math.floor(i / cols) * gapY;
+    renderNode(node);
+  });
+  setTimeout(renderArrows, 50);
+}
+
+// ═══════════════════════════════════════════════
+// SAVE / LOAD
+// ═══════════════════════════════════════════════
+document.getElementById('btn-export-json').addEventListener('click', () => {
+  const data = JSON.stringify({nodes, arrows, nodeIdCounter, arrowIdCounter}, null, 2);
+  const blob = new Blob([data], {type:'application/json'});
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+  a.download = 'trabajo-estandarizado.json'; a.click();
+});
+
+document.getElementById('btn-import-json').addEventListener('click', () => {
+  document.getElementById('file-input').click();
+});
+
+document.getElementById('file-input').addEventListener('change', e => {
+  const file = e.target.files[0]; if (!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    try {
+      const data = JSON.parse(ev.target.result);
+      clearAll();
+      nodeIdCounter = data.nodeIdCounter || 0;
+      arrowIdCounter = data.arrowIdCounter || 0;
+      nodes = data.nodes || [];
+      arrows = data.arrows || [];
+      nodes.forEach(n => renderNode(n));
+      setTimeout(renderArrows, 80);
+      updateNodeCount();
+    } catch(err) { alert('Error al cargar archivo: ' + err.message); }
+  };
+  reader.readAsText(file);
+  e.target.value = '';
+});
+
+// ═══════════════════════════════════════════════
+// CLEAR
+// ═══════════════════════════════════════════════
+function clearAll() {
+  nodes = []; arrows = []; selectedNode = null; selectedArrow = null;
+  nodeIdCounter = 0; arrowIdCounter = 0;
+  document.getElementById('node-layer').innerHTML = '';
+  document.getElementById('arrow-svg').querySelectorAll('path,text,circle').forEach(e => e.remove());
+  deselectAll();
+  updateNodeCount();
+}
+
+document.getElementById('btn-clear').addEventListener('click', () => {
+  if (nodes.length === 0 || confirm('¿Limpiar todo el diagrama?')) clearAll();
+});
+
+// ═══════════════════════════════════════════════
+// EXPORT PNG
+// ═══════════════════════════════════════════════
+document.getElementById('btn-export-img').addEventListener('click', () => {
+  // Serialize SVG arrows + nodes as canvas
+  const wrap = document.getElementById('canvas-wrap');
+  const wrapRect = wrap.getBoundingClientRect();
+  const canvas = document.createElement('canvas');
+  canvas.width = wrapRect.width * 2;
+  canvas.height = wrapRect.height * 2;
+  const ctx2 = canvas.getContext('2d');
+  ctx2.scale(2,2);
+  ctx2.fillStyle = '#0d1117';
+  ctx2.fillRect(0,0,wrapRect.width,wrapRect.height);
+  // draw grid dots
+  ctx2.fillStyle = 'rgba(255,255,255,0.04)';
+  // Serialize inline SVG and use image
+  const svgEl = document.getElementById('arrow-svg');
+  const svgData = new XMLSerializer().serializeToString(svgEl);
+  const svgBlob = new Blob([svgData], {type:'image/svg+xml;charset=utf-8'});
+  const url = URL.createObjectURL(svgBlob);
+  const img = new Image();
+  img.onload = () => {
+    ctx2.drawImage(img, 0, 0);
+    URL.revokeObjectURL(url);
+    // now draw nodes using html2canvas fallback message
+    const link = document.createElement('a');
+    link.download = 'diagrama-proceso.png';
+    link.href = canvas.toDataURL('image/png');
+    link.click();
+  };
+  img.onerror = () => { alert('Para exportar PNG completo instala html2canvas o usa Ctrl+P para imprimir.'); };
+  img.src = url;
+});
+
+document.getElementById('btn-print').addEventListener('click', () => window.print());
+
+// ═══════════════════════════════════════════════
+// ZOOM
+// ═══════════════════════════════════════════════
+document.getElementById('btn-zoom-in').addEventListener('click', () => { scale = Math.min(scale+0.1,2); applyZoom(); });
+document.getElementById('btn-zoom-out').addEventListener('click', () => { scale = Math.max(scale-0.1,0.4); applyZoom(); });
+document.getElementById('btn-zoom-reset').addEventListener('click', () => { scale = 1; applyZoom(); });
+
+function applyZoom() {
+  document.getElementById('node-layer').style.transform = `scale(${scale})`;
+  document.getElementById('node-layer').style.transformOrigin = '0 0';
+  drawGrid();
+  setTimeout(renderArrows, 50);
+}
+
+// mouse wheel zoom
+canvasWrap.addEventListener('wheel', e => {
+  e.preventDefault();
+  const delta = e.deltaY > 0 ? -0.08 : 0.08;
+  scale = Math.min(2, Math.max(0.4, scale + delta));
+  applyZoom();
+}, {passive:false});
+
+// ═══════════════════════════════════════════════
+// KEYBOARD
+// ═══════════════════════════════════════════════
+document.addEventListener('keydown', e => {
+  if (e.key === 'Delete' || e.key === 'Backspace') {
+    if (document.activeElement.tagName === 'INPUT' || document.activeElement.tagName === 'TEXTAREA') return;
+    if (selectedArrow) { deleteArrow(selectedArrow.id); }
+    else if (selectedNode) { document.getElementById('btn-del-node').click(); }
+  }
+  if (e.key === 'Escape') { deselectAll(); connectSource = null; setMode('select'); }
+  if (e.key === 'c' && !e.ctrlKey && !e.metaKey) setMode('connect');
+  if (e.key === 's' && !e.ctrlKey && !e.metaKey) setMode('select');
+});
+
+// ═══════════════════════════════════════════════
+// INIT EXAMPLE
+// ═══════════════════════════════════════════════
+window.addEventListener('load', () => {
+  // Place a starter example
+  const n1 = createNode('inicio', 60, 60);
+  n1.label = 'Inicio'; renderNode(n1);
+  const n2 = createNode('operacion', 220, 60);
+  n2.label = 'Paso 1'; n2.detail = 'Describe la operación aquí'; renderNode(n2);
+  const n3 = createNode('inspeccion', 380, 60);
+  n3.label = 'Control'; renderNode(n3);
+  const n4 = createNode('inicio', 520, 60);
+  n4.label = 'Fin'; renderNode(n4);
+  setTimeout(() => {
+    createArrow(n1.id, n2.id);
+    createArrow(n2.id, n3.id);
+    createArrow(n3.id, n4.id);
+    renderArrows();
+  }, 200);
+  drawGrid();
+});
+</script>
+<script src="branding.js"></script>
+</body>
+</html>
