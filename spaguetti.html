@@ -15,8 +15,6 @@
   --radius:12px
 }
 body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;flex-direction:column}
-
-/* TOPBAR */
 .topbar{display:flex;align-items:center;justify-content:space-between;padding:12px 24px;border-bottom:1px solid var(--border);background:var(--surface);flex-wrap:wrap;gap:8px;flex-shrink:0}
 .topbar-brand{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:var(--muted);text-decoration:none}
 .topbar-brand span{color:var(--yellow)}
@@ -25,31 +23,23 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-h
 .btn:hover{border-color:var(--yellow);color:var(--yellow)}
 .btn-primary{background:var(--yellow);color:#0d1117;border-color:var(--yellow)}
 .btn-primary:hover{opacity:.88;color:#0d1117}
-.btn-accent{background:var(--purple);color:#0d1117;border-color:var(--purple)}
-.btn-accent:hover{opacity:.88;color:#0d1117}
 .btn-danger:hover{border-color:var(--red);color:var(--red)}
 .saved-lbl{font-size:11px;color:var(--muted)}
-
-/* HERO */
 .hero{padding:20px 28px 12px;max-width:1400px;margin:0 auto;width:100%}
 .hero-eye{font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--yellow);margin-bottom:5px}
 .hero h1{font-family:'Instrument Serif',serif;font-size:clamp(1.3rem,2.5vw,1.85rem);margin-bottom:3px}
 .hero-sub{font-size:12.5px;color:var(--muted);line-height:1.6}
-
-/* LAYOUT */
 .main-layout{display:flex;flex:1;gap:0;max-width:1400px;margin:0 auto;width:100%;min-height:0}
-.sidebar{width:280px;flex-shrink:0;border-right:1px solid var(--border);background:var(--surface);display:flex;flex-direction:column;overflow-y:auto;padding:14px}
+.sidebar{width:290px;flex-shrink:0;border-right:1px solid var(--border);background:var(--surface);display:flex;flex-direction:column;overflow-y:auto;padding:14px}
 .canvas-area{flex:1;display:flex;flex-direction:column;padding:14px;gap:10px;min-width:0}
-
-/* SIDEBAR */
-.sb-section{margin-bottom:16px}
+.sb-section{margin-bottom:16px;border-bottom:1px solid var(--faint);padding-bottom:14px}
+.sb-section:last-child{border-bottom:none}
 .sb-title{font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:8px;display:flex;align-items:center;gap:6px}
 .field{display:flex;flex-direction:column;gap:4px;margin-bottom:9px}
 .field label{font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
 .field input,.field select,.field textarea{background:var(--surface2);border:1px solid var(--border);border-radius:7px;padding:7px 10px;font-size:12.5px;color:var(--text);font-family:'Inter',sans-serif;transition:border-color .17s;width:100%}
 .field input:focus,.field select:focus,.field textarea:focus{outline:none;border-color:var(--yellow)}
 .field input::placeholder{color:var(--faint)}
-
 /* OPERATORS */
 .op-list{display:flex;flex-direction:column;gap:6px}
 .op-item{display:flex;align-items:center;gap:7px;padding:7px 10px;border-radius:8px;border:1.5px solid var(--border);background:var(--surface2);cursor:pointer;transition:all .17s}
@@ -64,15 +54,24 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-h
 .add-op-row input{background:var(--surface2);border:1px solid var(--border);border-radius:7px;padding:6px 10px;font-size:12px;color:var(--text);font-family:'Inter',sans-serif;flex:1}
 .add-op-row input:focus{outline:none;border-color:var(--yellow)}
 .color-dot-pick{width:32px;height:32px;border-radius:7px;border:1.5px solid var(--border);cursor:pointer;padding:2px}
-
+/* LAYOUT ELEMENTS */
+.elem-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:8px}
+.elem-btn{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;padding:10px 6px;border-radius:9px;border:1.5px solid var(--border);background:var(--surface2);cursor:pointer;font-family:'Inter',sans-serif;font-size:10.5px;font-weight:600;color:var(--muted);transition:all .17s;line-height:1.2;text-align:center}
+.elem-btn:hover,.elem-btn.active{border-color:var(--blue);color:var(--blue);background:rgba(88,166,255,.08)}
+.elem-btn .elem-icon{font-size:20px}
+.elem-list{display:flex;flex-direction:column;gap:5px;max-height:130px;overflow-y:auto}
+.elem-item{display:flex;align-items:center;gap:7px;padding:5px 8px;border-radius:7px;background:var(--surface2);border:1px solid var(--border);font-size:11px}
+.elem-item .ei-color{width:10px;height:10px;border-radius:3px;flex-shrink:0}
+.elem-item .ei-name{flex:1;color:var(--text)}
+.elem-item .ei-del{background:none;border:none;color:var(--faint);cursor:pointer;font-size:11px;padding:0 2px}
+.elem-item .ei-del:hover{color:var(--red)}
 /* STATS */
 .stat-row{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:10px}
 .s-chip{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:8px 12px;text-align:center;flex:1;min-width:80px}
 .s-chip .sv{font-size:16px;font-weight:800;color:var(--text)}
 .s-chip .sl{font-size:9.5px;color:var(--muted);margin-top:1px;text-transform:uppercase;letter-spacing:.04em}
-
 /* CANVAS */
-.canvas-wrap{position:relative;flex:1;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;min-height:420px;cursor:crosshair}
+.canvas-wrap{position:relative;flex:1;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;min-height:420px}
 #bg-hint{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;pointer-events:none;opacity:.4}
 #bg-hint .hint-icon{font-size:48px}
 #bg-hint p{font-size:13px;color:var(--muted);text-align:center;max-width:240px;line-height:1.55}
@@ -82,33 +81,32 @@ canvas#diagram{position:absolute;inset:0;width:100%;height:100%}
 .tool-btn:hover,.tool-btn.active{border-color:var(--yellow);color:var(--yellow);background:rgba(210,153,34,.08)}
 .tool-sep{width:1px;height:20px;background:var(--border);flex-shrink:0}
 .scale-info{font-size:11px;color:var(--muted)}
-
-/* SCALE INPUT */
 .scale-row{display:flex;align-items:center;gap:6px}
 .scale-row input{background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:5px 8px;font-size:12px;color:var(--text);font-family:'Inter',sans-serif;width:60px}
 .scale-row input:focus{outline:none;border-color:var(--yellow)}
 .scale-row label{font-size:11px;color:var(--muted)}
-
-/* TABLE */
 .dist-table{width:100%;border-collapse:collapse;font-size:12px}
 .dist-table th{text-align:left;padding:7px 10px;background:var(--surface2);color:var(--muted);font-size:10px;font-weight:600;letter-spacing:.04em;white-space:nowrap}
 .dist-table td{padding:6px 10px;border-top:1px solid var(--faint)}
 .dist-table td.num{text-align:right;font-variant-numeric:tabular-nums}
 .dist-bar-wrap{width:80px;height:6px;background:var(--faint);border-radius:99px;overflow:hidden;display:inline-block;vertical-align:middle;margin-right:6px}
 .dist-bar{height:100%;border-radius:99px}
-
-/* NOTES */
 .notes-box{background:rgba(210,153,34,.07);border:1px solid rgba(210,153,34,.2);border-radius:9px;padding:12px 16px}
 .notes-box label{font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--yellow);display:block;margin-bottom:5px}
 .notes-box textarea{width:100%;background:transparent;border:none;color:var(--text);font-family:'Inter',sans-serif;font-size:12.5px;line-height:1.6;resize:vertical;min-height:52px}
 .notes-box textarea:focus{outline:none}
 .notes-box textarea::placeholder{color:rgba(210,153,34,.3)}
-
-/* TOAST */
 .toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(80px);background:#2a2208;border:1px solid var(--yellow);color:var(--yellow);padding:9px 20px;border-radius:99px;font-size:12.5px;font-weight:600;opacity:0;transition:all .3s;z-index:200;white-space:nowrap}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
-
-/* PRINT */
+/* Cursor styles per tool */
+.cursor-draw{cursor:crosshair!important}
+.cursor-wall{cursor:cell!important}
+.cursor-machine{cursor:copy!important}
+.cursor-desk{cursor:copy!important}
+.cursor-warehouse{cursor:copy!important}
+.cursor-point{cursor:cell!important}
+.cursor-erase{cursor:not-allowed!important}
+.cursor-move{cursor:move!important}
 @media print{
   .topbar,.btn,.tool-btn,.sidebar,.canvas-toolbar,.notes-box label+textarea{display:none!important}
   .main-layout{display:block}
@@ -127,7 +125,7 @@ canvas#diagram{position:absolute;inset:0;width:100%;height:100%}
     <span class="saved-lbl" id="saved-lbl"></span>
     <label class="btn" style="cursor:pointer">📂 Fondo <input type="file" id="bg-upload" accept="image/*" style="display:none" onchange="loadBg(event)"></label>
     <button class="btn" onclick="exportCSV()">📥 CSV</button>
-    <button class="btn btn-danger" onclick="clearAll()">🗑 Limpiar</button>
+    <button class="btn btn-danger" onclick="clearAll()">🗑 Limpiar todo</button>
     <button class="btn" onclick="saveLocal()">💾 Guardar</button>
     <button class="btn btn-primary" onclick="window.print()">🖨 PDF</button>
   </div>
@@ -137,7 +135,7 @@ canvas#diagram{position:absolute;inset:0;width:100%;height:100%}
 <div class="hero">
   <div class="hero-eye">🍝 Diagrama de Spaguetti — Largotek Lean Suite</div>
   <h1>Diagrama de Spaguetti</h1>
-  <p class="hero-sub">Traza el movimiento físico de operadores y materiales sobre el layout del área de trabajo. Cuantifica la distancia total recorrida e identifica desplazamientos innecesarios (desperdicio de Movimiento y Transporte).</p>
+  <p class="hero-sub">Construye el layout con muros, máquinas y escritorios. Luego traza los recorridos de operadores para cuantificar distancias e identificar desperdicios de movimiento.</p>
 </div>
 
 <!-- MAIN LAYOUT -->
@@ -172,6 +170,42 @@ canvas#diagram{position:absolute;inset:0;width:100%;height:100%}
       </div>
     </div>
 
+    <!-- ELEMENTOS DE LAYOUT -->
+    <div class="sb-section">
+      <div class="sb-title">🏗️ Elementos de Layout</div>
+      <div class="elem-grid">
+        <button class="elem-btn" id="ebt-wall"      onclick="setLayoutTool('wall')">
+          <span class="elem-icon">🧱</span>Muro / Pared
+        </button>
+        <button class="elem-btn" id="ebt-machine"   onclick="setLayoutTool('machine')">
+          <span class="elem-icon">⚙️</span>Máquina
+        </button>
+        <button class="elem-btn" id="ebt-desk"      onclick="setLayoutTool('desk')">
+          <span class="elem-icon">🖥️</span>Escritorio
+        </button>
+        <button class="elem-btn" id="ebt-warehouse" onclick="setLayoutTool('warehouse')">
+          <span class="elem-icon">📦</span>Almacén / Rack
+        </button>
+        <button class="elem-btn" id="ebt-column"    onclick="setLayoutTool('column')">
+          <span class="elem-icon">🏛️</span>Columna
+        </button>
+        <button class="elem-btn" id="ebt-table"     onclick="setLayoutTool('table')">
+          <span class="elem-icon">🪑</span>Mesa/Banco
+        </button>
+      </div>
+      <div style="font-size:10px;color:var(--muted);margin-bottom:7px;line-height:1.5">
+        Selecciona un elemento y <strong>arrastra</strong> en el canvas para colocarlo. Haz clic sobre un elemento para eliminarlo.
+      </div>
+      <!-- LABEL PARA NUEVO ELEMENTO -->
+      <div class="field">
+        <label>Etiqueta del elemento</label>
+        <input id="elem-label" placeholder="Ej: Torno CNC-1, Bodega MP..." value="">
+      </div>
+      <!-- LISTA DE ELEMENTOS -->
+      <div class="elem-list" id="elem-list"></div>
+      <button class="btn" style="width:100%;margin-top:6px;justify-content:center" onclick="clearLayoutElements()">🗑 Limpiar layout</button>
+    </div>
+
     <!-- OPERADORES -->
     <div class="sb-section">
       <div class="sb-title">👷 Operadores / Flujos</div>
@@ -183,23 +217,23 @@ canvas#diagram{position:absolute;inset:0;width:100%;height:100%}
       <button class="btn" style="width:100%;margin-top:6px;justify-content:center" onclick="addOp()">+ Agregar Operador</button>
     </div>
 
-    <!-- HERRAMIENTAS -->
+    <!-- HERRAMIENTAS DE TRAZADO -->
     <div class="sb-section">
-      <div class="sb-title">🖊️ Herramientas de Dibujo</div>
+      <div class="sb-title">🖊️ Herramientas de Trazado</div>
       <div style="display:flex;flex-direction:column;gap:6px">
-        <button class="tool-btn active" id="tool-draw" onclick="setTool('draw')">✏️ Trazar recorrido</button>
-        <button class="tool-btn" id="tool-point" onclick="setTool('point')">📍 Marcar punto / estación</button>
-        <button class="tool-btn" id="tool-erase" onclick="setTool('erase')">🧹 Borrar último segmento</button>
+        <button class="tool-btn active" id="tool-draw"  onclick="setTool('draw')">✏️ Trazar recorrido</button>
+        <button class="tool-btn"        id="tool-point" onclick="setTool('point')">📍 Marcar punto / estación</button>
+        <button class="tool-btn"        id="tool-erase" onclick="setTool('erase')">🧹 Borrar último segmento</button>
         <button class="tool-btn" onclick="undoLast()">↩ Deshacer</button>
-        <button class="tool-btn" onclick="clearCanvas()">🗑 Limpiar trazado</button>
+        <button class="tool-btn" onclick="clearPaths()">🗑 Limpiar trazados</button>
       </div>
     </div>
 
-    <!-- OPCIONES -->
+    <!-- OPCIONES VISUALES -->
     <div class="sb-section">
       <div class="sb-title">⚙️ Opciones de Visualización</div>
       <div class="field">
-        <label>Grosor de línea</label>
+        <label>Grosor de línea recorrido</label>
         <input type="range" id="line-width" min="1" max="8" value="2" oninput="redraw()">
       </div>
       <div class="field">
@@ -214,12 +248,16 @@ canvas#diagram{position:absolute;inset:0;width:100%;height:100%}
         <input type="checkbox" id="show-distances" checked onchange="redraw()">
         Mostrar distancias en segmentos
       </label>
+      <label style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--muted);cursor:pointer;margin-top:6px">
+        <input type="checkbox" id="show-labels" checked onchange="redraw()">
+        Mostrar etiquetas de elementos
+      </label>
     </div>
 
     <!-- NOTES -->
     <div class="notes-box">
       <label>💡 Observaciones</label>
-      <textarea id="m-notas" placeholder="Ej: El operador 1 recorre 280m/turno entre Est. 2 y almacén. Oportunidad: reubicar materia prima junto a la línea para eliminar 120m de desplazamiento..."></textarea>
+      <textarea id="m-notas" placeholder="Ej: El operador 1 recorre 280m/turno. Oportunidad: reubicar materia prima junto a la línea..."></textarea>
     </div>
 
   </div>
@@ -227,29 +265,28 @@ canvas#diagram{position:absolute;inset:0;width:100%;height:100%}
   <!-- CANVAS AREA -->
   <div class="canvas-area">
 
-    <!-- STATS -->
     <div class="stat-row" id="stat-row"></div>
 
-    <!-- TOOLBAR -->
     <div class="canvas-toolbar">
-      <span style="font-size:11.5px;color:var(--muted);font-weight:600">Operador activo:</span>
+      <span style="font-size:11.5px;color:var(--muted);font-weight:600">Modo activo:</span>
+      <span id="active-mode-label" style="font-size:12px;font-weight:700;color:var(--yellow)">✏️ Trazar recorrido</span>
+      <div class="tool-sep"></div>
+      <span style="font-size:11.5px;color:var(--muted);font-weight:600">Operador:</span>
       <span id="active-op-label" style="font-size:12px;font-weight:700;color:var(--yellow)">— ninguno —</span>
       <div class="tool-sep"></div>
-      <span class="scale-info" id="cursor-info">Haz clic en el canvas para comenzar a trazar</span>
+      <span class="scale-info" id="cursor-info">Posición: —</span>
       <div class="tool-sep"></div>
       <button class="tool-btn" onclick="fitCanvas()">⊞ Ajustar</button>
     </div>
 
-    <!-- CANVAS -->
     <div class="canvas-wrap" id="canvas-wrap">
       <div id="bg-hint">
-        <div class="hint-icon">🗺️</div>
-        <p>Sube una imagen de fondo con el layout del área, o traza directamente aquí.<br>Haz clic y arrastra para dibujar recorridos.</p>
+        <div class="hint-icon">🏗️</div>
+        <p>Usa el panel izquierdo para colocar muros, máquinas y escritorios. Luego traza los recorridos de los operadores.</p>
       </div>
       <canvas id="diagram"></canvas>
     </div>
 
-    <!-- DISTANCE TABLE -->
     <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden">
       <div style="padding:10px 14px;background:var(--surface2);border-bottom:1px solid var(--border);font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)">
         📏 Resumen de Distancias por Operador
@@ -274,21 +311,26 @@ canvas#diagram{position:absolute;inset:0;width:100%;height:100%}
 <div class="toast" id="toast"></div>
 
 <script>
-const KEY = 'largotek_spaguetti';
+const KEY  = 'largotek_spaguetti_v2';
 const META = ['m-area','m-analista','m-fecha','m-turno','m-notas','scale-val','scale-unit'];
 
-// State
-let operators = [];
-let paths = [];      // [{opId, points:[{x,y}]}]
-let pointMarkers = []; // [{opId, x, y, label}]
-let activeOpId = null;
-let currentTool = 'draw';
-let isDrawing = false;
-let currentPath = null;
-let bgImage = null;
+// ── STATE ──
+let operators     = [];
+let paths         = [];
+let pointMarkers  = [];
+let layoutElements= []; // {id,type,x,y,w,h,label,color}
+let activeOpId    = null;
+let currentTool   = 'draw';   // draw | point | erase
+let activeLayoutTool = null;  // wall | machine | desk | warehouse | column | table
+let isDrawing     = false;
+let isDraggingElem= false;
+let currentPath   = null;
+let dragStart     = null;
+let bgImage       = null;
 let canvas, ctx, wrap;
-let nextOpId = 1;
-let nextPtId = 1;
+let nextOpId  = 1;
+let nextPtId  = 1;
+let nextElemId= 1;
 
 const DEMO_OPS = [
   {id:1, name:'Operador 1', color:'#58a6ff'},
@@ -296,314 +338,379 @@ const DEMO_OPS = [
   {id:3, name:'Material',   color:'#f85149'},
 ];
 
+// Element type definitions
+const ELEM_TYPES = {
+  wall:      {label:'Muro',      fillColor:'rgba(120,130,145,0.7)', strokeColor:'#8b949e', minW:4,  minH:4,  defaultW:120, defaultH:12,  dash:[]},
+  machine:   {label:'Máquina',   fillColor:'rgba(63,185,80,0.18)', strokeColor:'#3fb950', minW:30, minH:20, defaultW:70,  defaultH:50,  dash:[]},
+  desk:      {label:'Escritorio',fillColor:'rgba(88,166,255,0.18)', strokeColor:'#58a6ff', minW:20, minH:15, defaultW:55,  defaultH:35,  dash:[]},
+  warehouse: {label:'Almacén',   fillColor:'rgba(210,153,34,0.12)', strokeColor:'#d29922', minW:40, minH:30, defaultW:90,  defaultH:60,  dash:[6,4]},
+  column:    {label:'Columna',   fillColor:'rgba(188,140,255,0.25)',strokeColor:'#bc8cff', minW:12, minH:12, defaultW:20,  defaultH:20,  dash:[]},
+  table:     {label:'Mesa/Banco',fillColor:'rgba(248,81,73,0.12)', strokeColor:'#f85149', minW:25, minH:15, defaultW:80,  defaultH:30,  dash:[]},
+};
+
 /* ── INIT ── */
-window.addEventListener('load', () => {
+window.addEventListener('load',()=>{
   canvas = document.getElementById('diagram');
-  ctx = canvas.getContext('2d');
-  wrap = document.getElementById('canvas-wrap');
+  ctx    = canvas.getContext('2d');
+  wrap   = document.getElementById('canvas-wrap');
   resizeCanvas();
-  window.addEventListener('resize', ()=>{ resizeCanvas(); redraw(); });
-
-  canvas.addEventListener('mousedown', onMouseDown);
-  canvas.addEventListener('mousemove', onMouseMove);
-  canvas.addEventListener('mouseup',   onMouseUp);
-  canvas.addEventListener('mouseleave',onMouseUp);
-
-  // Touch
-  canvas.addEventListener('touchstart', e=>{ e.preventDefault(); onMouseDown(touchToMouse(e)); },{passive:false});
-  canvas.addEventListener('touchmove',  e=>{ e.preventDefault(); onMouseMove(touchToMouse(e)); },{passive:false});
-  canvas.addEventListener('touchend',   e=>{ e.preventDefault(); onMouseUp(); },{passive:false});
-
+  window.addEventListener('resize',()=>{resizeCanvas();redraw();});
+  canvas.addEventListener('mousedown', onDown);
+  canvas.addEventListener('mousemove', onMove);
+  canvas.addEventListener('mouseup',   onUp);
+  canvas.addEventListener('mouseleave',onUp);
+  canvas.addEventListener('touchstart',e=>{e.preventDefault();onDown(touchToMouse(e));},{passive:false});
+  canvas.addEventListener('touchmove', e=>{e.preventDefault();onMove(touchToMouse(e));},{passive:false});
+  canvas.addEventListener('touchend',  e=>{e.preventDefault();onUp();},{passive:false});
+  // Right-click to delete element
+  canvas.addEventListener('contextmenu',e=>{e.preventDefault();deleteElemAt(getPos(e));});
   loadLocal();
 });
 
-function touchToMouse(e) {
-  const t = e.touches[0];
-  return {clientX:t.clientX, clientY:t.clientY, buttons:1};
+function touchToMouse(e){const t=e.touches[0];return{clientX:t.clientX,clientY:t.clientY,buttons:1};}
+function resizeCanvas(){const r=wrap.getBoundingClientRect();canvas.width=r.width;canvas.height=r.height;}
+function fitCanvas(){resizeCanvas();redraw();}
+
+/* ── CURSOR ── */
+function updateCursor(){
+  const cl=canvas.classList;
+  ['cursor-draw','cursor-wall','cursor-machine','cursor-desk','cursor-warehouse','cursor-point','cursor-erase','cursor-move'].forEach(c=>cl.remove(c));
+  if(activeLayoutTool) cl.add('cursor-machine');
+  else cl.add('cursor-'+currentTool);
 }
 
-function resizeCanvas() {
-  const r = wrap.getBoundingClientRect();
-  canvas.width  = r.width;
-  canvas.height = r.height;
+/* ── LAYOUT TOOL ── */
+function setLayoutTool(type){
+  if(activeLayoutTool===type){activeLayoutTool=null;document.getElementById('ebt-'+type).classList.remove('active');updateCursor();return;}
+  if(activeLayoutTool) document.getElementById('ebt-'+activeLayoutTool)?.classList.remove('active');
+  activeLayoutTool=type;
+  document.getElementById('ebt-'+type).classList.add('active');
+  currentTool='draw'; // keep path tools state
+  document.getElementById('active-mode-label').textContent='🏗️ Colocando: '+ELEM_TYPES[type].label;
+  updateCursor();
 }
 
-function fitCanvas() { resizeCanvas(); redraw(); }
-
-/* ── OPERATORS ── */
-function addOp() {
-  const name = document.getElementById('new-op-name').value.trim() || ('Operador '+(operators.length+1));
-  const color = document.getElementById('new-op-color').value;
-  operators.push({id: nextOpId++, name, color, obs:''});
-  document.getElementById('new-op-name').value = '';
-  if(!activeOpId) activeOpId = operators[0].id;
-  renderOpList();
-  updateStats();
-  autoSave();
+/* ── DRAW TOOL ── */
+function setTool(t){
+  currentTool=t;
+  activeLayoutTool=null;
+  ['wall','machine','desk','warehouse','column','table'].forEach(k=>document.getElementById('ebt-'+k)?.classList.remove('active'));
+  ['draw','point','erase'].forEach(id=>{const el=document.getElementById('tool-'+id);if(el)el.classList.toggle('active',id===t);});
+  const modeNames={draw:'✏️ Trazar recorrido',point:'📍 Marcar estación',erase:'🧹 Borrar último'};
+  document.getElementById('active-mode-label').textContent=modeNames[t]||t;
+  updateCursor();
 }
 
-function delOp(id) {
-  if(!confirm('¿Eliminar operador y sus trazados?')) return;
-  operators = operators.filter(o=>o.id!==id);
-  paths = paths.filter(p=>p.opId!==id);
-  pointMarkers = pointMarkers.filter(p=>p.opId!==id);
-  if(activeOpId===id) activeOpId = operators.length ? operators[0].id : null;
-  renderOpList();
-  redraw();
-  updateStats();
-  autoSave();
-}
-
-function setActiveOp(id) {
-  activeOpId = id;
-  renderOpList();
-  const op = operators.find(o=>o.id===id);
-  document.getElementById('active-op-label').textContent = op ? op.name : '— ninguno —';
-  document.getElementById('active-op-label').style.color = op ? op.color : 'var(--yellow)';
-}
-
-function renderOpList() {
-  const list = document.getElementById('op-list');
-  list.innerHTML = '';
-  operators.forEach(op => {
-    const totalDist = getOpDist(op.id);
-    const unit = document.getElementById('scale-unit').value;
-    const el = document.createElement('div');
-    el.className = 'op-item' + (op.id===activeOpId?' active':'');
-    el.onclick = ()=>setActiveOp(op.id);
-    el.innerHTML = `
-      <div class="op-dot" style="background:${op.color}"></div>
-      <span class="op-name">${esc(op.name)}</span>
-      <span class="op-dist">${totalDist.toFixed(1)} ${unit}</span>
-      <button class="op-del" onclick="event.stopPropagation();delOp(${op.id})">✕</button>`;
-    list.appendChild(el);
-  });
-  if(operators.length && !activeOpId) setActiveOp(operators[0].id);
-  if(activeOpId) {
-    const op = operators.find(o=>o.id===activeOpId);
-    document.getElementById('active-op-label').textContent = op ? op.name : '— ninguno —';
-    document.getElementById('active-op-label').style.color = op ? op.color : 'var(--yellow)';
+/* ── MOUSE EVENTS ── */
+function onDown(e){
+  const pos=getPos(e);
+  if(activeLayoutTool){
+    isDraggingElem=true;
+    dragStart=pos;
+    return;
   }
-}
-
-/* ── DRAW TOOLS ── */
-function setTool(t) {
-  currentTool = t;
-  ['draw','point','erase'].forEach(id=>{
-    const el=document.getElementById('tool-'+id);
-    if(el) el.classList.toggle('active', id===t);
-  });
-}
-
-function onMouseDown(e) {
-  if(!activeOpId) { showToast('⚠️ Selecciona un operador primero'); return; }
-  const pos = getPos(e);
-  if(currentTool==='draw') {
-    isDrawing = true;
-    currentPath = {opId: activeOpId, points:[pos]};
+  if(!activeOpId){showToast('⚠️ Selecciona un operador primero');return;}
+  if(currentTool==='draw'){
+    isDrawing=true;
+    currentPath={opId:activeOpId,points:[pos]};
     document.getElementById('bg-hint').style.display='none';
-  } else if(currentTool==='point') {
-    const label = prompt('Nombre de la estación/punto:', 'Est. '+(pointMarkers.length+1));
-    if(label!==null) {
-      pointMarkers.push({id:nextPtId++, opId:activeOpId, x:pos.x, y:pos.y, label:label||''});
-      redraw(); updateStats(); autoSave();
+  } else if(currentTool==='point'){
+    const label=prompt('Nombre de la estación/punto:','Est.'+(pointMarkers.length+1));
+    if(label!==null){
+      pointMarkers.push({id:nextPtId++,opId:activeOpId,x:pos.x,y:pos.y,label:label||''});
+      redraw();updateStats();autoSave();
       document.getElementById('bg-hint').style.display='none';
     }
-  } else if(currentTool==='erase') {
+  } else if(currentTool==='erase'){
     undoLast();
   }
 }
 
-function onMouseMove(e) {
-  const pos = getPos(e);
-  document.getElementById('cursor-info').textContent = `x:${Math.round(pos.x)}  y:${Math.round(pos.y)}`;
-  if(!isDrawing || !currentPath) return;
-  const last = currentPath.points[currentPath.points.length-1];
-  const dx=pos.x-last.x, dy=pos.y-last.y;
-  if(dx*dx+dy*dy > 25) { // min distance for new point
-    currentPath.points.push(pos);
-    redrawWithCurrent();
+function onMove(e){
+  const pos=getPos(e);
+  document.getElementById('cursor-info').textContent=`x:${Math.round(pos.x)}  y:${Math.round(pos.y)}`;
+  if(isDraggingElem&&dragStart){
+    redraw();
+    // Preview ghost
+    const type=activeLayoutTool;
+    const def=ELEM_TYPES[type];
+    const x=Math.min(dragStart.x,pos.x), y=Math.min(dragStart.y,pos.y);
+    const w=Math.max(Math.abs(pos.x-dragStart.x),def.minW);
+    const h=Math.max(Math.abs(pos.y-dragStart.y),def.minH);
+    drawElemShape(ctx,{type,x,y,w,h,label:'',color:def.strokeColor},0.45);
+    return;
   }
+  if(!isDrawing||!currentPath) return;
+  const last=currentPath.points[currentPath.points.length-1];
+  const dx=pos.x-last.x,dy=pos.y-last.y;
+  if(dx*dx+dy*dy>25){currentPath.points.push(pos);redrawWithCurrent();}
 }
 
-function onMouseUp() {
-  if(!isDrawing || !currentPath) return;
-  isDrawing = false;
-  if(currentPath.points.length > 1) {
-    paths.push(currentPath);
-    updateStats();
-    autoSave();
+function onUp(e){
+  if(isDraggingElem&&dragStart){
+    isDraggingElem=false;
+    if(e){
+      const pos=getPos(e);
+      const type=activeLayoutTool;
+      const def=ELEM_TYPES[type];
+      const x=Math.min(dragStart.x,pos.x), y=Math.min(dragStart.y,pos.y);
+      const w=Math.max(Math.abs(pos.x-dragStart.x),def.defaultW);
+      const h=Math.max(Math.abs(pos.y-dragStart.y),def.defaultH);
+      const label=document.getElementById('elem-label').value.trim()||def.label+' '+(layoutElements.filter(el=>el.type===type).length+1);
+      layoutElements.push({id:nextElemId++,type,x,y,w,h,label,color:def.strokeColor});
+      document.getElementById('bg-hint').style.display='none';
+      renderElemList();redraw();autoSave();
+      showToast('✅ '+def.label+' agregado');
+    }
+    dragStart=null;
+    return;
   }
-  currentPath = null;
+  if(!isDrawing||!currentPath) return;
+  isDrawing=false;
+  if(currentPath.points.length>1){paths.push(currentPath);updateStats();autoSave();}
+  currentPath=null;
   redraw();
 }
 
-function undoLast() {
-  if(paths.length===0) return;
-  // Undo last path of active op first, else any last
-  const idx = [...paths].reverse().findIndex(p=>p.opId===activeOpId);
-  if(idx>=0) paths.splice(paths.length-1-idx,1);
-  else paths.pop();
-  redraw(); updateStats(); autoSave();
-  showToast('↩ Último segmento eliminado');
-}
+function getPos(e){const r=canvas.getBoundingClientRect();return{x:(e.clientX-r.left),y:(e.clientY-r.top)};}
 
-function clearCanvas() {
-  if(!confirm('¿Limpiar todos los trazados?')) return;
-  paths=[]; pointMarkers=[]; redraw(); updateStats(); autoSave();
-}
-
-function getPos(e) {
-  const r = canvas.getBoundingClientRect();
-  return {x: (e.clientX-r.left), y: (e.clientY-r.top)};
+function deleteElemAt(pos){
+  const idx=layoutElements.findIndex(el=>{
+    return pos.x>=el.x&&pos.x<=el.x+el.w&&pos.y>=el.y&&pos.y<=el.y+el.h;
+  });
+  if(idx>=0){
+    const nm=layoutElements[idx].label||ELEM_TYPES[layoutElements[idx].type]?.label||'Elemento';
+    if(confirm('¿Eliminar "'+nm+'"?')){layoutElements.splice(idx,1);renderElemList();redraw();autoSave();}
+  }
 }
 
 /* ── RENDER ── */
-function redraw() {
+function redraw(){
   ctx.clearRect(0,0,canvas.width,canvas.height);
-  if(bgImage) {
-    ctx.drawImage(bgImage, 0,0, canvas.width, canvas.height);
-  }
-  const lw   = parseFloat(document.getElementById('line-width').value)||2;
-  const opac = parseFloat(document.getElementById('line-opacity').value)/100;
-  const arrows= document.getElementById('show-arrows').checked;
-  const dists = document.getElementById('show-distances').checked;
-
+  if(bgImage) ctx.drawImage(bgImage,0,0,canvas.width,canvas.height);
+  // Draw layout elements first
+  layoutElements.forEach(el=>drawElemShape(ctx,el,1));
+  // Paths
+  const lw  =parseFloat(document.getElementById('line-width').value)||2;
+  const opac=parseFloat(document.getElementById('line-opacity').value)/100;
+  const arrows=document.getElementById('show-arrows').checked;
+  const dists =document.getElementById('show-distances').checked;
   paths.forEach(path=>{
-    const op = operators.find(o=>o.id===path.opId);
+    const op=operators.find(o=>o.id===path.opId);
     if(!op||path.points.length<2) return;
     ctx.save();
-    ctx.globalAlpha = opac;
-    ctx.strokeStyle = op.color;
-    ctx.lineWidth = lw;
-    ctx.lineJoin = 'round';
-    ctx.lineCap = 'round';
+    ctx.globalAlpha=opac;
+    ctx.strokeStyle=op.color;
+    ctx.lineWidth=lw;
+    ctx.lineJoin='round';
+    ctx.lineCap='round';
     ctx.beginPath();
-    ctx.moveTo(path.points[0].x, path.points[0].y);
+    ctx.moveTo(path.points[0].x,path.points[0].y);
     path.points.forEach(p=>ctx.lineTo(p.x,p.y));
     ctx.stroke();
-
-    if(arrows) {
-      // Draw arrowhead at midpoint of each sub-segment
+    if(arrows){
       for(let i=0;i<path.points.length-1;i+=Math.max(1,Math.floor(path.points.length/5))){
-        const a=path.points[i], b=path.points[i+1]||path.points[path.points.length-1];
-        drawArrow(ctx, a, b, op.color, lw);
+        const a=path.points[i],b=path.points[i+1]||path.points[path.points.length-1];
+        drawArrow(ctx,a,b,op.color,lw);
       }
     }
-
-    if(dists) {
-      const d = pathDist(path);
-      const scale = parseFloat(document.getElementById('scale-val').value)||1;
-      const unit = document.getElementById('scale-unit').value;
-      const mid = path.points[Math.floor(path.points.length/2)];
-      ctx.globalAlpha = Math.min(opac+0.2,1);
-      ctx.font = `bold ${Math.max(9,lw*3+6)}px Inter,sans-serif`;
-      ctx.fillStyle = op.color;
-      ctx.textAlign = 'center';
-      ctx.fillText((d/100*scale).toFixed(1)+' '+unit, mid.x, mid.y-6);
+    if(dists){
+      const d=pathDist(path);
+      const scale=parseFloat(document.getElementById('scale-val').value)||1;
+      const unit=document.getElementById('scale-unit').value;
+      const mid=path.points[Math.floor(path.points.length/2)];
+      ctx.globalAlpha=Math.min(opac+0.2,1);
+      ctx.font=`bold ${Math.max(9,lw*3+6)}px Inter,sans-serif`;
+      ctx.fillStyle=op.color;
+      ctx.textAlign='center';
+      ctx.fillText((d/100*scale).toFixed(1)+' '+unit,mid.x,mid.y-6);
     }
     ctx.restore();
   });
-
   // Current path preview
-  if(currentPath && currentPath.points.length>1) {
-    const op = operators.find(o=>o.id===activeOpId);
+  if(currentPath&&currentPath.points.length>1){
+    const op=operators.find(o=>o.id===activeOpId);
     if(op){
-      ctx.save();
-      ctx.globalAlpha = 0.6;
-      ctx.strokeStyle = op.color;
-      ctx.lineWidth = lw;
-      ctx.setLineDash([5,4]);
-      ctx.beginPath();
-      ctx.moveTo(currentPath.points[0].x,currentPath.points[0].y);
-      currentPath.points.forEach(p=>ctx.lineTo(p.x,p.y));
-      ctx.stroke();
-      ctx.restore();
+      const lw2=parseFloat(document.getElementById('line-width').value)||2;
+      ctx.save();ctx.globalAlpha=0.6;ctx.strokeStyle=op.color;ctx.lineWidth=lw2;ctx.setLineDash([5,4]);
+      ctx.beginPath();ctx.moveTo(currentPath.points[0].x,currentPath.points[0].y);
+      currentPath.points.forEach(p=>ctx.lineTo(p.x,p.y));ctx.stroke();ctx.restore();
     }
   }
-
   // Point markers
   pointMarkers.forEach(pm=>{
-    const op = operators.find(o=>o.id===pm.opId);
-    const color = op?op.color:'#ffffff';
-    ctx.save();
-    ctx.globalAlpha=0.95;
-    ctx.fillStyle=color;
-    ctx.beginPath();
-    ctx.arc(pm.x,pm.y,7,0,Math.PI*2);
-    ctx.fill();
-    ctx.strokeStyle='rgba(0,0,0,0.5)';
-    ctx.lineWidth=1.5;
-    ctx.stroke();
-    ctx.fillStyle='#0d1117';
-    ctx.font='bold 9px Inter,sans-serif';
-    ctx.textAlign='center';
-    ctx.textBaseline='middle';
-    ctx.fillText('P',pm.x,pm.y);
-    if(pm.label){
-      ctx.fillStyle=color;
-      ctx.font='bold 10px Inter,sans-serif';
-      ctx.textBaseline='alphabetic';
-      ctx.fillText(pm.label,pm.x,pm.y-11);
+    const op=operators.find(o=>o.id===pm.opId);
+    const color=op?op.color:'#ffffff';
+    ctx.save();ctx.globalAlpha=0.95;ctx.fillStyle=color;
+    ctx.beginPath();ctx.arc(pm.x,pm.y,7,0,Math.PI*2);ctx.fill();
+    ctx.strokeStyle='rgba(0,0,0,0.5)';ctx.lineWidth=1.5;ctx.stroke();
+    ctx.fillStyle='#0d1117';ctx.font='bold 9px Inter,sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('P',pm.x,pm.y);
+    if(pm.label&&document.getElementById('show-labels').checked){
+      ctx.fillStyle=color;ctx.font='bold 10px Inter,sans-serif';ctx.textBaseline='alphabetic';ctx.fillText(pm.label,pm.x,pm.y-11);
     }
     ctx.restore();
   });
+}
+
+function drawElemShape(ctx,el,alpha){
+  const def=ELEM_TYPES[el.type]||{};
+  ctx.save();
+  ctx.globalAlpha=alpha;
+  ctx.fillStyle=def.fillColor||'rgba(100,100,100,0.2)';
+  ctx.strokeStyle=el.color||def.strokeColor||'#aaa';
+  ctx.lineWidth=el.type==='wall'?4:1.5;
+  if(def.dash&&def.dash.length) ctx.setLineDash(def.dash);
+  // Special shape for column: circle
+  if(el.type==='column'){
+    const cx=el.x+el.w/2, cy=el.y+el.h/2, r=Math.min(el.w,el.h)/2;
+    ctx.beginPath();ctx.arc(cx,cy,r,0,Math.PI*2);
+    ctx.fill();ctx.stroke();
+  } else {
+    const r=el.type==='wall'?2:5;
+    ctx.beginPath();ctx.roundRect(el.x,el.y,el.w,el.h,r);
+    ctx.fill();ctx.stroke();
+  }
+  // Label
+  if(el.label&&document.getElementById('show-labels')?.checked!==false){
+    ctx.globalAlpha=Math.min(alpha+0.3,1);
+    ctx.fillStyle=el.color||def.strokeColor||'#aaa';
+    ctx.font='bold 10px Inter,sans-serif';
+    ctx.textAlign='center';
+    ctx.textBaseline='middle';
+    const cx=el.x+el.w/2, cy=el.y+el.h/2;
+    const maxW=el.w-8;
+    ctx.save();
+    ctx.rect(el.x,el.y,el.w,el.h);
+    ctx.clip();
+    ctx.fillText(el.label,cx,cy);
+    ctx.restore();
+  }
+  ctx.restore();
 }
 
 function redrawWithCurrent(){redraw();}
 
 function drawArrow(ctx,a,b,color,lw){
-  const dx=b.x-a.x, dy=b.y-a.y;
-  const len=Math.sqrt(dx*dx+dy*dy);
+  const dx=b.x-a.x,dy=b.y-a.y,len=Math.sqrt(dx*dx+dy*dy);
   if(len<10) return;
-  const ux=dx/len, uy=dy/len;
-  const mx=(a.x+b.x)/2, my=(a.y+b.y)/2;
+  const ux=dx/len,uy=dy/len;
+  const mx=(a.x+b.x)/2,my=(a.y+b.y)/2;
   const as=Math.max(6,lw*3);
-  ctx.save();
-  ctx.fillStyle=color;
+  ctx.save();ctx.fillStyle=color;
   ctx.beginPath();
-  ctx.moveTo(mx+ux*as, my+uy*as);
-  ctx.lineTo(mx-uy*as*0.5-ux*as*0.5, my+ux*as*0.5-uy*as*0.5);
-  ctx.lineTo(mx+uy*as*0.5-ux*as*0.5, my-ux*as*0.5-uy*as*0.5);
-  ctx.closePath();
-  ctx.fill();
-  ctx.restore();
+  ctx.moveTo(mx+ux*as,my+uy*as);
+  ctx.lineTo(mx-uy*as*.5-ux*as*.5,my+ux*as*.5-uy*as*.5);
+  ctx.lineTo(mx+uy*as*.5-ux*as*.5,my-ux*as*.5-uy*as*.5);
+  ctx.closePath();ctx.fill();ctx.restore();
+}
+
+/* ── ELEM LIST ── */
+function renderElemList(){
+  const list=document.getElementById('elem-list');
+  list.innerHTML='';
+  if(!layoutElements.length){list.innerHTML='<div style="font-size:11px;color:var(--faint);padding:4px">Sin elementos aún</div>';return;}
+  layoutElements.forEach(el=>{
+    const def=ELEM_TYPES[el.type]||{};
+    const div=document.createElement('div');
+    div.className='elem-item';
+    div.innerHTML=`<div class="ei-color" style="background:${el.color}"></div>
+      <span class="ei-name">${esc(el.label||def.label||el.type)}</span>
+      <button class="ei-del" onclick="delElem(${el.id})" title="Eliminar">✕</button>`;
+    list.appendChild(div);
+  });
+}
+
+function delElem(id){
+  layoutElements=layoutElements.filter(e=>e.id!==id);
+  renderElemList();redraw();autoSave();
+}
+
+function clearLayoutElements(){
+  if(!confirm('¿Eliminar todos los elementos del layout?')) return;
+  layoutElements=[];renderElemList();redraw();autoSave();
+  showToast('🗑 Layout limpiado');
+}
+
+/* ── OPERATORS ── */
+function addOp(){
+  const name=document.getElementById('new-op-name').value.trim()||('Operador '+(operators.length+1));
+  const color=document.getElementById('new-op-color').value;
+  operators.push({id:nextOpId++,name,color,obs:''});
+  document.getElementById('new-op-name').value='';
+  if(!activeOpId) activeOpId=operators[0].id;
+  renderOpList();updateStats();autoSave();
+}
+
+function delOp(id){
+  if(!confirm('¿Eliminar operador y sus trazados?')) return;
+  operators=operators.filter(o=>o.id!==id);
+  paths=paths.filter(p=>p.opId!==id);
+  pointMarkers=pointMarkers.filter(p=>p.opId!==id);
+  if(activeOpId===id) activeOpId=operators.length?operators[0].id:null;
+  renderOpList();redraw();updateStats();autoSave();
+}
+
+function setActiveOp(id){
+  activeOpId=id;renderOpList();
+  const op=operators.find(o=>o.id===id);
+  document.getElementById('active-op-label').textContent=op?op.name:'— ninguno —';
+  document.getElementById('active-op-label').style.color=op?op.color:'var(--yellow)';
+}
+
+function renderOpList(){
+  const list=document.getElementById('op-list');
+  list.innerHTML='';
+  const unit=document.getElementById('scale-unit').value;
+  operators.forEach(op=>{
+    const d=getOpDist(op.id);
+    const el=document.createElement('div');
+    el.className='op-item'+(op.id===activeOpId?' active':'');
+    el.onclick=()=>setActiveOp(op.id);
+    el.innerHTML=`<div class="op-dot" style="background:${op.color}"></div>
+      <span class="op-name">${esc(op.name)}</span>
+      <span class="op-dist">${d.toFixed(1)} ${unit}</span>
+      <button class="op-del" onclick="event.stopPropagation();delOp(${op.id})">✕</button>`;
+    list.appendChild(el);
+  });
+  if(operators.length&&!activeOpId) setActiveOp(operators[0].id);
+  if(activeOpId){
+    const op=operators.find(o=>o.id===activeOpId);
+    document.getElementById('active-op-label').textContent=op?op.name:'— ninguno —';
+    document.getElementById('active-op-label').style.color=op?op.color:'var(--yellow)';
+  }
+}
+
+/* ── PATHS ── */
+function undoLast(){
+  if(!paths.length) return;
+  const idx=[...paths].reverse().findIndex(p=>p.opId===activeOpId);
+  if(idx>=0) paths.splice(paths.length-1-idx,1); else paths.pop();
+  redraw();updateStats();autoSave();showToast('↩ Último segmento eliminado');
+}
+
+function clearPaths(){
+  if(!confirm('¿Limpiar todos los trazados (mantiene layout)?')) return;
+  paths=[];pointMarkers=[];redraw();updateStats();autoSave();
 }
 
 /* ── DISTANCES ── */
 function pathDist(path){
   let d=0;
-  for(let i=1;i<path.points.length;i++){
-    const dx=path.points[i].x-path.points[i-1].x;
-    const dy=path.points[i].y-path.points[i-1].y;
-    d+=Math.sqrt(dx*dx+dy*dy);
-  }
-  return d; // pixels
+  for(let i=1;i<path.points.length;i++){const dx=path.points[i].x-path.points[i-1].x,dy=path.points[i].y-path.points[i-1].y;d+=Math.sqrt(dx*dx+dy*dy);}
+  return d;
 }
-
-function pxToReal(px){
-  const scale=parseFloat(document.getElementById('scale-val').value)||1;
-  return px/100*scale;
-}
-
-function getOpDist(opId){
-  return pxToReal(paths.filter(p=>p.opId===opId).reduce((s,p)=>s+pathDist(p),0));
-}
+function pxToReal(px){return px/100*(parseFloat(document.getElementById('scale-val').value)||1);}
+function getOpDist(opId){return pxToReal(paths.filter(p=>p.opId===opId).reduce((s,p)=>s+pathDist(p),0));}
 
 function updateStats(){
   const unit=document.getElementById('scale-unit').value;
   const totalDist=operators.reduce((s,o)=>s+getOpDist(o.id),0);
-  const totalPaths=paths.length;
-  const totalPts=pointMarkers.length;
-
   document.getElementById('stat-row').innerHTML=[
     {v:operators.length,l:'Operadores'},
-    {v:totalPaths,l:'Segmentos'},
-    {v:totalPts,l:'Puntos marcados'},
+    {v:layoutElements.length,l:'Elementos layout'},
+    {v:paths.length,l:'Segmentos'},
     {v:totalDist.toFixed(1)+' '+unit,l:'Distancia Total'},
   ].map(s=>`<div class="s-chip"><div class="sv">${s.v}</div><div class="sl">${s.l}</div></div>`).join('');
-
-  // Table
   const tbody=document.getElementById('dist-body');
   tbody.innerHTML='';
   const maxDist=Math.max(...operators.map(o=>getOpDist(o.id)),0.001);
@@ -613,33 +720,21 @@ function updateStats(){
     const pct=totalDist>0?(d/totalDist*100).toFixed(1)+'%':'—';
     const barW=maxDist>0?(d/maxDist*100):0;
     const tr=document.createElement('tr');
-    tr.innerHTML=`
-      <td style="display:flex;align-items:center;gap:8px">
-        <div style="width:11px;height:11px;border-radius:50%;background:${op.color};flex-shrink:0"></div>
-        ${esc(op.name)}
-      </td>
+    tr.innerHTML=`<td style="display:flex;align-items:center;gap:8px"><div style="width:11px;height:11px;border-radius:50%;background:${op.color};flex-shrink:0"></div>${esc(op.name)}</td>
       <td class="num">${segs}</td>
       <td class="num"><strong>${d.toFixed(1)} ${unit}</strong></td>
-      <td>
-        <div class="dist-bar-wrap"><div class="dist-bar" style="width:${barW}%;background:${op.color}"></div></div>
-        ${pct}
-      </td>
+      <td><div class="dist-bar-wrap"><div class="dist-bar" style="width:${barW}%;background:${op.color}"></div></div>${pct}</td>
       <td><input style="background:transparent;border:none;color:var(--muted);font-size:11px;font-family:'Inter',sans-serif;width:120px" placeholder="Notas..." value="${esc(op.obs||'')}" oninput="operators.find(o=>o.id===${op.id}).obs=this.value;autoSave()"></td>`;
     tbody.appendChild(tr);
   });
-
   renderOpList();
 }
 
 /* ── BACKGROUND ── */
 function loadBg(e){
-  const file=e.target.files[0]; if(!file) return;
+  const file=e.target.files[0];if(!file)return;
   const reader=new FileReader();
-  reader.onload=ev=>{
-    const img=new Image();
-    img.onload=()=>{bgImage=img;document.getElementById('bg-hint').style.display='none';redraw();};
-    img.src=ev.target.result;
-  };
+  reader.onload=ev=>{const img=new Image();img.onload=()=>{bgImage=img;document.getElementById('bg-hint').style.display='none';redraw();};img.src=ev.target.result;};
   reader.readAsDataURL(file);
 }
 
@@ -655,7 +750,8 @@ function exportCSV(){
     const pct=total>0?(d/total*100).toFixed(1)+'%':'0%';
     csv+=`"${op.name}",${segs},${d.toFixed(2)},${pct},"${op.obs||''}"\n`;
   });
-  csv+=`\nTotal,,${total.toFixed(2)},100%,\n`;
+  csv+=`\nTotal,,${total.toFixed(2)},100%,\n\nElementos de Layout\nTipo,Etiqueta,X,Y,Ancho,Alto\n`;
+  layoutElements.forEach(el=>csv+=`${ELEM_TYPES[el.type]?.label||el.type},"${el.label}",${Math.round(el.x)},${Math.round(el.y)},${Math.round(el.w)},${Math.round(el.h)}\n`);
   const blob=new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8;'});
   const a=document.createElement('a');a.href=URL.createObjectURL(blob);
   a.download='spaguetti-largotek.csv';a.click();
@@ -665,11 +761,11 @@ function exportCSV(){
 let saveTimer;
 function autoSave(){clearTimeout(saveTimer);saveTimer=setTimeout(saveLocal,1200);}
 function saveLocal(){
-  const d={fields:{},operators,paths,pointMarkers,nextOpId,nextPtId,ts:new Date().toISOString()};
-  META.forEach(id=>{const el=document.getElementById(id);if(el) d.fields[id]=el.value;});
+  const d={fields:{},operators,paths,pointMarkers,layoutElements,nextOpId,nextPtId,nextElemId,ts:new Date().toISOString()};
+  META.forEach(id=>{const el=document.getElementById(id);if(el)d.fields[id]=el.value;});
   localStorage.setItem(KEY,JSON.stringify(d));
   const t=new Date().toLocaleTimeString('es',{hour:'2-digit',minute:'2-digit'});
-  const el=document.getElementById('saved-lbl');if(el) el.textContent='✓ Guardado '+t;
+  const el=document.getElementById('saved-lbl');if(el)el.textContent='✓ Guardado '+t;
 }
 function loadLocal(){
   const raw=localStorage.getItem(KEY);
@@ -677,51 +773,59 @@ function loadLocal(){
   try{
     const d=JSON.parse(raw);
     META.forEach(id=>{const el=document.getElementById(id);if(el&&d.fields&&d.fields[id]!=null)el.value=d.fields[id];});
-    operators=d.operators||[];
-    paths=d.paths||[];
-    pointMarkers=d.pointMarkers||[];
+    operators=d.operators||[];paths=d.paths||[];pointMarkers=d.pointMarkers||[];
+    layoutElements=d.layoutElements||[];
     nextOpId=d.nextOpId||operators.length+1;
     nextPtId=d.nextPtId||pointMarkers.length+1;
+    nextElemId=d.nextElemId||layoutElements.length+1;
     if(operators.length){activeOpId=operators[0].id;setActiveOp(activeOpId);}
     if(d.ts){const el=document.getElementById('saved-lbl');if(el)el.textContent='Último guardado: '+new Date(d.ts).toLocaleString('es',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});}
-    if(paths.length||pointMarkers.length) document.getElementById('bg-hint').style.display='none';
-    redraw();updateStats();
+    if(paths.length||pointMarkers.length||layoutElements.length) document.getElementById('bg-hint').style.display='none';
+    renderElemList();redraw();updateStats();
   }catch(e){loadDemo();}
 }
 function loadDemo(){
-  operators=[...DEMO_OPS];
-  nextOpId=4;
-  // Demo paths (simple lines on canvas)
+  operators=[...DEMO_OPS];nextOpId=4;
   setTimeout(()=>{
-    const W=canvas.width, H=canvas.height;
+    const W=canvas.width,H=canvas.height;
     const s=(x,y)=>({x:W*x,y:H*y});
+    // Demo layout
+    layoutElements=[
+      {id:1,type:'wall',x:W*.05,y:H*.1,w:W*.9,h:8,label:'Pared Norte',color:'#8b949e'},
+      {id:2,type:'wall',x:W*.05,y:H*.85,w:W*.9,h:8,label:'Pared Sur',color:'#8b949e'},
+      {id:3,type:'wall',x:W*.05,y:H*.1,w:8,h:H*.75,label:'Pared Oeste',color:'#8b949e'},
+      {id:4,type:'wall',x:W*.95,y:H*.1,w:8,h:H*.75,label:'Pared Este',color:'#8b949e'},
+      {id:5,type:'machine',x:W*.1,y:H*.2,w:70,h:50,label:'CNC-1',color:'#3fb950'},
+      {id:6,type:'machine',x:W*.1,y:H*.5,w:70,h:50,label:'CNC-2',color:'#3fb950'},
+      {id:7,type:'machine',x:W*.35,y:H*.2,w:70,h:50,label:'Torno',color:'#3fb950'},
+      {id:8,type:'desk',x:W*.6,y:H*.25,w:55,h:35,label:'Insp.',color:'#58a6ff'},
+      {id:9,type:'warehouse',x:W*.72,y:H*.55,w:90,h:60,label:'Almacén MP',color:'#d29922'},
+      {id:10,type:'desk',x:W*.6,y:H*.6,w:55,h:35,label:'Calidad',color:'#58a6ff'},
+    ];
+    nextElemId=11;
     paths=[
-      {opId:1,points:[s(.1,.3),s(.3,.3),s(.3,.6),s(.6,.6),s(.6,.3),s(.85,.3)]},
-      {opId:1,points:[s(.85,.3),s(.85,.7),s(.1,.7),s(.1,.3)]},
-      {opId:2,points:[s(.15,.35),s(.5,.35),s(.5,.65),s(.15,.65),s(.15,.35)]},
-      {opId:3,points:[s(.05,.5),s(.95,.5),s(.95,.2),s(.5,.2)]},
+      {opId:1,points:[s(.17,.45),s(.17,.35),s(.22,.25),s(.42,.25),s(.63,.3)]},
+      {opId:1,points:[s(.63,.3),s(.63,.63),s(.77,.63),s(.77,.7)]},
+      {opId:2,points:[s(.2,.55),s(.4,.55),s(.4,.3),s(.62,.3)]},
+      {opId:3,points:[s(.77,.7),s(.5,.7),s(.5,.5),s(.2,.5)]},
     ];
     pointMarkers=[
-      {id:1,opId:1,x:W*.1,y:H*.3,label:'Inicio'},
-      {id:2,opId:1,x:W*.85,y:H*.3,label:'Est.5'},
-      {id:3,opId:2,x:W*.5,y:H*.35,label:'QC'},
-      {id:4,opId:3,x:W*.05,y:H*.5,label:'Almacén'},
+      {id:1,opId:1,x:W*.17,y:H*.45,label:'Inicio'},
+      {id:2,opId:1,x:W*.77,y:H*.7,label:'Almacén'},
     ];
-    nextPtId=5;
+    nextPtId=3;
     document.getElementById('m-area').value='Línea de Ensamblado A';
     document.getElementById('m-analista').value='Analista Demo';
     document.getElementById('bg-hint').style.display='none';
-    activeOpId=1;
-    setActiveOp(1);
-    redraw();updateStats();
+    activeOpId=1;setActiveOp(1);
+    renderElemList();redraw();updateStats();
   },80);
 }
-function clearAll(){if(!confirm('¿Limpiar todo el diagrama?'))return;localStorage.removeItem(KEY);location.reload();}
+function clearAll(){if(!confirm('¿Limpiar TODO (layout + trazados + operadores)?'))return;localStorage.removeItem(KEY);location.reload();}
 
-/* UTILS */
+/* ── UTILS ── */
 function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;');}
 function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2200);}
-
 document.querySelectorAll('input[type=range],input[type=checkbox],select').forEach(el=>el.addEventListener('change',autoSave));
 </script>
 <script src="branding.js"></script>
