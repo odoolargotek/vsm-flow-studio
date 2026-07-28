@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>VOC / CTQ — Largotek Lean Suite</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300..700&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0d1117;--surface:#161b22;--surface2:#21262d;--border:#30363d;
+  --text:#e6edf3;--muted:#8b949e;--faint:#3d444d;
+  --accent:#4f98a3;--green:#5fc97a;--yellow:#e8c44a;--red:#f85149;--purple:#bc8cff;--orange:#ffa657;
+  --d-color:#4f98a3;
+  --radius:14px;
+  --kano-b:#4f98a3; /* Básico      */
+  --kano-d:#3fb950; /* Desempeño   */
+  --kano-e:#bc8cff; /* Deleite     */
+  --kano-i:#484f58; /* Indiferente */
+}
+html{scroll-behavior:smooth}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+
+/* TOPBAR */
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:13px 28px;border-bottom:1px solid var(--border);background:var(--surface)}
+.topbar-brand{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:var(--muted);text-decoration:none}
+.topbar-brand span{color:var(--accent)}
+.topbar-right{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:7px 15px;border-radius:8px;border:1.5px solid var(--border);background:transparent;color:var(--muted);font-size:12px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;transition:all .18s}
+.btn:hover{border-color:var(--accent);color:var(--accent)}
+.btn-primary{background:var(--accent);color:#fff;border-color:var(--accent)}
+.btn-primary:hover{background:#3a7f8a}
+.btn-danger:hover{border-color:var(--red);color:var(--red)}
+.saved-label{font-size:11px;color:var(--muted)}
+
+/* HERO */
+.hero{padding:30px 32px 18px;max-width:1100px;margin:0 auto}
+.hero-eye{font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--d-color);margin-bottom:8px}
+.hero h1{font-family:'Instrument Serif',serif;font-size:clamp(1.4rem,2.8vw,2rem);margin-bottom:6px}
+.hero-sub{font-size:13px;color:var(--muted);line-height:1.7;max-width:700px}
+
+/* WRAP */
+.wrap{max-width:1100px;margin:0 auto;padding:8px 28px 80px}
+
+/* CARD */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:20px;overflow:hidden}
+.card-head{display:flex;align-items:center;gap:10px;padding:12px 18px;border-bottom:1px solid var(--faint);background:var(--surface2)}
+.card-icon{font-size:15px}
+.card-title{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.card-subtitle{font-size:11px;color:var(--faint);margin-left:auto}
+.card-body{padding:16px 18px}
+
+/* FIELD */
+.field{display:flex;flex-direction:column;gap:5px}
+.field label{font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.field input,.field textarea,.field select{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:9px 12px;font-size:13px;color:var(--text);font-family:'Inter',sans-serif;transition:border-color .18s;width:100%}
+.field textarea{resize:vertical;min-height:64px;line-height:1.65}
+.field input:focus,.field textarea:focus,.field select:focus{outline:none;border-color:var(--accent)}
+.field input::placeholder,.field textarea::placeholder{color:var(--faint)}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media(max-width:640px){.two-col{grid-template-columns:1fr}}
+.field-full{grid-column:1/-1}
+
+/* SECTION LABEL */
+.section-lbl{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:20px 0 10px;display:flex;align-items:center;gap:8px}
+.section-lbl::after{content:'';flex:1;height:1px;background:var(--faint)}
+
+/* ── VOC TABLE ── */
+.voc-table-wrap{overflow-x:auto;margin-bottom:8px}
+.voc-table{width:100%;border-collapse:collapse;font-size:12px;min-width:860px}
+.voc-table th{text-align:left;padding:8px 10px;background:var(--surface2);color:var(--muted);font-size:10px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;border-bottom:1px solid var(--border);white-space:nowrap}
+.voc-table td{padding:6px 6px;border-top:1px solid var(--faint);vertical-align:top}
+.voc-table tr:hover td{background:rgba(255,255,255,.02)}
+.voc-table td input,.voc-table td textarea{width:100%;background:transparent;border:none;color:var(--text);font-size:12px;font-family:'Inter',sans-serif;padding:3px 4px;resize:none;line-height:1.5}
+.voc-table td input:focus,.voc-table td textarea:focus{outline:1px solid var(--accent);border-radius:3px;background:var(--surface2)}
+.voc-table td input::placeholder,.voc-table td textarea::placeholder{color:var(--faint)}
+.voc-table td select{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:11px;font-family:'Inter',sans-serif;padding:4px 6px;cursor:pointer}
+.voc-table td select:focus{outline:none;border-color:var(--accent)}
+.del-btn{background:transparent;border:none;color:var(--faint);cursor:pointer;font-size:13px;padding:2px 5px;transition:color .15s;display:block;margin:0 auto}
+.del-btn:hover{color:var(--red)}
+.add-btn{display:inline-flex;align-items:center;gap:5px;margin-top:8px;padding:6px 14px;border-radius:6px;border:1px dashed var(--border);background:transparent;color:var(--muted);font-size:11px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;transition:all .18s}
+.add-btn:hover{border-color:var(--accent);color:var(--accent)}
+
+/* Priority badge inline */
+.prio-alta{color:#f85149}
+.prio-media{color:#e8c44a}
+.prio-baja{color:#5fc97a}
+
+/* Kano badge */
+.kano-b{color:var(--kano-b)}
+.kano-d{color:var(--kano-d)}
+.kano-e{color:var(--kano-e)}
+.kano-i{color:var(--kano-i)}
+
+/* ── CTQ TREE ── */
+.ctq-tree{display:flex;flex-direction:column;gap:12px}
+.ctq-need-block{
+  background:var(--surface2);border:1px solid var(--border);
+  border-radius:12px;overflow:hidden;
+}
+.need-header{
+  display:flex;align-items:center;gap:10px;
+  padding:10px 14px;
+  background:rgba(79,152,163,.08);
+  border-bottom:1px solid var(--border);
+  cursor:pointer;
+  user-select:none;
+}
+.need-header:hover{background:rgba(79,152,163,.14)}
+.need-icon{font-size:13px;color:var(--accent)}
+.need-label{font-size:12px;font-weight:700;color:var(--accent);flex:1}
+.need-toggle{font-size:11px;color:var(--muted);transition:transform .2s}
+.need-toggle.open{transform:rotate(180deg)}
+.need-body{padding:10px 14px 14px;display:flex;flex-direction:column;gap:8px}
+.need-body.hidden{display:none}
+
+.req-block{
+  background:var(--surface);border:1px solid var(--faint);
+  border-left:3px solid var(--yellow);
+  border-radius:8px;padding:10px 12px;
+  display:flex;flex-direction:column;gap:8px;
+}
+.req-label-row{display:flex;align-items:center;gap:8px}
+.req-dot{width:8px;height:8px;border-radius:50%;background:var(--yellow);flex-shrink:0}
+.req-input{flex:1;background:transparent;border:none;color:var(--text);font-size:12px;font-weight:600;font-family:'Inter',sans-serif;padding:0}
+.req-input:focus{outline:none;color:var(--yellow)}
+.req-input::placeholder{color:var(--faint)}
+
+.ctq-items{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:8px;margin-top:4px}
+.ctq-item{
+  background:var(--surface2);border:1px solid var(--faint);
+  border-left:3px solid var(--green);
+  border-radius:8px;padding:8px 10px;
+  display:flex;flex-direction:column;gap:5px;
+}
+.ctq-item-top{display:flex;align-items:center;gap:6px}
+.ctq-item-dot{width:6px;height:6px;border-radius:50%;background:var(--green);flex-shrink:0}
+.ctq-item input{background:transparent;border:none;color:var(--text);font-size:11.5px;font-family:'Inter',sans-serif;padding:0;width:100%}
+.ctq-item input:focus{outline:none}
+.ctq-item input::placeholder{color:var(--faint)}
+.ctq-item-meta{display:grid;grid-template-columns:1fr 1fr;gap:4px}
+.ctq-meta-input{background:var(--bg);border:1px solid var(--faint);border-radius:5px;padding:3px 7px;font-size:11px;color:var(--muted);font-family:'Inter',sans-serif;width:100%}
+.ctq-meta-input:focus{outline:none;border-color:var(--green);color:var(--text)}
+.ctq-meta-input::placeholder{color:var(--faint)}
+.ctq-meta-label{font-size:9px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--faint);margin-bottom:1px}
+
+.tree-add-btn{display:inline-flex;align-items:center;gap:4px;margin-top:4px;padding:4px 10px;border-radius:5px;border:1px dashed var(--faint);background:transparent;color:var(--faint);font-size:10px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;transition:all .18s}
+.tree-add-btn:hover{border-color:var(--accent);color:var(--accent)}
+.tree-add-need{border-color:rgba(79,152,163,.4);color:var(--accent);font-size:11px;padding:6px 14px;margin:0}
+.tree-add-need:hover{background:rgba(79,152,163,.08)}
+.tree-del-btn{background:transparent;border:none;color:var(--faint);cursor:pointer;font-size:11px;padding:0 3px;transition:color .15s;flex-shrink:0}
+.tree-del-btn:hover{color:var(--red)}
+
+/* SUMMARY CHIPS */
+.summary-row{display:flex;flex-wrap:wrap;gap:8px;padding:12px 0 4px}
+.chip{display:flex;align-items:center;gap:6px;padding:5px 12px;border-radius:99px;font-size:11px;font-weight:700;border:1.5px solid currentColor}
+.chip-val{font-size:16px;font-weight:900;line-height:1}
+
+/* TOAST */
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:#1e3a2e;border:1px solid var(--green);color:var(--green);padding:10px 22px;border-radius:99px;font-size:13px;font-weight:600;opacity:0;transition:all .3s;z-index:999;white-space:nowrap}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* PRINT */
+@media print{
+  body{background:#fff;color:#111}
+  .topbar,.btn,.add-btn,.tree-add-btn,.tree-add-need,.del-btn,.tree-del-btn{display:none!important}
+  .card,.ctq-need-block,.req-block,.ctq-item{background:#fff!important;border-color:#ccc!important}
+  .card-head,.need-header{background:#f3f3f3!important}
+  .need-body.hidden{display:flex!important}
+  input,textarea,select{background:#f9f9f9!important;color:#111!important;border:1px solid #ddd!important}
+}
+</style>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <a href="index.html" class="topbar-brand">← <span>Largotek</span> Lean Suite</a>
+  <div class="topbar-right">
+    <span class="saved-label" id="saved-lbl"></span>
+    <button class="btn btn-danger" onclick="clearAll()">🗑 Limpiar</button>
+    <button class="btn" onclick="saveLocal()">💾 Guardar</button>
+    <button class="btn btn-primary" onclick="window.print()">🖨 PDF</button>
+  </div>
+</div>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-eye">🔵 Definir — Largotek Lean Suite</div>
+  <h1>Voz del Cliente (VOC) y Árbol CTQ</h1>
+  <p class="hero-sub">Captura los requerimientos del cliente, transládalos en necesidades medibles (CTQs) y priorizalos para enfocar el proyecto. <strong style="color:var(--accent)">VOC</strong> = qué dice el cliente. <strong style="color:var(--yellow)">CTQ</strong> = cómo lo medimos.</p>
+</div>
+
+<div class="wrap">
+
+  <!-- INFO PROYECTO -->
+  <div class="card">
+    <div class="card-head"><span class="card-icon">🏷️</span><span class="card-title">Identificación del Proyecto</span></div>
+    <div class="card-body">
+      <div class="two-col">
+        <div class="field"><label>Título del Proyecto</label><input id="p-title" placeholder="Ej: Reducción de tiempos de entrega" oninput="autoSave()"></div>
+        <div class="field"><label>Área / Proceso</label><input id="p-area" placeholder="Ej: Logística — Almacén Central" oninput="autoSave()"></div>
+        <div class="field"><label>Responsable</label><input id="p-owner" placeholder="Nombre y cargo" oninput="autoSave()"></div>
+        <div class="field"><label>Fecha</label><input id="p-date" type="date" oninput="autoSave()"></div>
+        <div class="field field-full"><label>Segmentos de Clientes analizados</label><input id="p-segments" placeholder="Ej: Clientes minoristas, distribuidores, usuarios internos del almacén" oninput="autoSave()"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RESUMEN -->  
+  <div class="card">
+    <div class="card-head"><span class="card-icon">📊</span><span class="card-title">Resumen VOC</span><span class="card-subtitle">Se actualiza automáticamente</span></div>
+    <div class="card-body">
+      <div class="summary-row">
+        <div class="chip" style="color:var(--accent)"><span class="chip-val" id="cnt-total">0</span> Voces capturadas</div>
+        <div class="chip" style="color:#f85149"><span class="chip-val" id="cnt-alta">0</span> Prioridad Alta</div>
+        <div class="chip" style="color:#e8c44a"><span class="chip-val" id="cnt-media">0</span> Prioridad Media</div>
+        <div class="chip" style="color:#5fc97a"><span class="chip-val" id="cnt-baja">0</span> Prioridad Baja</div>
+        <div class="chip" style="color:var(--purple)"><span class="chip-val" id="cnt-ctq">0</span> CTQs definidos</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- VOC TABLE -->
+  <div class="card">
+    <div class="card-head"><span class="card-icon">🗣️</span><span class="card-title">Tabla VOC — Voz del Cliente</span></div>
+    <div class="card-body">
+      <p style="font-size:12px;color:var(--muted);margin-bottom:12px;line-height:1.7">
+        Registra cada comentario / queja / requerimiento del cliente tal como lo expresó (verbatim), luego traduce al lenguaje del proyecto.
+      </p>
+      <div class="voc-table-wrap">
+        <table class="voc-table">
+          <thead>
+            <tr>
+              <th style="width:34px">#</th>
+              <th style="min-width:160px">Verbatim del Cliente <span style="font-weight:400;opacity:.6">(cita textual)</span></th>
+              <th style="min-width:130px">Necesidad identificada</th>
+              <th style="min-width:130px">Requerimiento del proceso</th>
+              <th style="min-width:110px">Métrica / CTQ</th>
+              <th style="min-width:90px">Meta / Especificación</th>
+              <th style="min-width:80px">Fuente</th>
+              <th style="min-width:90px">Clasificación Kano</th>
+              <th style="min-width:70px">Prioridad</th>
+              <th style="width:28px"></th>
+            </tr>
+          </thead>
+          <tbody id="voc-body"></tbody>
+        </table>
+      </div>
+      <button class="add-btn" onclick="addVocRow()">+ Agregar voz del cliente</button>
+    </div>
+  </div>
+
+  <!-- CTQ TREE -->
+  <div class="card">
+    <div class="card-head"><span class="card-icon">🌳</span><span class="card-title">Árbol CTQ — Critical to Quality</span></div>
+    <div class="card-body">
+      <p style="font-size:12px;color:var(--muted);margin-bottom:14px;line-height:1.7">
+        Desglosa cada <strong style="color:var(--accent)">Necesidad</strong> del cliente en <strong style="color:var(--yellow)">Requerimientos</strong> del proceso y luego en <strong style="color:var(--green)">CTQs medibles</strong> con meta y unidad.
+      </p>
+
+      <!-- LEYENDA -->
+      <div style="display:flex;gap:16px;flex-wrap:wrap;margin-bottom:14px">
+        <span style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--muted)">
+          <span style="width:10px;height:10px;border-radius:50%;background:var(--accent);display:inline-block"></span> Necesidad del cliente
+        </span>
+        <span style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--muted)">
+          <span style="width:10px;height:3px;background:var(--yellow);display:inline-block;border-radius:2px"></span> Requerimiento del proceso
+        </span>
+        <span style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--muted)">
+          <span style="width:8px;height:8px;border-radius:2px;background:var(--green);display:inline-block"></span> CTQ (métrica medible)
+        </span>
+      </div>
+
+      <div class="ctq-tree" id="ctq-tree"></div>
+      <button class="tree-add-btn tree-add-need" onclick="addNeed()">+ Agregar necesidad del cliente</button>
+    </div>
+  </div>
+
+  <!-- NOTAS -->
+  <div class="card">
+    <div class="card-head"><span class="card-icon">📝</span><span class="card-title">Notas y Observaciones</span></div>
+    <div class="card-body">
+      <div class="field"><textarea id="p-notes" rows="3" placeholder="Método de recolección utilizado (entrevistas, encuestas, focus group, datos históricos...) y observaciones del equipo." oninput="autoSave()"></textarea></div>
+    </div>
+  </div>
+
+</div>
+<div class="toast" id="toast">✅ Guardado en caché</div>
+
+<script>
+const KEY = 'largotek_voc_ctq';
+const INFO_FIELDS = ['p-title','p-area','p-owner','p-date','p-segments','p-notes'];
+let needCount = 0;
+
+// ─── VOC ROW ───
+function addVocRow(d={}) {
+  const tbody = document.getElementById('voc-body');
+  const idx = tbody.children.length + 1;
+  const tr = document.createElement('tr');
+  tr.innerHTML = `
+    <td style="text-align:center;color:var(--muted);font-size:11px;font-weight:700;padding-top:10px">${idx}</td>
+    <td><textarea rows="2" placeholder="\"El pedido siempre llega tarde y con productos equivocados\"" oninput="autoSave();updateSummary()">${d.verbatim||''}</textarea></td>
+    <td><input placeholder="Entrega confiable y a tiempo" value="${d.need||''}" oninput="autoSave();updateSummary()"></td>
+    <td><input placeholder="Tiempo de despacho ≤24 hs" value="${d.req||''}" oninput="autoSave()"></td>
+    <td><input placeholder="% Entregas a tiempo" value="${d.ctq||''}" oninput="autoSave();updateSummary()"></td>
+    <td><input placeholder="≥95%" value="${d.meta||''}" oninput="autoSave()"></td>
+    <td><input placeholder="Encuesta / Reclamo" value="${d.fuente||''}" oninput="autoSave()"></td>
+    <td>
+      <select onchange="autoSave();updateSummary()">
+        <option value="" ${!d.kano?'selected':''}>Seleccionar</option>
+        <option value="basico" ${d.kano==='basico'?'selected':''}>Básico (must-be)</option>
+        <option value="desempeno" ${d.kano==='desempeno'?'selected':''}>Desempeño (linear)</option>
+        <option value="deleite" ${d.kano==='deleite'?'selected':''}>Deleite (wow)</option>
+        <option value="indiferente" ${d.kano==='indiferente'?'selected':''}>Indiferente</option>
+      </select>
+    </td>
+    <td>
+      <select onchange="autoSave();updateSummary()">
+        <option value="alta" ${(d.prio||'alta')==='alta'?'selected':''}>🔴 Alta</option>
+        <option value="media" ${d.prio==='media'?'selected':''}>🟡 Media</option>
+        <option value="baja" ${d.prio==='baja'?'selected':''}>🟢 Baja</option>
+      </select>
+    </td>
+    <td><button class="del-btn" onclick="this.closest('tr').remove();renumberVoc();updateSummary();autoSave()" title="Eliminar">✕</button></td>
+  `;
+  tbody.appendChild(tr);
+  updateSummary();
+  autoSave();
+}
+
+function renumberVoc() {
+  document.querySelectorAll('#voc-body tr').forEach((tr, i) => {
+    tr.cells[0].textContent = i + 1;
+  });
+}
+
+// ─── SUMMARY ───
+function updateSummary() {
+  const rows = document.querySelectorAll('#voc-body tr');
+  let alta=0, media=0, baja=0, ctqs=0;
+  rows.forEach(tr => {
+    const sels = tr.querySelectorAll('select');
+    if (sels[1]) {
+      if (sels[1].value==='alta') alta++;
+      else if (sels[1].value==='media') media++;
+      else if (sels[1].value==='baja') baja++;
+    }
+    const ctqInput = tr.querySelectorAll('input')[3];
+    if (ctqInput && ctqInput.value.trim()) ctqs++;
+  });
+  // ctqs from tree
+  const treeCTQs = document.querySelectorAll('.ctq-item input:first-of-type');
+  let treeCTQCount = 0;
+  treeCTQs.forEach(i => { if(i.value.trim()) treeCTQCount++; });
+  document.getElementById('cnt-total').textContent = rows.length;
+  document.getElementById('cnt-alta').textContent = alta;
+  document.getElementById('cnt-media').textContent = media;
+  document.getElementById('cnt-baja').textContent = baja;
+  document.getElementById('cnt-ctq').textContent = ctqs + treeCTQCount;
+}
+
+// ─── CTQ TREE ───
+function addNeed(needData={}) {
+  needCount++;
+  const nid = 'need-' + needCount;
+  const tree = document.getElementById('ctq-tree');
+  const block = document.createElement('div');
+  block.className = 'ctq-need-block';
+  block.id = nid;
+  block.innerHTML = `
+    <div class="need-header" onclick="toggleNeed('${nid}')">
+      <span class="need-icon">🔵</span>
+      <input class="req-input need-label" placeholder="Necesidad del cliente (Ej: Entrega rápida y sin errores)" value="${needData.label||''}" onclick="event.stopPropagation()" oninput="autoSave()" style="color:var(--accent);font-size:13px;font-weight:700">
+      <button class="tree-del-btn" onclick="event.stopPropagation();document.getElementById('${nid}').remove();updateSummary();autoSave()" title="Eliminar necesidad">✕</button>
+      <span class="need-toggle open" id="toggle-${nid}">&#9650;</span>
+    </div>
+    <div class="need-body" id="body-${nid}">
+      <div class="req-list" id="reqs-${nid}"></div>
+      <button class="tree-add-btn" onclick="addReq('${nid}')" style="color:var(--yellow);border-color:rgba(232,196,74,.3)">+ Agregar requerimiento</button>
+    </div>
+  `;
+  tree.appendChild(block);
+  // seed requirements
+  if (needData.reqs && needData.reqs.length) {
+    needData.reqs.forEach(r => addReq(nid, r));
+  } else {
+    addReq(nid);
+  }
+  autoSave();
+}
+
+function toggleNeed(nid) {
+  const body = document.getElementById('body-' + nid);
+  const tog = document.getElementById('toggle-' + nid);
+  body.classList.toggle('hidden');
+  tog.classList.toggle('open');
+}
+
+let reqCount = 0;
+function addReq(nid, reqData={}) {
+  reqCount++;
+  const rid = 'req-' + reqCount;
+  const list = document.getElementById('reqs-' + nid);
+  const block = document.createElement('div');
+  block.className = 'req-block';
+  block.id = rid;
+  block.innerHTML = `
+    <div class="req-label-row">
+      <span class="req-dot"></span>
+      <input class="req-input" placeholder="Requerimiento (Ej: Tiempo de despacho ≤24 hs)" value="${reqData.label||''}" oninput="autoSave()">
+      <button class="tree-del-btn" onclick="document.getElementById('${rid}').remove();updateSummary();autoSave()" title="Eliminar requerimiento">✕</button>
+    </div>
+    <div class="ctq-items" id="ctqs-${rid}"></div>
+    <button class="tree-add-btn" onclick="addCTQ('${rid}')" style="color:var(--green);border-color:rgba(95,201,122,.3)">+ Agregar CTQ</button>
+  `;
+  list.appendChild(block);
+  if (reqData.ctqs && reqData.ctqs.length) {
+    reqData.ctqs.forEach(c => addCTQ(rid, c));
+  } else {
+    addCTQ(rid);
+  }
+  autoSave();
+}
+
+let ctqCount = 0;
+function addCTQ(rid, ctqData={}) {
+  ctqCount++;
+  const cid = 'ctq-' + ctqCount;
+  const container = document.getElementById('ctqs-' + rid);
+  const item = document.createElement('div');
+  item.className = 'ctq-item';
+  item.id = cid;
+  item.innerHTML = `
+    <div class="ctq-item-top">
+      <span class="ctq-item-dot"></span>
+      <input placeholder="CTQ: % Entregas a tiempo" value="${ctqData.name||''}" oninput="autoSave();updateSummary()" style="font-weight:600">
+      <button class="tree-del-btn" onclick="document.getElementById('${cid}').remove();updateSummary();autoSave()" title="Eliminar CTQ">✕</button>
+    </div>
+    <div class="ctq-item-meta">
+      <div>
+        <div class="ctq-meta-label">Meta / Spec</div>
+        <input class="ctq-meta-input" placeholder="Ej: ≥95%" value="${ctqData.meta||''}" oninput="autoSave()">
+      </div>
+      <div>
+        <div class="ctq-meta-label">Unidad</div>
+        <input class="ctq-meta-input" placeholder="Ej: %" value="${ctqData.unit||''}" oninput="autoSave()">
+      </div>
+      <div>
+        <div class="ctq-meta-label">Límite inferior (LSL)</div>
+        <input class="ctq-meta-input" placeholder="Ej: 90%" value="${ctqData.lsl||''}" oninput="autoSave()">
+      </div>
+      <div>
+        <div class="ctq-meta-label">Límite superior (USL)</div>
+        <input class="ctq-meta-input" placeholder="Ej: 100%" value="${ctqData.usl||''}" oninput="autoSave()">
+      </div>
+    </div>
+  `;
+  container.appendChild(item);
+  updateSummary();
+  autoSave();
+}
+
+// ─── SAVE / LOAD ───
+let saveTimer;
+function autoSave(){clearTimeout(saveTimer);saveTimer=setTimeout(saveLocal,900);}
+
+function saveLocal(){
+  const d={fields:{},voc:[],tree:[]};
+  INFO_FIELDS.forEach(id=>{const el=document.getElementById(id);if(el)d.fields[id]=el.value;});
+  // voc rows
+  document.querySelectorAll('#voc-body tr').forEach(tr=>{
+    const inputs=tr.querySelectorAll('input,textarea');
+    const sels=tr.querySelectorAll('select');
+    d.voc.push({verbatim:inputs[0]?.value,need:inputs[1]?.value,req:inputs[2]?.value,ctq:inputs[3]?.value,meta:inputs[4]?.value,fuente:inputs[5]?.value,kano:sels[0]?.value,prio:sels[1]?.value});
+  });
+  // ctq tree
+  document.querySelectorAll('.ctq-need-block').forEach(nb=>{
+    const needInput=nb.querySelector('.need-header input');
+    const nd={label:needInput?needInput.value:'',reqs:[]};
+    nb.querySelectorAll('.req-block').forEach(rb=>{
+      const reqInput=rb.querySelector('.req-label-row input');
+      const rd={label:reqInput?reqInput.value:'',ctqs:[]};
+      rb.querySelectorAll('.ctq-item').forEach(cb=>{
+        const inputs=cb.querySelectorAll('input');
+        rd.ctqs.push({name:inputs[0]?.value,meta:inputs[1]?.value,unit:inputs[2]?.value,lsl:inputs[3]?.value,usl:inputs[4]?.value});
+      });
+      nd.reqs.push(rd);
+    });
+    d.tree.push(nd);
+  });
+  d.ts=new Date().toISOString();
+  localStorage.setItem(KEY,JSON.stringify(d));
+  const t=new Date().toLocaleTimeString('es',{hour:'2-digit',minute:'2-digit'});
+  const lbl=document.getElementById('saved-lbl');if(lbl)lbl.textContent='✓ Guardado '+t;
+  const toast=document.getElementById('toast');toast.classList.add('show');setTimeout(()=>toast.classList.remove('show'),2000);
+}
+
+function loadLocal(){
+  const raw=localStorage.getItem(KEY);
+  if(!raw){loadDefaults();return;}
+  try{
+    const d=JSON.parse(raw);
+    INFO_FIELDS.forEach(id=>{const el=document.getElementById(id);if(el&&d.fields&&d.fields[id]!=null)el.value=d.fields[id];});
+    (d.voc||[]).forEach(v=>addVocRow(v));
+    (d.tree||[]).forEach(n=>addNeed(n));
+    if(d.ts){
+      const t=new Date(d.ts).toLocaleString('es',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});
+      const lbl=document.getElementById('saved-lbl');if(lbl)lbl.textContent='Último guardado: '+t;
+    }
+    updateSummary();
+  }catch(e){loadDefaults();}
+}
+
+function loadDefaults(){
+  addVocRow();
+  addNeed();
+  updateSummary();
+}
+
+function clearAll(){
+  if(!confirm('¿Limpiar todo el VOC/CTQ?'))return;
+  localStorage.removeItem(KEY);
+  location.reload();
+}
+
+window.addEventListener('load',loadLocal);
+</script>
+<script src="branding.js"></script>
+</body>
+</html>
