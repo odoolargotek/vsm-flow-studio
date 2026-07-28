@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AMEF / FMEA — Largotek Lean Suite</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300..700&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0d1117;--surface:#161b22;--surface2:#21262d;--border:#30363d;
+  --text:#e6edf3;--muted:#8b949e;--faint:#3d444d;
+  --accent:#bc8cff;--green:#5fc97a;--yellow:#e8c44a;--red:#f85149;--orange:#ffa657;
+  --a-color:#bc8cff;
+  --radius:14px;
+}
+html{scroll-behavior:smooth}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+
+/* TOPBAR */
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:13px 28px;border-bottom:1px solid var(--border);background:var(--surface)}
+.topbar-brand{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:var(--muted);text-decoration:none}
+.topbar-brand span{color:var(--accent)}
+.topbar-right{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:7px 15px;border-radius:8px;border:1.5px solid var(--border);background:transparent;color:var(--muted);font-size:12px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;transition:all .18s}
+.btn:hover{border-color:var(--accent);color:var(--accent)}
+.btn-primary{background:var(--accent);color:#fff;border-color:var(--accent)}
+.btn-primary:hover{background:#a370f7}
+.btn-danger:hover{border-color:var(--red);color:var(--red)}
+.saved-label{font-size:11px;color:var(--muted)}
+
+/* HERO */
+.hero{padding:30px 32px 18px;max-width:1200px;margin:0 auto}
+.hero-eye{font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--a-color);margin-bottom:8px}
+.hero h1{font-family:'Instrument Serif',serif;font-size:clamp(1.4rem,2.8vw,2rem);margin-bottom:6px}
+.hero-sub{font-size:13px;color:var(--muted);line-height:1.7;max-width:760px}
+
+/* WRAP */
+.wrap{max-width:1200px;margin:0 auto;padding:8px 28px 80px}
+
+/* CARD */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:20px;overflow:hidden}
+.card-head{display:flex;align-items:center;gap:10px;padding:12px 18px;border-bottom:1px solid var(--faint);background:var(--surface2)}
+.card-icon{font-size:15px}
+.card-title{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.card-subtitle{font-size:11px;color:var(--faint);margin-left:auto}
+.card-body{padding:16px 18px}
+
+/* FIELD */
+.field{display:flex;flex-direction:column;gap:5px}
+.field label{font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.field input,.field textarea,.field select{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:9px 12px;font-size:13px;color:var(--text);font-family:'Inter',sans-serif;transition:border-color .18s;width:100%}
+.field input:focus,.field textarea:focus,.field select:focus{outline:none;border-color:var(--accent)}
+.field input::placeholder,.field textarea::placeholder{color:var(--faint)}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.three-col{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+@media(max-width:640px){.two-col,.three-col{grid-template-columns:1fr}}
+.field-full{grid-column:1/-1}
+
+/* SUMMARY CHIPS */
+.summary-row{display:flex;flex-wrap:wrap;gap:8px;padding:8px 0 4px}
+.chip{display:flex;align-items:center;gap:6px;padding:5px 14px;border-radius:99px;font-size:11px;font-weight:700;border:1.5px solid currentColor}
+.chip-val{font-size:18px;font-weight:900;line-height:1}
+
+/* FMEA TABLE */
+.fmea-wrap{overflow-x:auto;margin-bottom:8px}
+.fmea-table{width:100%;border-collapse:collapse;font-size:11.5px;min-width:1280px}
+.fmea-table th{text-align:left;padding:8px 8px;background:var(--surface2);color:var(--muted);font-size:10px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;border-bottom:1px solid var(--border);white-space:nowrap;position:sticky;top:0;z-index:2}
+.fmea-table td{padding:5px 5px;border-top:1px solid var(--faint);vertical-align:middle}
+.fmea-table tr:hover td{background:rgba(255,255,255,.018)}
+.fmea-table td input,.fmea-table td textarea{width:100%;background:transparent;border:none;color:var(--text);font-size:11.5px;font-family:'Inter',sans-serif;padding:3px 4px;resize:none;line-height:1.45}
+.fmea-table td input:focus,.fmea-table td textarea:focus{outline:1px solid var(--accent);border-radius:3px;background:var(--surface2)}
+.fmea-table td input::placeholder,.fmea-table td textarea::placeholder{color:var(--faint)}
+.fmea-table td select{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:5px;color:var(--text);font-size:11px;font-family:'Inter',sans-serif;padding:4px 5px;cursor:pointer}
+.fmea-table td select:focus{outline:none;border-color:var(--accent)}
+
+/* RPN CELL */
+.rpn-cell{text-align:center;font-size:14px;font-weight:900;border-radius:6px;padding:4px 6px;min-width:46px;display:inline-block}
+.rpn-low{background:rgba(95,201,122,.18);color:var(--green)}
+.rpn-mid{background:rgba(232,196,74,.18);color:var(--yellow)}
+.rpn-high{background:rgba(255,166,87,.18);color:var(--orange)}
+.rpn-crit{background:rgba(248,81,73,.22);color:var(--red)}
+
+/* SCORE SELECTS */
+.score-sel{text-align:center}
+.score-sel select{text-align:center;font-weight:700}
+
+/* ROW NUMBER */
+.row-num{text-align:center;color:var(--muted);font-size:11px;font-weight:700}
+
+/* ACTIONS TABLE */
+.actions-mini{font-size:11px;color:var(--muted);white-space:pre-wrap}
+
+/* DEL BTN */
+.del-btn{background:transparent;border:none;color:var(--faint);cursor:pointer;font-size:13px;padding:2px 5px;transition:color .15s;display:block;margin:0 auto}
+.del-btn:hover{color:var(--red)}
+.add-btn{display:inline-flex;align-items:center;gap:5px;margin-top:8px;padding:6px 14px;border-radius:6px;border:1px dashed var(--border);background:transparent;color:var(--muted);font-size:11px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;transition:all .18s}
+.add-btn:hover{border-color:var(--accent);color:var(--accent)}
+
+/* SCALE GUIDE */
+.scale-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+@media(max-width:720px){.scale-grid{grid-template-columns:1fr}}
+.scale-card{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:12px 14px}
+.scale-title{font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;margin-bottom:8px;display:flex;align-items:center;gap:6px}
+.scale-rows{display:flex;flex-direction:column;gap:4px}
+.scale-row{display:flex;align-items:center;gap:8px;font-size:11px}
+.scale-num{width:24px;height:24px;border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0}
+.scale-desc{color:var(--muted);line-height:1.4}
+
+/* PRIORITY MATRIX */
+.matrix-note{font-size:12px;color:var(--muted);line-height:1.7;padding:10px 0}
+
+/* RPN THRESHOLD LEGEND */
+.rpn-legend{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px}
+.rpn-lbl{display:flex;align-items:center;gap:5px;font-size:11px}
+.rpn-dot{width:10px;height:10px;border-radius:3px}
+
+/* TOAST */
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:#1e2a3a;border:1px solid var(--accent);color:var(--accent);padding:10px 22px;border-radius:99px;font-size:13px;font-weight:600;opacity:0;transition:all .3s;z-index:999;white-space:nowrap}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* PRINT */
+@media print{
+  body{background:#fff;color:#111}
+  .topbar,.btn,.add-btn,.del-btn{display:none!important}
+  .card,.scale-card{background:#fff!important;border-color:#ccc!important}
+  .card-head{background:#f3f3f3!important}
+  .fmea-table th{background:#f0f0f0!important;color:#333!important}
+  .fmea-table td input,.fmea-table td textarea{color:#111!important}
+  .fmea-table td select{background:#f9f9f9!important;color:#111!important}
+  .rpn-cell{border:1px solid #ccc}
+}
+</style>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <a href="index.html" class="topbar-brand">← <span>Largotek</span> Lean Suite</a>
+  <div class="topbar-right">
+    <span class="saved-label" id="saved-lbl"></span>
+    <button class="btn btn-danger" onclick="clearAll()">🗑 Limpiar</button>
+    <button class="btn" onclick="exportCSV()">📊 CSV</button>
+    <button class="btn" onclick="saveLocal()">💾 Guardar</button>
+    <button class="btn btn-primary" onclick="window.print()">🖨 PDF</button>
+  </div>
+</div>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-eye">🟣 Analizar — Largotek Lean Suite</div>
+  <h1>AMEF — Análisis de Modo y Efecto de Falla</h1>
+  <p class="hero-sub">Identifica modos de falla potenciales, evalúa su riesgo con el índice <strong style="color:var(--accent)">RPN = Severidad × Ocurrencia × Detección</strong> y prioriza acciones correctivas. RPN &gt; 100 requiere acción inmediata.</p>
+</div>
+
+<div class="wrap">
+
+  <!-- INFO PROYECTO -->
+  <div class="card">
+    <div class="card-head"><span class="card-icon">🏷️</span><span class="card-title">Identificación del Proyecto</span></div>
+    <div class="card-body">
+      <div class="three-col">
+        <div class="field"><label>Título del Proyecto</label><input id="p-title" placeholder="Ej: Reducción de defectos en línea de ensamble" oninput="autoSave()"></div>
+        <div class="field"><label>Proceso / Subsistema</label><input id="p-process" placeholder="Ej: Ensamble — Estación 3" oninput="autoSave()"></div>
+        <div class="field"><label>Responsable AMEF</label><input id="p-owner" placeholder="Nombre y cargo" oninput="autoSave()"></div>
+        <div class="field"><label>Fecha Inicio</label><input id="p-date" type="date" oninput="autoSave()"></div>
+        <div class="field"><label>Revisión N°</label><input id="p-rev" placeholder="Rev. 1" oninput="autoSave()"></div>
+        <div class="field"><label>Equipo Participante</label><input id="p-team" placeholder="Ingeniería, Calidad, Producción..." oninput="autoSave()"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RESUMEN -->
+  <div class="card">
+    <div class="card-head"><span class="card-icon">📊</span><span class="card-title">Resumen de Riesgo</span><span class="card-subtitle">Actualizado automáticamente</span></div>
+    <div class="card-body">
+      <div class="summary-row">
+        <div class="chip" style="color:var(--accent)"><span class="chip-val" id="cnt-total">0</span> Modos de falla</div>
+        <div class="chip" style="color:var(--red)"><span class="chip-val" id="cnt-crit">0</span> RPN Crítico ≥200</div>
+        <div class="chip" style="color:var(--orange)"><span class="chip-val" id="cnt-high">0</span> RPN Alto 100–199</div>
+        <div class="chip" style="color:var(--yellow)"><span class="chip-val" id="cnt-mid">0</span> RPN Medio 50–99</div>
+        <div class="chip" style="color:var(--green)"><span class="chip-val" id="cnt-low">0</span> RPN Bajo &lt;50</div>
+        <div class="chip" style="color:var(--muted)"><span class="chip-val" id="rpn-avg">0</span> RPN Promedio</div>
+      </div>
+      <div class="rpn-legend">
+        <div class="rpn-lbl"><div class="rpn-dot" style="background:var(--green)"></div> Bajo (&lt;50) — Aceptable</div>
+        <div class="rpn-lbl"><div class="rpn-dot" style="background:var(--yellow)"></div> Medio (50–99) — Monitorear</div>
+        <div class="rpn-lbl"><div class="rpn-dot" style="background:var(--orange)"></div> Alto (100–199) — Acción requerida</div>
+        <div class="rpn-lbl"><div class="rpn-dot" style="background:var(--red)"></div> Crítico (≥200) — Acción inmediata</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FMEA TABLE -->
+  <div class="card">
+    <div class="card-head"><span class="card-icon">⚠️</span><span class="card-title">Tabla AMEF</span><span class="card-subtitle">S × O × D = RPN</span></div>
+    <div class="card-body">
+      <div class="fmea-wrap">
+        <table class="fmea-table" id="fmea-table">
+          <thead>
+            <tr>
+              <th style="width:28px">#</th>
+              <th style="min-width:110px">Paso / Función del proceso</th>
+              <th style="min-width:120px">Modo de Falla Potencial</th>
+              <th style="min-width:120px">Efecto(s) potencial(es)</th>
+              <th class="score-sel" style="width:56px" title="Severidad: impacto del efecto al cliente (1–10)">S</th>
+              <th style="min-width:110px">Causa(s) potencial(es)</th>
+              <th class="score-sel" style="width:56px" title="Ocurrencia: frecuencia estimada de la causa (1–10)">O</th>
+              <th style="min-width:110px">Controles actuales de detección</th>
+              <th class="score-sel" style="width:56px" title="Detección: capacidad de detectar la falla antes de que llegue al cliente (1–10, 1=fácil detectar)">D</th>
+              <th style="width:60px">RPN</th>
+              <th style="min-width:130px">Acciones recomendadas</th>
+              <th style="min-width:80px">Responsable</th>
+              <th style="min-width:72px">Fecha límite</th>
+              <th style="min-width:100px">Acciones realizadas</th>
+              <th class="score-sel" style="width:44px">S'</th>
+              <th class="score-sel" style="width:44px">O'</th>
+              <th class="score-sel" style="width:44px">D'</th>
+              <th style="width:60px">RPN'</th>
+              <th style="width:28px"></th>
+            </tr>
+          </thead>
+          <tbody id="fmea-body"></tbody>
+        </table>
+      </div>
+      <button class="add-btn" onclick="addRow()">+ Agregar modo de falla</button>
+    </div>
+  </div>
+
+  <!-- SCALE GUIDE -->
+  <div class="card">
+    <div class="card-head"><span class="card-icon">📖</span><span class="card-title">Guía de Escalas SOD (1–10)</span></div>
+    <div class="card-body">
+      <div class="scale-grid">
+        <!-- SEVERIDAD -->
+        <div class="scale-card">
+          <div class="scale-title" style="color:var(--red)">🔴 Severidad (S) — Impacto al cliente</div>
+          <div class="scale-rows">
+            <div class="scale-row"><div class="scale-num" style="background:rgba(95,201,122,.2);color:var(--green)">1</div><div class="scale-desc">Sin efecto apreciable</div></div>
+            <div class="scale-row"><div class="scale-num" style="background:rgba(95,201,122,.2);color:var(--green)">2–3</div><div class="scale-desc">Efecto leve, cliente apenas lo nota</div></div>
+            <div class="scale-row"><div class="scale-num" style="background:rgba(232,196,74,.2);color:var(--yellow)">4–6</div><div class="scale-desc">Efecto moderado, molestia / inconformidad</div></div>
+            <div class="scale-row"><div class="scale-num" style="background:rgba(255,166,87,.2);color:var(--orange)">7–8</div><div class="scale-desc">Efecto grave, pérdida de función principal</div></div>
+            <div class="scale-row"><div class="scale-num" style="background:rgba(248,81,73,.2);color:var(--red)">9–10</div><div class="scale-desc">Efecto crítico / riesgo de seguridad o regulatorio</div></div>
+          </div>
+        </div>
+        <!-- OCURRENCIA -->
+        <div class="scale-card">
+          <div class="scale-title" style="color:var(--orange)">🟠 Ocurrencia (O) — Frecuencia de la causa</div>
+          <div class="scale-rows">
+            <div class="scale-row"><div class="scale-num" style="background:rgba(95,201,122,.2);color:var(--green)">1</div><div class="scale-desc">Remota: ≤1 en 1,500,000</div></div>
+            <div class="scale-row"><div class="scale-num" style="background:rgba(95,201,122,.2);color:var(--green)">2–3</div><div class="scale-desc">Baja: 1 en 150,000 — 1 en 15,000</div></div>
+            <div class="scale-row"><div class="scale-num" style="background:rgba(232,196,74,.2);color:var(--yellow)">4–6</div><div class="scale-desc">Moderada: 1 en 2,000 — 1 en 400</div></div>
+            <div class="scale-row"><div class="scale-num" style="background:rgba(255,166,87,.2);color:var(--orange)">7–8</div><div class="scale-desc">Alta: 1 en 80 — 1 en 20</div></div>
+            <div class="scale-row"><div class="scale-num" style="background:rgba(248,81,73,.2);color:var(--red)">9–10</div><div class="scale-desc">Muy alta: ≥1 en 8 — casi inevitable</div></div>
+          </div>
+        </div>
+        <!-- DETECCION -->
+        <div class="scale-card">
+          <div class="scale-title" style="color:var(--accent)">🟣 Detección (D) — Capacidad de detectar</div>
+          <div class="scale-rows">
+            <div class="scale-row"><div class="scale-num" style="background:rgba(95,201,122,.2);color:var(--green)">1–2</div><div class="scale-desc">Casi seguro: control siempre detecta la falla</div></div>
+            <div class="scale-row"><div class="scale-num" style="background:rgba(95,201,122,.2);color:var(--green)">3–4</div><div class="scale-desc">Alta probabilidad de detección</div></div>
+            <div class="scale-row"><div class="scale-num" style="background:rgba(232,196,74,.2);color:var(--yellow)">5–6</div><div class="scale-desc">Detección moderada</div></div>
+            <div class="scale-row"><div class="scale-num" style="background:rgba(255,166,87,.2);color:var(--orange)">7–8</div><div class="scale-desc">Baja probabilidad de detección</div></div>
+            <div class="scale-row"><div class="scale-num" style="background:rgba(248,81,73,.2);color:var(--red)">9–10</div><div class="scale-desc">Sin control: falla llega al cliente</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- NOTAS -->
+  <div class="card">
+    <div class="card-head"><span class="card-icon">📝</span><span class="card-title">Notas y Observaciones</span></div>
+    <div class="card-body">
+      <div class="field"><textarea id="p-notes" rows="3" placeholder="Supuestos, limitaciones del análisis, próxima fecha de revisión..." oninput="autoSave()"></textarea></div>
+    </div>
+  </div>
+
+</div>
+<div class="toast" id="toast">✅ Guardado en caché</div>
+
+<script>
+const KEY = 'largotek_amef';
+const INFO = ['p-title','p-process','p-owner','p-date','p-rev','p-team','p-notes'];
+
+const SCORES = [1,2,3,4,5,6,7,8,9,10];
+function scoreOpts(val){
+  return SCORES.map(n=>`<option value="${n}" ${n==val?'selected':''}>${n}</option>`).join('');
+}
+
+function rpnClass(rpn){
+  if(rpn>=200) return 'rpn-crit';
+  if(rpn>=100) return 'rpn-high';
+  if(rpn>=50)  return 'rpn-mid';
+  return 'rpn-low';
+}
+
+function calcRPN(tr, sId, oId, dId, outId){
+  const s = parseInt(tr.querySelector(sId).value)||1;
+  const o = parseInt(tr.querySelector(oId).value)||1;
+  const d = parseInt(tr.querySelector(dId).value)||1;
+  const rpn = s*o*d;
+  const el = tr.querySelector(outId);
+  el.textContent = rpn;
+  el.className = 'rpn-cell ' + rpnClass(rpn);
+  return rpn;
+}
+
+function updateRow(tr){
+  calcRPN(tr, '.sel-s', '.sel-o', '.sel-d', '.rpn-out');
+  calcRPN(tr, '.sel-sp', '.sel-op', '.sel-dp', '.rpn-outp');
+  updateSummary();
+  autoSave();
+}
+
+let rowCount = 0;
+function addRow(d={}){
+  rowCount++;
+  const tbody = document.getElementById('fmea-body');
+  const tr = document.createElement('tr');
+  const rid = 'row-'+rowCount;
+  tr.id = rid;
+  tr.innerHTML = `
+    <td class="row-num">${tbody.children.length+1}</td>
+    <td><textarea rows="2" placeholder="Ej: Soldadura punto A" oninput="updateRow(this.closest('tr'))">${d.step||''}</textarea></td>
+    <td><textarea rows="2" placeholder="Ej: Unión incompleta" oninput="updateRow(this.closest('tr'))">${d.mode||''}</textarea></td>
+    <td><textarea rows="2" placeholder="Ej: Producto rechazado por cliente" oninput="updateRow(this.closest('tr'))">${d.effect||''}</textarea></td>
+    <td class="score-sel"><select class="sel-s" onchange="updateRow(this.closest('tr'))">${scoreOpts(d.s||5)}</select></td>
+    <td><textarea rows="2" placeholder="Ej: Parámetro fuera de rango" oninput="updateRow(this.closest('tr'))">${d.cause||''}</textarea></td>
+    <td class="score-sel"><select class="sel-o" onchange="updateRow(this.closest('tr'))">${scoreOpts(d.o||5)}</select></td>
+    <td><textarea rows="2" placeholder="Ej: Inspección visual cada hora" oninput="updateRow(this.closest('tr'))">${d.control||''}</textarea></td>
+    <td class="score-sel"><select class="sel-d" onchange="updateRow(this.closest('tr'))">${scoreOpts(d.d||5)}</select></td>
+    <td style="text-align:center"><span class="rpn-cell rpn-mid rpn-out">125</span></td>
+    <td><textarea rows="2" placeholder="Ej: Implementar poka-yoke en fixture" oninput="autoSave()">${d.actions||''}</textarea></td>
+    <td><input placeholder="Responsable" value="${d.resp||''}" oninput="autoSave()"></td>
+    <td><input type="date" value="${d.due||''}" oninput="autoSave()"></td>
+    <td><textarea rows="2" placeholder="Acciones tomadas" oninput="autoSave()">${d.done||''}</textarea></td>
+    <td class="score-sel"><select class="sel-sp" onchange="updateRow(this.closest('tr'))">${scoreOpts(d.sp||d.s||5)}</select></td>
+    <td class="score-sel"><select class="sel-op" onchange="updateRow(this.closest('tr'))">${scoreOpts(d.op||d.o||5)}</select></td>
+    <td class="score-sel"><select class="sel-dp" onchange="updateRow(this.closest('tr'))">${scoreOpts(d.dp||d.d||5)}</select></td>
+    <td style="text-align:center"><span class="rpn-cell rpn-mid rpn-outp">125</span></td>
+    <td><button class="del-btn" onclick="this.closest('tr').remove();renumber();updateSummary();autoSave()" title="Eliminar">✕</button></td>
+  `;
+  tbody.appendChild(tr);
+  updateRow(tr);
+}
+
+function renumber(){
+  document.querySelectorAll('#fmea-body tr').forEach((tr,i)=>{
+    const c=tr.querySelector('.row-num'); if(c) c.textContent=i+1;
+  });
+}
+
+function updateSummary(){
+  const spans = document.querySelectorAll('.rpn-out');
+  let total=0,crit=0,high=0,mid=0,low=0,sum=0;
+  spans.forEach(s=>{
+    const v=parseInt(s.textContent)||0;
+    total++; sum+=v;
+    if(v>=200) crit++;
+    else if(v>=100) high++;
+    else if(v>=50) mid++;
+    else low++;
+  });
+  document.getElementById('cnt-total').textContent=total;
+  document.getElementById('cnt-crit').textContent=crit;
+  document.getElementById('cnt-high').textContent=high;
+  document.getElementById('cnt-mid').textContent=mid;
+  document.getElementById('cnt-low').textContent=low;
+  document.getElementById('rpn-avg').textContent=total?Math.round(sum/total):0;
+}
+
+// ── SAVE / LOAD ──
+let saveTimer;
+function autoSave(){clearTimeout(saveTimer);saveTimer=setTimeout(saveLocal,900);}
+
+function getRowData(tr){
+  const ta = tr.querySelectorAll('textarea');
+  const inp = tr.querySelectorAll('input');
+  const sel = tr.querySelectorAll('select');
+  return {
+    step:ta[0]?.value, mode:ta[1]?.value, effect:ta[2]?.value,
+    s:sel[0]?.value, cause:ta[3]?.value, o:sel[1]?.value,
+    control:ta[4]?.value, d:sel[2]?.value,
+    actions:ta[5]?.value, resp:inp[0]?.value, due:inp[1]?.value, done:ta[6]?.value,
+    sp:sel[3]?.value, op:sel[4]?.value, dp:sel[5]?.value
+  };
+}
+
+function saveLocal(){
+  const data={fields:{},rows:[]};
+  INFO.forEach(id=>{const el=document.getElementById(id);if(el)data.fields[id]=el.value;});
+  document.querySelectorAll('#fmea-body tr').forEach(tr=>data.rows.push(getRowData(tr)));
+  data.ts=new Date().toISOString();
+  localStorage.setItem(KEY,JSON.stringify(data));
+  const t=new Date().toLocaleTimeString('es',{hour:'2-digit',minute:'2-digit'});
+  const lbl=document.getElementById('saved-lbl');if(lbl)lbl.textContent='✓ Guardado '+t;
+  const toast=document.getElementById('toast');toast.classList.add('show');setTimeout(()=>toast.classList.remove('show'),2000);
+}
+
+function loadLocal(){
+  const raw=localStorage.getItem(KEY);
+  if(!raw){addRow();addRow();updateSummary();return;}
+  try{
+    const data=JSON.parse(raw);
+    INFO.forEach(id=>{const el=document.getElementById(id);if(el&&data.fields&&data.fields[id]!=null)el.value=data.fields[id];});
+    (data.rows||[]).forEach(r=>addRow(r));
+    if(!data.rows?.length){addRow();addRow();}
+    if(data.ts){
+      const t=new Date(data.ts).toLocaleString('es',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});
+      const lbl=document.getElementById('saved-lbl');if(lbl)lbl.textContent='Último guardado: '+t;
+    }
+    updateSummary();
+  }catch(e){addRow();addRow();updateSummary();}
+}
+
+function clearAll(){
+  if(!confirm('¿Limpiar todo el AMEF?'))return;
+  localStorage.removeItem(KEY);
+  location.reload();
+}
+
+function exportCSV(){
+  const headers=['#','Paso/Función','Modo de Falla','Efecto','S','Causa','O','Control','D','RPN','Acciones','Responsable','Fecha','Acciones realizadas','S2','O2','D2','RPN2'];
+  const rows=[headers.join(',')];
+  document.querySelectorAll('#fmea-body tr').forEach((tr,i)=>{
+    const ta=tr.querySelectorAll('textarea');
+    const inp=tr.querySelectorAll('input');
+    const sel=tr.querySelectorAll('select');
+    const rpn=tr.querySelector('.rpn-out')?.textContent||'';
+    const rpn2=tr.querySelector('.rpn-outp')?.textContent||'';
+    const esc=v=>'"'+(v||'').replace(/"/g,'""')+'"';
+    rows.push([i+1,esc(ta[0]?.value),esc(ta[1]?.value),esc(ta[2]?.value),sel[0]?.value,esc(ta[3]?.value),sel[1]?.value,esc(ta[4]?.value),sel[2]?.value,rpn,esc(ta[5]?.value),esc(inp[0]?.value),inp[1]?.value,esc(ta[6]?.value),sel[3]?.value,sel[4]?.value,sel[5]?.value,rpn2].join(','));
+  });
+  const blob=new Blob([rows.join('\n')],{type:'text/csv;charset=utf-8;'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);
+  const proj=document.getElementById('p-title').value.trim().replace(/\s+/g,'-')||'AMEF';
+  a.download=proj+'-amef.csv';a.click();
+}
+
+window.addEventListener('load',loadLocal);
+</script>
+<script src="branding.js"></script>
+</body>
+</html>
