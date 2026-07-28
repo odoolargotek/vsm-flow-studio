@@ -1,0 +1,729 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Diagrama de Spaguetti — Largotek</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300..700&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0d1117;--surface:#161b22;--surface2:#21262d;--border:#30363d;
+  --text:#e6edf3;--muted:#8b949e;--faint:#3d444d;
+  --green:#3fb950;--yellow:#d29922;--red:#f85149;--blue:#58a6ff;--purple:#bc8cff;
+  --radius:12px
+}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;flex-direction:column}
+
+/* TOPBAR */
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:12px 24px;border-bottom:1px solid var(--border);background:var(--surface);flex-wrap:wrap;gap:8px;flex-shrink:0}
+.topbar-brand{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:var(--muted);text-decoration:none}
+.topbar-brand span{color:var(--yellow)}
+.topbar-right{display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+.btn{display:inline-flex;align-items:center;gap:5px;padding:6px 13px;border-radius:7px;border:1.5px solid var(--border);background:transparent;color:var(--muted);font-size:11.5px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;transition:all .17s}
+.btn:hover{border-color:var(--yellow);color:var(--yellow)}
+.btn-primary{background:var(--yellow);color:#0d1117;border-color:var(--yellow)}
+.btn-primary:hover{opacity:.88;color:#0d1117}
+.btn-accent{background:var(--purple);color:#0d1117;border-color:var(--purple)}
+.btn-accent:hover{opacity:.88;color:#0d1117}
+.btn-danger:hover{border-color:var(--red);color:var(--red)}
+.saved-lbl{font-size:11px;color:var(--muted)}
+
+/* HERO */
+.hero{padding:20px 28px 12px;max-width:1400px;margin:0 auto;width:100%}
+.hero-eye{font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--yellow);margin-bottom:5px}
+.hero h1{font-family:'Instrument Serif',serif;font-size:clamp(1.3rem,2.5vw,1.85rem);margin-bottom:3px}
+.hero-sub{font-size:12.5px;color:var(--muted);line-height:1.6}
+
+/* LAYOUT */
+.main-layout{display:flex;flex:1;gap:0;max-width:1400px;margin:0 auto;width:100%;min-height:0}
+.sidebar{width:280px;flex-shrink:0;border-right:1px solid var(--border);background:var(--surface);display:flex;flex-direction:column;overflow-y:auto;padding:14px}
+.canvas-area{flex:1;display:flex;flex-direction:column;padding:14px;gap:10px;min-width:0}
+
+/* SIDEBAR */
+.sb-section{margin-bottom:16px}
+.sb-title{font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:8px;display:flex;align-items:center;gap:6px}
+.field{display:flex;flex-direction:column;gap:4px;margin-bottom:9px}
+.field label{font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.field input,.field select,.field textarea{background:var(--surface2);border:1px solid var(--border);border-radius:7px;padding:7px 10px;font-size:12.5px;color:var(--text);font-family:'Inter',sans-serif;transition:border-color .17s;width:100%}
+.field input:focus,.field select:focus,.field textarea:focus{outline:none;border-color:var(--yellow)}
+.field input::placeholder{color:var(--faint)}
+
+/* OPERATORS */
+.op-list{display:flex;flex-direction:column;gap:6px}
+.op-item{display:flex;align-items:center;gap:7px;padding:7px 10px;border-radius:8px;border:1.5px solid var(--border);background:var(--surface2);cursor:pointer;transition:all .17s}
+.op-item.active{border-color:var(--yellow);background:rgba(210,153,34,.1)}
+.op-item:hover{border-color:var(--yellow)}
+.op-dot{width:14px;height:14px;border-radius:50%;flex-shrink:0;border:2px solid rgba(255,255,255,.2)}
+.op-name{font-size:12px;font-weight:600;flex:1}
+.op-dist{font-size:10px;color:var(--muted);font-variant-numeric:tabular-nums}
+.op-del{background:none;border:none;color:var(--faint);cursor:pointer;font-size:12px;padding:0 2px;transition:color .15s}
+.op-del:hover{color:var(--red)}
+.add-op-row{display:flex;gap:6px;margin-top:6px}
+.add-op-row input{background:var(--surface2);border:1px solid var(--border);border-radius:7px;padding:6px 10px;font-size:12px;color:var(--text);font-family:'Inter',sans-serif;flex:1}
+.add-op-row input:focus{outline:none;border-color:var(--yellow)}
+.color-dot-pick{width:32px;height:32px;border-radius:7px;border:1.5px solid var(--border);cursor:pointer;padding:2px}
+
+/* STATS */
+.stat-row{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:10px}
+.s-chip{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:8px 12px;text-align:center;flex:1;min-width:80px}
+.s-chip .sv{font-size:16px;font-weight:800;color:var(--text)}
+.s-chip .sl{font-size:9.5px;color:var(--muted);margin-top:1px;text-transform:uppercase;letter-spacing:.04em}
+
+/* CANVAS */
+.canvas-wrap{position:relative;flex:1;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;min-height:420px;cursor:crosshair}
+#bg-hint{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;pointer-events:none;opacity:.4}
+#bg-hint .hint-icon{font-size:48px}
+#bg-hint p{font-size:13px;color:var(--muted);text-align:center;max-width:240px;line-height:1.55}
+canvas#diagram{position:absolute;inset:0;width:100%;height:100%}
+.canvas-toolbar{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.tool-btn{padding:6px 12px;border-radius:7px;border:1.5px solid var(--border);background:transparent;color:var(--muted);font-size:11.5px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;transition:all .17s}
+.tool-btn:hover,.tool-btn.active{border-color:var(--yellow);color:var(--yellow);background:rgba(210,153,34,.08)}
+.tool-sep{width:1px;height:20px;background:var(--border);flex-shrink:0}
+.scale-info{font-size:11px;color:var(--muted)}
+
+/* SCALE INPUT */
+.scale-row{display:flex;align-items:center;gap:6px}
+.scale-row input{background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:5px 8px;font-size:12px;color:var(--text);font-family:'Inter',sans-serif;width:60px}
+.scale-row input:focus{outline:none;border-color:var(--yellow)}
+.scale-row label{font-size:11px;color:var(--muted)}
+
+/* TABLE */
+.dist-table{width:100%;border-collapse:collapse;font-size:12px}
+.dist-table th{text-align:left;padding:7px 10px;background:var(--surface2);color:var(--muted);font-size:10px;font-weight:600;letter-spacing:.04em;white-space:nowrap}
+.dist-table td{padding:6px 10px;border-top:1px solid var(--faint)}
+.dist-table td.num{text-align:right;font-variant-numeric:tabular-nums}
+.dist-bar-wrap{width:80px;height:6px;background:var(--faint);border-radius:99px;overflow:hidden;display:inline-block;vertical-align:middle;margin-right:6px}
+.dist-bar{height:100%;border-radius:99px}
+
+/* NOTES */
+.notes-box{background:rgba(210,153,34,.07);border:1px solid rgba(210,153,34,.2);border-radius:9px;padding:12px 16px}
+.notes-box label{font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--yellow);display:block;margin-bottom:5px}
+.notes-box textarea{width:100%;background:transparent;border:none;color:var(--text);font-family:'Inter',sans-serif;font-size:12.5px;line-height:1.6;resize:vertical;min-height:52px}
+.notes-box textarea:focus{outline:none}
+.notes-box textarea::placeholder{color:rgba(210,153,34,.3)}
+
+/* TOAST */
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(80px);background:#2a2208;border:1px solid var(--yellow);color:var(--yellow);padding:9px 20px;border-radius:99px;font-size:12.5px;font-weight:600;opacity:0;transition:all .3s;z-index:200;white-space:nowrap}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* PRINT */
+@media print{
+  .topbar,.btn,.tool-btn,.sidebar,.canvas-toolbar,.notes-box label+textarea{display:none!important}
+  .main-layout{display:block}
+  .canvas-area{padding:0}
+  body{background:#fff;color:#111}
+  .canvas-wrap{border:1px solid #ccc}
+}
+</style>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <a href="index.html" class="topbar-brand">← <span>Largotek</span> Lean Suite</a>
+  <div class="topbar-right">
+    <span class="saved-lbl" id="saved-lbl"></span>
+    <label class="btn" style="cursor:pointer">📂 Fondo <input type="file" id="bg-upload" accept="image/*" style="display:none" onchange="loadBg(event)"></label>
+    <button class="btn" onclick="exportCSV()">📥 CSV</button>
+    <button class="btn btn-danger" onclick="clearAll()">🗑 Limpiar</button>
+    <button class="btn" onclick="saveLocal()">💾 Guardar</button>
+    <button class="btn btn-primary" onclick="window.print()">🖨 PDF</button>
+  </div>
+</div>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-eye">🍝 Diagrama de Spaguetti — Largotek Lean Suite</div>
+  <h1>Diagrama de Spaguetti</h1>
+  <p class="hero-sub">Traza el movimiento físico de operadores y materiales sobre el layout del área de trabajo. Cuantifica la distancia total recorrida e identifica desplazamientos innecesarios (desperdicio de Movimiento y Transporte).</p>
+</div>
+
+<!-- MAIN LAYOUT -->
+<div class="main-layout">
+
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+
+    <!-- META -->
+    <div class="sb-section">
+      <div class="sb-title">🏷️ Identificación</div>
+      <div class="field"><label>Área / Proceso</label><input id="m-area" placeholder="Ej: Línea de Ensamblado A"></div>
+      <div class="field"><label>Analista</label><input id="m-analista" placeholder="Nombre"></div>
+      <div class="field"><label>Fecha</label><input id="m-fecha" type="date"></div>
+      <div class="field"><label>Turno / Período</label><input id="m-turno" placeholder="Ej: Turno Mañana"></div>
+    </div>
+
+    <!-- ESCALA -->
+    <div class="sb-section">
+      <div class="sb-title">📐 Escala</div>
+      <div class="scale-row">
+        <label>100 px =</label>
+        <input id="scale-val" type="number" value="1" min="0.01" step="0.1" oninput="updateStats()">
+        <label id="scale-unit-lbl">m</label>
+      </div>
+      <div class="field" style="margin-top:8px"><label>Unidad</label>
+        <select id="scale-unit" onchange="document.getElementById('scale-unit-lbl').textContent=this.value;updateStats()">
+          <option value="m">Metros (m)</option>
+          <option value="ft">Pies (ft)</option>
+          <option value="cm">Centímetros (cm)</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- OPERADORES -->
+    <div class="sb-section">
+      <div class="sb-title">👷 Operadores / Flujos</div>
+      <div class="op-list" id="op-list"></div>
+      <div class="add-op-row" style="margin-top:8px">
+        <input id="new-op-name" placeholder="Nombre operador..." onkeydown="if(event.key==='Enter')addOp()">
+        <input type="color" id="new-op-color" class="color-dot-pick" value="#58a6ff">
+      </div>
+      <button class="btn" style="width:100%;margin-top:6px;justify-content:center" onclick="addOp()">+ Agregar Operador</button>
+    </div>
+
+    <!-- HERRAMIENTAS -->
+    <div class="sb-section">
+      <div class="sb-title">🖊️ Herramientas de Dibujo</div>
+      <div style="display:flex;flex-direction:column;gap:6px">
+        <button class="tool-btn active" id="tool-draw" onclick="setTool('draw')">✏️ Trazar recorrido</button>
+        <button class="tool-btn" id="tool-point" onclick="setTool('point')">📍 Marcar punto / estación</button>
+        <button class="tool-btn" id="tool-erase" onclick="setTool('erase')">🧹 Borrar último segmento</button>
+        <button class="tool-btn" onclick="undoLast()">↩ Deshacer</button>
+        <button class="tool-btn" onclick="clearCanvas()">🗑 Limpiar trazado</button>
+      </div>
+    </div>
+
+    <!-- OPCIONES -->
+    <div class="sb-section">
+      <div class="sb-title">⚙️ Opciones de Visualización</div>
+      <div class="field">
+        <label>Grosor de línea</label>
+        <input type="range" id="line-width" min="1" max="8" value="2" oninput="redraw()">
+      </div>
+      <div class="field">
+        <label>Opacidad de línea</label>
+        <input type="range" id="line-opacity" min="20" max="100" value="80" oninput="redraw()">
+      </div>
+      <label style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--muted);cursor:pointer">
+        <input type="checkbox" id="show-arrows" checked onchange="redraw()">
+        Mostrar flechas de dirección
+      </label>
+      <label style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--muted);cursor:pointer;margin-top:6px">
+        <input type="checkbox" id="show-distances" checked onchange="redraw()">
+        Mostrar distancias en segmentos
+      </label>
+    </div>
+
+    <!-- NOTES -->
+    <div class="notes-box">
+      <label>💡 Observaciones</label>
+      <textarea id="m-notas" placeholder="Ej: El operador 1 recorre 280m/turno entre Est. 2 y almacén. Oportunidad: reubicar materia prima junto a la línea para eliminar 120m de desplazamiento..."></textarea>
+    </div>
+
+  </div>
+
+  <!-- CANVAS AREA -->
+  <div class="canvas-area">
+
+    <!-- STATS -->
+    <div class="stat-row" id="stat-row"></div>
+
+    <!-- TOOLBAR -->
+    <div class="canvas-toolbar">
+      <span style="font-size:11.5px;color:var(--muted);font-weight:600">Operador activo:</span>
+      <span id="active-op-label" style="font-size:12px;font-weight:700;color:var(--yellow)">— ninguno —</span>
+      <div class="tool-sep"></div>
+      <span class="scale-info" id="cursor-info">Haz clic en el canvas para comenzar a trazar</span>
+      <div class="tool-sep"></div>
+      <button class="tool-btn" onclick="fitCanvas()">⊞ Ajustar</button>
+    </div>
+
+    <!-- CANVAS -->
+    <div class="canvas-wrap" id="canvas-wrap">
+      <div id="bg-hint">
+        <div class="hint-icon">🗺️</div>
+        <p>Sube una imagen de fondo con el layout del área, o traza directamente aquí.<br>Haz clic y arrastra para dibujar recorridos.</p>
+      </div>
+      <canvas id="diagram"></canvas>
+    </div>
+
+    <!-- DISTANCE TABLE -->
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden">
+      <div style="padding:10px 14px;background:var(--surface2);border-bottom:1px solid var(--border);font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)">
+        📏 Resumen de Distancias por Operador
+      </div>
+      <div style="padding:10px">
+        <table class="dist-table" id="dist-table">
+          <thead><tr>
+            <th>Operador</th>
+            <th class="num">Segmentos</th>
+            <th class="num">Distancia Total</th>
+            <th>% del Total</th>
+            <th>Observación</th>
+          </tr></thead>
+          <tbody id="dist-body"></tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const KEY = 'largotek_spaguetti';
+const META = ['m-area','m-analista','m-fecha','m-turno','m-notas','scale-val','scale-unit'];
+
+// State
+let operators = [];
+let paths = [];      // [{opId, points:[{x,y}]}]
+let pointMarkers = []; // [{opId, x, y, label}]
+let activeOpId = null;
+let currentTool = 'draw';
+let isDrawing = false;
+let currentPath = null;
+let bgImage = null;
+let canvas, ctx, wrap;
+let nextOpId = 1;
+let nextPtId = 1;
+
+const DEMO_OPS = [
+  {id:1, name:'Operador 1', color:'#58a6ff'},
+  {id:2, name:'Operador 2', color:'#3fb950'},
+  {id:3, name:'Material',   color:'#f85149'},
+];
+
+/* ── INIT ── */
+window.addEventListener('load', () => {
+  canvas = document.getElementById('diagram');
+  ctx = canvas.getContext('2d');
+  wrap = document.getElementById('canvas-wrap');
+  resizeCanvas();
+  window.addEventListener('resize', ()=>{ resizeCanvas(); redraw(); });
+
+  canvas.addEventListener('mousedown', onMouseDown);
+  canvas.addEventListener('mousemove', onMouseMove);
+  canvas.addEventListener('mouseup',   onMouseUp);
+  canvas.addEventListener('mouseleave',onMouseUp);
+
+  // Touch
+  canvas.addEventListener('touchstart', e=>{ e.preventDefault(); onMouseDown(touchToMouse(e)); },{passive:false});
+  canvas.addEventListener('touchmove',  e=>{ e.preventDefault(); onMouseMove(touchToMouse(e)); },{passive:false});
+  canvas.addEventListener('touchend',   e=>{ e.preventDefault(); onMouseUp(); },{passive:false});
+
+  loadLocal();
+});
+
+function touchToMouse(e) {
+  const t = e.touches[0];
+  return {clientX:t.clientX, clientY:t.clientY, buttons:1};
+}
+
+function resizeCanvas() {
+  const r = wrap.getBoundingClientRect();
+  canvas.width  = r.width;
+  canvas.height = r.height;
+}
+
+function fitCanvas() { resizeCanvas(); redraw(); }
+
+/* ── OPERATORS ── */
+function addOp() {
+  const name = document.getElementById('new-op-name').value.trim() || ('Operador '+(operators.length+1));
+  const color = document.getElementById('new-op-color').value;
+  operators.push({id: nextOpId++, name, color, obs:''});
+  document.getElementById('new-op-name').value = '';
+  if(!activeOpId) activeOpId = operators[0].id;
+  renderOpList();
+  updateStats();
+  autoSave();
+}
+
+function delOp(id) {
+  if(!confirm('¿Eliminar operador y sus trazados?')) return;
+  operators = operators.filter(o=>o.id!==id);
+  paths = paths.filter(p=>p.opId!==id);
+  pointMarkers = pointMarkers.filter(p=>p.opId!==id);
+  if(activeOpId===id) activeOpId = operators.length ? operators[0].id : null;
+  renderOpList();
+  redraw();
+  updateStats();
+  autoSave();
+}
+
+function setActiveOp(id) {
+  activeOpId = id;
+  renderOpList();
+  const op = operators.find(o=>o.id===id);
+  document.getElementById('active-op-label').textContent = op ? op.name : '— ninguno —';
+  document.getElementById('active-op-label').style.color = op ? op.color : 'var(--yellow)';
+}
+
+function renderOpList() {
+  const list = document.getElementById('op-list');
+  list.innerHTML = '';
+  operators.forEach(op => {
+    const totalDist = getOpDist(op.id);
+    const unit = document.getElementById('scale-unit').value;
+    const el = document.createElement('div');
+    el.className = 'op-item' + (op.id===activeOpId?' active':'');
+    el.onclick = ()=>setActiveOp(op.id);
+    el.innerHTML = `
+      <div class="op-dot" style="background:${op.color}"></div>
+      <span class="op-name">${esc(op.name)}</span>
+      <span class="op-dist">${totalDist.toFixed(1)} ${unit}</span>
+      <button class="op-del" onclick="event.stopPropagation();delOp(${op.id})">✕</button>`;
+    list.appendChild(el);
+  });
+  if(operators.length && !activeOpId) setActiveOp(operators[0].id);
+  if(activeOpId) {
+    const op = operators.find(o=>o.id===activeOpId);
+    document.getElementById('active-op-label').textContent = op ? op.name : '— ninguno —';
+    document.getElementById('active-op-label').style.color = op ? op.color : 'var(--yellow)';
+  }
+}
+
+/* ── DRAW TOOLS ── */
+function setTool(t) {
+  currentTool = t;
+  ['draw','point','erase'].forEach(id=>{
+    const el=document.getElementById('tool-'+id);
+    if(el) el.classList.toggle('active', id===t);
+  });
+}
+
+function onMouseDown(e) {
+  if(!activeOpId) { showToast('⚠️ Selecciona un operador primero'); return; }
+  const pos = getPos(e);
+  if(currentTool==='draw') {
+    isDrawing = true;
+    currentPath = {opId: activeOpId, points:[pos]};
+    document.getElementById('bg-hint').style.display='none';
+  } else if(currentTool==='point') {
+    const label = prompt('Nombre de la estación/punto:', 'Est. '+(pointMarkers.length+1));
+    if(label!==null) {
+      pointMarkers.push({id:nextPtId++, opId:activeOpId, x:pos.x, y:pos.y, label:label||''});
+      redraw(); updateStats(); autoSave();
+      document.getElementById('bg-hint').style.display='none';
+    }
+  } else if(currentTool==='erase') {
+    undoLast();
+  }
+}
+
+function onMouseMove(e) {
+  const pos = getPos(e);
+  document.getElementById('cursor-info').textContent = `x:${Math.round(pos.x)}  y:${Math.round(pos.y)}`;
+  if(!isDrawing || !currentPath) return;
+  const last = currentPath.points[currentPath.points.length-1];
+  const dx=pos.x-last.x, dy=pos.y-last.y;
+  if(dx*dx+dy*dy > 25) { // min distance for new point
+    currentPath.points.push(pos);
+    redrawWithCurrent();
+  }
+}
+
+function onMouseUp() {
+  if(!isDrawing || !currentPath) return;
+  isDrawing = false;
+  if(currentPath.points.length > 1) {
+    paths.push(currentPath);
+    updateStats();
+    autoSave();
+  }
+  currentPath = null;
+  redraw();
+}
+
+function undoLast() {
+  if(paths.length===0) return;
+  // Undo last path of active op first, else any last
+  const idx = [...paths].reverse().findIndex(p=>p.opId===activeOpId);
+  if(idx>=0) paths.splice(paths.length-1-idx,1);
+  else paths.pop();
+  redraw(); updateStats(); autoSave();
+  showToast('↩ Último segmento eliminado');
+}
+
+function clearCanvas() {
+  if(!confirm('¿Limpiar todos los trazados?')) return;
+  paths=[]; pointMarkers=[]; redraw(); updateStats(); autoSave();
+}
+
+function getPos(e) {
+  const r = canvas.getBoundingClientRect();
+  return {x: (e.clientX-r.left), y: (e.clientY-r.top)};
+}
+
+/* ── RENDER ── */
+function redraw() {
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  if(bgImage) {
+    ctx.drawImage(bgImage, 0,0, canvas.width, canvas.height);
+  }
+  const lw   = parseFloat(document.getElementById('line-width').value)||2;
+  const opac = parseFloat(document.getElementById('line-opacity').value)/100;
+  const arrows= document.getElementById('show-arrows').checked;
+  const dists = document.getElementById('show-distances').checked;
+
+  paths.forEach(path=>{
+    const op = operators.find(o=>o.id===path.opId);
+    if(!op||path.points.length<2) return;
+    ctx.save();
+    ctx.globalAlpha = opac;
+    ctx.strokeStyle = op.color;
+    ctx.lineWidth = lw;
+    ctx.lineJoin = 'round';
+    ctx.lineCap = 'round';
+    ctx.beginPath();
+    ctx.moveTo(path.points[0].x, path.points[0].y);
+    path.points.forEach(p=>ctx.lineTo(p.x,p.y));
+    ctx.stroke();
+
+    if(arrows) {
+      // Draw arrowhead at midpoint of each sub-segment
+      for(let i=0;i<path.points.length-1;i+=Math.max(1,Math.floor(path.points.length/5))){
+        const a=path.points[i], b=path.points[i+1]||path.points[path.points.length-1];
+        drawArrow(ctx, a, b, op.color, lw);
+      }
+    }
+
+    if(dists) {
+      const d = pathDist(path);
+      const scale = parseFloat(document.getElementById('scale-val').value)||1;
+      const unit = document.getElementById('scale-unit').value;
+      const mid = path.points[Math.floor(path.points.length/2)];
+      ctx.globalAlpha = Math.min(opac+0.2,1);
+      ctx.font = `bold ${Math.max(9,lw*3+6)}px Inter,sans-serif`;
+      ctx.fillStyle = op.color;
+      ctx.textAlign = 'center';
+      ctx.fillText((d/100*scale).toFixed(1)+' '+unit, mid.x, mid.y-6);
+    }
+    ctx.restore();
+  });
+
+  // Current path preview
+  if(currentPath && currentPath.points.length>1) {
+    const op = operators.find(o=>o.id===activeOpId);
+    if(op){
+      ctx.save();
+      ctx.globalAlpha = 0.6;
+      ctx.strokeStyle = op.color;
+      ctx.lineWidth = lw;
+      ctx.setLineDash([5,4]);
+      ctx.beginPath();
+      ctx.moveTo(currentPath.points[0].x,currentPath.points[0].y);
+      currentPath.points.forEach(p=>ctx.lineTo(p.x,p.y));
+      ctx.stroke();
+      ctx.restore();
+    }
+  }
+
+  // Point markers
+  pointMarkers.forEach(pm=>{
+    const op = operators.find(o=>o.id===pm.opId);
+    const color = op?op.color:'#ffffff';
+    ctx.save();
+    ctx.globalAlpha=0.95;
+    ctx.fillStyle=color;
+    ctx.beginPath();
+    ctx.arc(pm.x,pm.y,7,0,Math.PI*2);
+    ctx.fill();
+    ctx.strokeStyle='rgba(0,0,0,0.5)';
+    ctx.lineWidth=1.5;
+    ctx.stroke();
+    ctx.fillStyle='#0d1117';
+    ctx.font='bold 9px Inter,sans-serif';
+    ctx.textAlign='center';
+    ctx.textBaseline='middle';
+    ctx.fillText('P',pm.x,pm.y);
+    if(pm.label){
+      ctx.fillStyle=color;
+      ctx.font='bold 10px Inter,sans-serif';
+      ctx.textBaseline='alphabetic';
+      ctx.fillText(pm.label,pm.x,pm.y-11);
+    }
+    ctx.restore();
+  });
+}
+
+function redrawWithCurrent(){redraw();}
+
+function drawArrow(ctx,a,b,color,lw){
+  const dx=b.x-a.x, dy=b.y-a.y;
+  const len=Math.sqrt(dx*dx+dy*dy);
+  if(len<10) return;
+  const ux=dx/len, uy=dy/len;
+  const mx=(a.x+b.x)/2, my=(a.y+b.y)/2;
+  const as=Math.max(6,lw*3);
+  ctx.save();
+  ctx.fillStyle=color;
+  ctx.beginPath();
+  ctx.moveTo(mx+ux*as, my+uy*as);
+  ctx.lineTo(mx-uy*as*0.5-ux*as*0.5, my+ux*as*0.5-uy*as*0.5);
+  ctx.lineTo(mx+uy*as*0.5-ux*as*0.5, my-ux*as*0.5-uy*as*0.5);
+  ctx.closePath();
+  ctx.fill();
+  ctx.restore();
+}
+
+/* ── DISTANCES ── */
+function pathDist(path){
+  let d=0;
+  for(let i=1;i<path.points.length;i++){
+    const dx=path.points[i].x-path.points[i-1].x;
+    const dy=path.points[i].y-path.points[i-1].y;
+    d+=Math.sqrt(dx*dx+dy*dy);
+  }
+  return d; // pixels
+}
+
+function pxToReal(px){
+  const scale=parseFloat(document.getElementById('scale-val').value)||1;
+  return px/100*scale;
+}
+
+function getOpDist(opId){
+  return pxToReal(paths.filter(p=>p.opId===opId).reduce((s,p)=>s+pathDist(p),0));
+}
+
+function updateStats(){
+  const unit=document.getElementById('scale-unit').value;
+  const totalDist=operators.reduce((s,o)=>s+getOpDist(o.id),0);
+  const totalPaths=paths.length;
+  const totalPts=pointMarkers.length;
+
+  document.getElementById('stat-row').innerHTML=[
+    {v:operators.length,l:'Operadores'},
+    {v:totalPaths,l:'Segmentos'},
+    {v:totalPts,l:'Puntos marcados'},
+    {v:totalDist.toFixed(1)+' '+unit,l:'Distancia Total'},
+  ].map(s=>`<div class="s-chip"><div class="sv">${s.v}</div><div class="sl">${s.l}</div></div>`).join('');
+
+  // Table
+  const tbody=document.getElementById('dist-body');
+  tbody.innerHTML='';
+  const maxDist=Math.max(...operators.map(o=>getOpDist(o.id)),0.001);
+  operators.forEach(op=>{
+    const d=getOpDist(op.id);
+    const segs=paths.filter(p=>p.opId===op.id).length;
+    const pct=totalDist>0?(d/totalDist*100).toFixed(1)+'%':'—';
+    const barW=maxDist>0?(d/maxDist*100):0;
+    const tr=document.createElement('tr');
+    tr.innerHTML=`
+      <td style="display:flex;align-items:center;gap:8px">
+        <div style="width:11px;height:11px;border-radius:50%;background:${op.color};flex-shrink:0"></div>
+        ${esc(op.name)}
+      </td>
+      <td class="num">${segs}</td>
+      <td class="num"><strong>${d.toFixed(1)} ${unit}</strong></td>
+      <td>
+        <div class="dist-bar-wrap"><div class="dist-bar" style="width:${barW}%;background:${op.color}"></div></div>
+        ${pct}
+      </td>
+      <td><input style="background:transparent;border:none;color:var(--muted);font-size:11px;font-family:'Inter',sans-serif;width:120px" placeholder="Notas..." value="${esc(op.obs||'')}" oninput="operators.find(o=>o.id===${op.id}).obs=this.value;autoSave()"></td>`;
+    tbody.appendChild(tr);
+  });
+
+  renderOpList();
+}
+
+/* ── BACKGROUND ── */
+function loadBg(e){
+  const file=e.target.files[0]; if(!file) return;
+  const reader=new FileReader();
+  reader.onload=ev=>{
+    const img=new Image();
+    img.onload=()=>{bgImage=img;document.getElementById('bg-hint').style.display='none';redraw();};
+    img.src=ev.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+/* ── EXPORT ── */
+function exportCSV(){
+  const unit=document.getElementById('scale-unit').value;
+  let csv=`Área,${document.getElementById('m-area').value}\nAnalista,${document.getElementById('m-analista').value}\nFecha,${document.getElementById('m-fecha').value}\n\n`;
+  csv+=`Operador,Segmentos,Distancia Total (${unit}),% del Total,Observación\n`;
+  const total=operators.reduce((s,o)=>s+getOpDist(o.id),0);
+  operators.forEach(op=>{
+    const d=getOpDist(op.id);
+    const segs=paths.filter(p=>p.opId===op.id).length;
+    const pct=total>0?(d/total*100).toFixed(1)+'%':'0%';
+    csv+=`"${op.name}",${segs},${d.toFixed(2)},${pct},"${op.obs||''}"\n`;
+  });
+  csv+=`\nTotal,,${total.toFixed(2)},100%,\n`;
+  const blob=new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8;'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);
+  a.download='spaguetti-largotek.csv';a.click();
+}
+
+/* ── PERSIST ── */
+let saveTimer;
+function autoSave(){clearTimeout(saveTimer);saveTimer=setTimeout(saveLocal,1200);}
+function saveLocal(){
+  const d={fields:{},operators,paths,pointMarkers,nextOpId,nextPtId,ts:new Date().toISOString()};
+  META.forEach(id=>{const el=document.getElementById(id);if(el) d.fields[id]=el.value;});
+  localStorage.setItem(KEY,JSON.stringify(d));
+  const t=new Date().toLocaleTimeString('es',{hour:'2-digit',minute:'2-digit'});
+  const el=document.getElementById('saved-lbl');if(el) el.textContent='✓ Guardado '+t;
+}
+function loadLocal(){
+  const raw=localStorage.getItem(KEY);
+  if(!raw){loadDemo();return;}
+  try{
+    const d=JSON.parse(raw);
+    META.forEach(id=>{const el=document.getElementById(id);if(el&&d.fields&&d.fields[id]!=null)el.value=d.fields[id];});
+    operators=d.operators||[];
+    paths=d.paths||[];
+    pointMarkers=d.pointMarkers||[];
+    nextOpId=d.nextOpId||operators.length+1;
+    nextPtId=d.nextPtId||pointMarkers.length+1;
+    if(operators.length){activeOpId=operators[0].id;setActiveOp(activeOpId);}
+    if(d.ts){const el=document.getElementById('saved-lbl');if(el)el.textContent='Último guardado: '+new Date(d.ts).toLocaleString('es',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});}
+    if(paths.length||pointMarkers.length) document.getElementById('bg-hint').style.display='none';
+    redraw();updateStats();
+  }catch(e){loadDemo();}
+}
+function loadDemo(){
+  operators=[...DEMO_OPS];
+  nextOpId=4;
+  // Demo paths (simple lines on canvas)
+  setTimeout(()=>{
+    const W=canvas.width, H=canvas.height;
+    const s=(x,y)=>({x:W*x,y:H*y});
+    paths=[
+      {opId:1,points:[s(.1,.3),s(.3,.3),s(.3,.6),s(.6,.6),s(.6,.3),s(.85,.3)]},
+      {opId:1,points:[s(.85,.3),s(.85,.7),s(.1,.7),s(.1,.3)]},
+      {opId:2,points:[s(.15,.35),s(.5,.35),s(.5,.65),s(.15,.65),s(.15,.35)]},
+      {opId:3,points:[s(.05,.5),s(.95,.5),s(.95,.2),s(.5,.2)]},
+    ];
+    pointMarkers=[
+      {id:1,opId:1,x:W*.1,y:H*.3,label:'Inicio'},
+      {id:2,opId:1,x:W*.85,y:H*.3,label:'Est.5'},
+      {id:3,opId:2,x:W*.5,y:H*.35,label:'QC'},
+      {id:4,opId:3,x:W*.05,y:H*.5,label:'Almacén'},
+    ];
+    nextPtId=5;
+    document.getElementById('m-area').value='Línea de Ensamblado A';
+    document.getElementById('m-analista').value='Analista Demo';
+    document.getElementById('bg-hint').style.display='none';
+    activeOpId=1;
+    setActiveOp(1);
+    redraw();updateStats();
+  },80);
+}
+function clearAll(){if(!confirm('¿Limpiar todo el diagrama?'))return;localStorage.removeItem(KEY);location.reload();}
+
+/* UTILS */
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;');}
+function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2200);}
+
+document.querySelectorAll('input[type=range],input[type=checkbox],select').forEach(el=>el.addEventListener('change',autoSave));
+</script>
+<script src="branding.js"></script>
+</body>
+</html>
