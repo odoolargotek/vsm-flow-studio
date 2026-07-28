@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>SIPOC — Largotek Lean Suite</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300..700&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0d1117;--surface:#161b22;--surface2:#21262d;--border:#30363d;
+  --text:#e6edf3;--muted:#8b949e;--faint:#3d444d;
+  --accent:#4f98a3;--green:#5fc97a;--yellow:#e8c44a;--red:#f85149;
+  --d-color:#4f98a3;
+  --radius:14px;
+  /* colores SIPOC */
+  --s-col:#4f98a3;  /* Suppliers */
+  --i-col:#d29922;  /* Inputs    */
+  --p-col:#bc8cff;  /* Process   */
+  --o-col:#3fb950;  /* Outputs   */
+  --c-col:#f85149;  /* Customers */
+}
+html{scroll-behavior:smooth}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+
+/* TOPBAR */
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:13px 28px;border-bottom:1px solid var(--border);background:var(--surface)}
+.topbar-brand{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:var(--muted);text-decoration:none}
+.topbar-brand span{color:var(--accent)}
+.topbar-right{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:7px 15px;border-radius:8px;border:1.5px solid var(--border);background:transparent;color:var(--muted);font-size:12px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;transition:all .18s}
+.btn:hover{border-color:var(--accent);color:var(--accent)}
+.btn-primary{background:var(--accent);color:#fff;border-color:var(--accent)}
+.btn-primary:hover{background:#3a7f8a}
+.btn-danger:hover{border-color:var(--red);color:var(--red)}
+
+/* HERO */
+.hero{padding:30px 32px 18px;max-width:1100px;margin:0 auto}
+.hero-eye{font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--d-color);margin-bottom:8px}
+.hero h1{font-family:'Instrument Serif',serif;font-size:clamp(1.4rem,2.8vw,2rem);margin-bottom:6px}
+.hero-sub{font-size:13px;color:var(--muted);line-height:1.7;max-width:680px}
+
+/* WRAP */
+.wrap{max-width:1100px;margin:0 auto;padding:8px 28px 80px}
+
+/* INFO CARD */
+.info-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:20px;overflow:hidden}
+.info-card-head{display:flex;align-items:center;gap:10px;padding:12px 18px;border-bottom:1px solid var(--faint);background:var(--surface2)}
+.info-card-icon{font-size:15px}
+.info-card-title{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.info-card-body{padding:16px 18px;display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media(max-width:640px){.info-card-body{grid-template-columns:1fr}}
+.field{display:flex;flex-direction:column;gap:5px}
+.field label{font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.field input,.field textarea,.field select{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:9px 12px;font-size:13px;color:var(--text);font-family:'Inter',sans-serif;transition:border-color .18s;width:100%}
+.field textarea{resize:vertical;min-height:64px;line-height:1.65}
+.field input:focus,.field textarea:focus,.field select:focus{outline:none;border-color:var(--accent)}
+.field input::placeholder,.field textarea::placeholder{color:var(--faint)}
+.field-full{grid-column:1/-1}
+
+/* SIPOC TABLE SECTION */
+.sipoc-section{margin-bottom:24px}
+.sipoc-label{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:12px;display:flex;align-items:center;gap:8px}
+
+/* SIPOC GRID (horizontal) */
+.sipoc-grid{
+  display:grid;
+  grid-template-columns:repeat(5,1fr);
+  gap:0;
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  overflow:hidden;
+  background:var(--surface);
+}
+@media(max-width:768px){
+  .sipoc-grid{grid-template-columns:1fr}
+}
+
+/* COLUMN */
+.sipoc-col{display:flex;flex-direction:column;border-right:1px solid var(--border)}
+.sipoc-col:last-child{border-right:none}
+
+/* COLUMN HEADER */
+.col-header{
+  padding:14px 16px 12px;
+  text-align:center;
+  font-size:11px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;
+  border-bottom:3px solid currentColor;
+  background:var(--surface2);
+}
+.col-header .col-letter{font-size:26px;font-weight:900;display:block;line-height:1.1;margin-bottom:3px}
+.col-header .col-name{display:block;font-size:10px;font-weight:700;letter-spacing:.08em;opacity:.85}
+.col-header .col-name-es{display:block;font-size:9px;font-weight:400;letter-spacing:.04em;opacity:.55;margin-top:1px}
+
+/* COLUMN BODY */
+.col-body{flex:1;padding:12px 10px;display:flex;flex-direction:column;gap:6px;min-height:180px}
+
+/* ITEM */
+.sipoc-item{display:flex;align-items:flex-start;gap:6px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:7px 8px;transition:border-color .18s}
+.sipoc-item:focus-within{border-color:currentColor}
+.sipoc-item textarea{
+  flex:1;background:transparent;border:none;color:var(--text);font-size:12px;
+  font-family:'Inter',sans-serif;resize:none;min-height:38px;line-height:1.55;
+  padding:0;
+}
+.sipoc-item textarea:focus{outline:none}
+.sipoc-item textarea::placeholder{color:var(--faint)}
+.item-del{background:transparent;border:none;color:var(--faint);cursor:pointer;font-size:12px;padding:0;flex-shrink:0;line-height:1;transition:color .15s;margin-top:1px}
+.item-del:hover{color:var(--red)}
+
+/* ADD ROW BTN */
+.add-row-btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:4px;
+  margin:6px 10px 10px;
+  padding:6px 10px;
+  border-radius:6px;border:1px dashed var(--border);
+  background:transparent;color:var(--muted);
+  font-size:11px;font-weight:600;cursor:pointer;
+  font-family:'Inter',sans-serif;transition:all .18s;
+  width:calc(100% - 20px);
+}
+.add-row-btn:hover{border-color:currentColor;color:currentColor}
+
+/* PROCESS STEPS (special P column) */
+.step-item{display:flex;align-items:flex-start;gap:6px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:7px 8px;transition:border-color .18s;position:relative}
+.step-item:focus-within{border-color:var(--p-col)}
+.step-num{font-size:10px;font-weight:800;color:var(--p-col);background:rgba(188,140,255,.12);border-radius:4px;padding:1px 5px;flex-shrink:0;margin-top:2px}
+.step-item textarea{flex:1;background:transparent;border:none;color:var(--text);font-size:12px;font-family:'Inter',sans-serif;resize:none;min-height:38px;line-height:1.55;padding:0}
+.step-item textarea:focus{outline:none}
+.step-item textarea::placeholder{color:var(--faint)}
+
+/* DIVIDERS (arrows) */
+.arrow-divider{
+  display:none; /* only in print / wide */
+}
+@media(min-width:769px){
+  .sipoc-grid{
+    position:relative;
+  }
+}
+
+/* SCOPE NOTE */
+.scope-note{margin-top:20px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
+.scope-head{display:flex;align-items:center;gap:10px;padding:12px 18px;border-bottom:1px solid var(--faint);background:var(--surface2)}
+.scope-head-icon{font-size:15px}
+.scope-head-title{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.scope-body{padding:14px 18px;display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media(max-width:600px){.scope-body{grid-template-columns:1fr}}
+
+/* NOTES */
+.notes-card{margin-top:20px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
+.notes-head{display:flex;align-items:center;gap:10px;padding:12px 18px;border-bottom:1px solid var(--faint);background:var(--surface2)}
+.notes-body{padding:14px 18px}
+
+/* LEGEND BAR */
+.legend-bar{display:flex;align-items:center;gap:16px;flex-wrap:wrap;padding:10px 0 4px}
+.leg{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--muted)}
+.leg-dot{width:10px;height:10px;border-radius:50%}
+
+/* TOAST */
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:#1e3a2e;border:1px solid var(--green);color:var(--green);padding:10px 22px;border-radius:99px;font-size:13px;font-weight:600;opacity:0;transition:all .3s;z-index:999;white-space:nowrap}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* SAVED LABEL */
+.saved-label{font-size:11px;color:var(--muted)}
+
+/* PRINT */
+@media print{
+  body{background:#fff;color:#111}
+  .topbar,.btn,.item-del,.add-row-btn{display:none!important}
+  .sipoc-grid{border:1.5px solid #ccc}
+  .sipoc-col{border-right:1px solid #ccc}
+  .col-header{background:#f3f3f3!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .sipoc-item,.step-item{background:#f9f9f9!important;border:1px solid #ddd}
+  .field input,.field textarea,.field select{background:#f9f9f9;color:#111;border:1px solid #ccc}
+  .info-card,.scope-note,.notes-card{background:#fff;border:1px solid #ccc}
+  .info-card-head,.scope-head,.notes-head{background:#f3f3f3}
+}
+</style>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <a href="index.html" class="topbar-brand">← <span>Largotek</span> Lean Suite</a>
+  <div class="topbar-right">
+    <span class="saved-label" id="saved-lbl"></span>
+    <button class="btn btn-danger" onclick="clearAll()">🗑 Limpiar</button>
+    <button class="btn" onclick="saveLocal()">💾 Guardar</button>
+    <button class="btn btn-primary" onclick="window.print()">🖨 PDF</button>
+  </div>
+</div>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-eye">🔵 Definir — Largotek Lean Suite</div>
+  <h1>SIPOC</h1>
+  <p class="hero-sub">Diagrama de alto nivel que delimita el alcance del proceso: <strong style="color:var(--s-col)">Suppliers</strong> → <strong style="color:var(--i-col)">Inputs</strong> → <strong style="color:var(--p-col)">Process</strong> → <strong style="color:var(--o-col)">Outputs</strong> → <strong style="color:var(--c-col)">Customers</strong>. Úsalo al inicio del proyecto para alinear al equipo antes de medir.</p>
+</div>
+
+<div class="wrap">
+
+  <!-- INFO DEL PROYECTO -->
+  <div class="info-card">
+    <div class="info-card-head"><span class="info-card-icon">🏷️</span><span class="info-card-title">Identificación del Proyecto</span></div>
+    <div class="info-card-body">
+      <div class="field"><label>Título del Proyecto</label><input id="p-title" placeholder="Ej: Reducción de errores de entrega — Almacén Central" oninput="autoSave()"></div>
+      <div class="field"><label>Área / Proceso</label><input id="p-area" placeholder="Ej: Logística — Almacén Central" oninput="autoSave()"></div>
+      <div class="field"><label>Responsable</label><input id="p-owner" placeholder="Nombre y cargo" oninput="autoSave()"></div>
+      <div class="field"><label>Fecha</label><input id="p-date" type="date" oninput="autoSave()"></div>
+      <div class="field field-full"><label>Objetivo / Problema a resolver</label><textarea id="p-goal" placeholder="Ej: Reducir el tiempo de ciclo del proceso de picking en un 30% en 60 días..." oninput="autoSave()"></textarea></div>
+    </div>
+  </div>
+
+  <!-- LEYENDA -->
+  <div class="legend-bar">
+    <span style="font-size:11px;color:var(--muted);font-weight:600;letter-spacing:.06em;text-transform:uppercase">Columnas:</span>
+    <span class="leg"><span class="leg-dot" style="background:var(--s-col)"></span>S — Proveedores</span>
+    <span class="leg"><span class="leg-dot" style="background:var(--i-col)"></span>I — Entradas</span>
+    <span class="leg"><span class="leg-dot" style="background:var(--p-col)"></span>P — Pasos del Proceso</span>
+    <span class="leg"><span class="leg-dot" style="background:var(--o-col)"></span>O — Salidas</span>
+    <span class="leg"><span class="leg-dot" style="background:var(--c-col)"></span>C — Clientes</span>
+  </div>
+
+  <!-- SIPOC GRID -->
+  <div class="sipoc-grid">
+
+    <!-- S: SUPPLIERS -->
+    <div class="sipoc-col" id="col-s" style="--col-color:var(--s-col)">
+      <div class="col-header" style="color:var(--s-col)">
+        <span class="col-letter">S</span>
+        <span class="col-name">Suppliers</span>
+        <span class="col-name-es">Proveedores</span>
+      </div>
+      <div class="col-body" id="body-s"></div>
+      <button class="add-row-btn" style="color:var(--s-col);border-color:rgba(79,152,163,.3)" onclick="addItem('s','s-col')">+ Agregar proveedor</button>
+    </div>
+
+    <!-- I: INPUTS -->
+    <div class="sipoc-col" id="col-i" style="--col-color:var(--i-col)">
+      <div class="col-header" style="color:var(--i-col)">
+        <span class="col-letter">I</span>
+        <span class="col-name">Inputs</span>
+        <span class="col-name-es">Entradas</span>
+      </div>
+      <div class="col-body" id="body-i"></div>
+      <button class="add-row-btn" style="color:var(--i-col);border-color:rgba(210,153,34,.3)" onclick="addItem('i','i-col')">+ Agregar entrada</button>
+    </div>
+
+    <!-- P: PROCESS -->
+    <div class="sipoc-col" id="col-p" style="--col-color:var(--p-col)">
+      <div class="col-header" style="color:var(--p-col)">
+        <span class="col-letter">P</span>
+        <span class="col-name">Process</span>
+        <span class="col-name-es">Proceso (pasos)</span>
+      </div>
+      <div class="col-body" id="body-p"></div>
+      <button class="add-row-btn" style="color:var(--p-col);border-color:rgba(188,140,255,.3)" onclick="addStep('p')">+ Agregar paso</button>
+    </div>
+
+    <!-- O: OUTPUTS -->
+    <div class="sipoc-col" id="col-o" style="--col-color:var(--o-col)">
+      <div class="col-header" style="color:var(--o-col)">
+        <span class="col-letter">O</span>
+        <span class="col-name">Outputs</span>
+        <span class="col-name-es">Salidas</span>
+      </div>
+      <div class="col-body" id="body-o"></div>
+      <button class="add-row-btn" style="color:var(--o-col);border-color:rgba(63,185,80,.3)" onclick="addItem('o','o-col')">+ Agregar salida</button>
+    </div>
+
+    <!-- C: CUSTOMERS -->
+    <div class="sipoc-col" id="col-c" style="--col-color:var(--c-col)">
+      <div class="col-header" style="color:var(--c-col)">
+        <span class="col-letter">C</span>
+        <span class="col-name">Customers</span>
+        <span class="col-name-es">Clientes</span>
+      </div>
+      <div class="col-body" id="body-c"></div>
+      <button class="add-row-btn" style="color:var(--c-col);border-color:rgba(248,81,73,.3)" onclick="addItem('c','c-col')">+ Agregar cliente</button>
+    </div>
+
+  </div><!-- /sipoc-grid -->
+
+  <!-- SCOPE -->
+  <div class="scope-note">
+    <div class="scope-head"><span class="scope-head-icon">🔍</span><span class="scope-head-title">Límites del Proceso (Alcance)</span></div>
+    <div class="scope-body">
+      <div class="field">
+        <label>Inicio del proceso (primer paso)</label>
+        <input id="scope-start" placeholder="Ej: Recepción del pedido del cliente" oninput="autoSave()">
+      </div>
+      <div class="field">
+        <label>Fin del proceso (último paso)</label>
+        <input id="scope-end" placeholder="Ej: Entrega del producto al cliente final" oninput="autoSave()">
+      </div>
+      <div class="field">
+        <label>Qué incluye</label>
+        <textarea id="scope-in" placeholder="Ej: Picking, empaque, carga y despacho desde almacén central." oninput="autoSave()"></textarea>
+      </div>
+      <div class="field">
+        <label>Qué NO incluye</label>
+        <textarea id="scope-out" placeholder="Ej: Proceso de facturación, transporte externo, devoluciones." oninput="autoSave()"></textarea>
+      </div>
+    </div>
+  </div>
+
+  <!-- NOTAS -->
+  <div class="notes-card">
+    <div class="notes-head"><span class="scope-head-icon">📝</span><span class="scope-head-title">Notas y Observaciones</span></div>
+    <div class="notes-body">
+      <div class="field"><textarea id="p-notes" placeholder="Observaciones del equipo, supuestos, restricciones o hallazgos iniciales..." oninput="autoSave()"></textarea></div>
+    </div>
+  </div>
+
+</div><!-- /wrap -->
+
+<div class="toast" id="toast">✅ Guardado en caché</div>
+
+<script>
+const KEY = 'largotek_sipoc';
+const INFO_FIELDS = ['p-title','p-area','p-owner','p-date','p-goal','scope-start','scope-end','scope-in','scope-out','p-notes'];
+
+// ----- ADD ITEM (S, I, O, C) -----
+function addItem(col, colorVar, val='') {
+  const body = document.getElementById('body-' + col);
+  const item = document.createElement('div');
+  item.className = 'sipoc-item';
+  item.style.setProperty('color', `var(--${colorVar})`);
+  const placeholder = {s:'Ej: Proveedor de materias primas', i:'Ej: Formulario de pedido', o:'Ej: Producto empacado listo', c:'Ej: Cliente minorista'}[col] || 'Escribe aquí...';
+  item.innerHTML = `<textarea rows="2" placeholder="${placeholder}" oninput="autoSave()">${val}</textarea><button class="item-del" onclick="this.parentNode.remove();renumber('p');autoSave()" title="Eliminar">✕</button>`;
+  body.appendChild(item);
+  item.querySelector('textarea').focus();
+  autoSave();
+}
+
+// ----- ADD STEP (P column with number) -----
+function addStep(col, val='') {
+  const body = document.getElementById('body-p');
+  const item = document.createElement('div');
+  item.className = 'step-item';
+  item.innerHTML = `<span class="step-num">?</span><textarea rows="2" placeholder="Ej: Verificar stock disponible" oninput="autoSave()">${val}</textarea><button class="item-del" onclick="this.parentNode.remove();renumber('p');autoSave()" title="Eliminar">✕</button>`;
+  body.appendChild(item);
+  renumber('p');
+  item.querySelector('textarea').focus();
+  autoSave();
+}
+
+function renumber(col) {
+  document.querySelectorAll('#body-' + col + ' .step-num').forEach((el, i) => {
+    el.textContent = (i + 1) + '.';
+  });
+}
+
+// ----- AUTOSAVE -----
+let saveTimer;
+function autoSave() { clearTimeout(saveTimer); saveTimer = setTimeout(saveLocal, 900); }
+
+function saveLocal() {
+  const d = { fields: {}, cols: {} };
+  INFO_FIELDS.forEach(id => { const el = document.getElementById(id); if (el) d.fields[id] = el.value; });
+  ['s','i','o','c'].forEach(col => {
+    d.cols[col] = [];
+    document.querySelectorAll('#body-' + col + ' textarea').forEach(ta => d.cols[col].push(ta.value));
+  });
+  d.cols['p'] = [];
+  document.querySelectorAll('#body-p textarea').forEach(ta => d.cols['p'].push(ta.value));
+  d.ts = new Date().toISOString();
+  localStorage.setItem(KEY, JSON.stringify(d));
+  const t = new Date().toLocaleTimeString('es', { hour: '2-digit', minute: '2-digit' });
+  const lbl = document.getElementById('saved-lbl');
+  if (lbl) lbl.textContent = '✓ Guardado ' + t;
+  const toast = document.getElementById('toast');
+  toast.classList.add('show');
+  setTimeout(() => toast.classList.remove('show'), 2000);
+}
+
+function loadLocal() {
+  const raw = localStorage.getItem(KEY);
+  if (!raw) { loadDefaults(); return; }
+  try {
+    const d = JSON.parse(raw);
+    INFO_FIELDS.forEach(id => { const el = document.getElementById(id); if (el && d.fields && d.fields[id] != null) el.value = d.fields[id]; });
+    if (d.cols) {
+      ['s','i','o','c'].forEach(col => (d.cols[col] || []).forEach(v => addItem(col, col+'-col', v)));
+      (d.cols['p'] || []).forEach(v => addStep('p', v));
+      renumber('p');
+    }
+    if (d.ts) {
+      const t = new Date(d.ts).toLocaleString('es', { day:'2-digit', month:'2-digit', hour:'2-digit', minute:'2-digit' });
+      const lbl = document.getElementById('saved-lbl');
+      if (lbl) lbl.textContent = 'Último guardado: ' + t;
+    }
+  } catch(e) { loadDefaults(); }
+}
+
+function loadDefaults() {
+  // Start with empty columns — user fills in their project data
+  addItem('s','s-col','');
+  addItem('i','i-col','');
+  addStep('p','');
+  addStep('p','');
+  addStep('p','');
+  addItem('o','o-col','');
+  addItem('c','c-col','');
+  renumber('p');
+}
+
+function clearAll() {
+  if (!confirm('¿Limpiar todo el SIPOC? Se perderán los datos no guardados externamente.')) return;
+  localStorage.removeItem(KEY);
+  location.reload();
+}
+
+window.addEventListener('load', loadLocal);
+</script>
+<script src="branding.js"></script>
+</body>
+</html>
