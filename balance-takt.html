@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Balance / Takt Time — Largotek</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300..700&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0d1117;--surface:#161b22;--surface2:#21262d;--border:#30363d;
+  --text:#e6edf3;--muted:#8b949e;--faint:#3d444d;
+  --accent:#bc8cff;--yellow:#d29922;--green:#3fb950;--red:#f85149;--blue:#58a6ff;
+  --radius:14px
+}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:13px 28px;border-bottom:1px solid var(--border);background:var(--surface);flex-wrap:wrap;gap:8px}
+.topbar-brand{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:var(--muted);text-decoration:none}
+.topbar-brand span{color:var(--accent)}
+.topbar-right{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:7px 15px;border-radius:8px;border:1.5px solid var(--border);background:transparent;color:var(--muted);font-size:12px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;transition:all .18s}
+.btn:hover{border-color:var(--accent);color:var(--accent)}
+.btn-primary{background:var(--accent);color:#111;border-color:var(--accent)}
+.btn-primary:hover{opacity:.88}
+.btn-danger:hover{border-color:var(--red);color:var(--red)}
+.hero{padding:32px 32px 20px;max-width:1040px;margin:0 auto}
+.hero-eye{font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--accent);margin-bottom:8px}
+.hero h1{font-family:'Instrument Serif',serif;font-size:clamp(1.5rem,3vw,2.2rem);margin-bottom:6px}
+.hero-sub{font-size:13px;color:var(--muted);line-height:1.7}
+.wrap{max-width:1040px;margin:0 auto;padding:0 32px 80px}
+.saved-lbl{font-size:11px;color:var(--muted)}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:16px;overflow:hidden}
+.card-head{display:flex;align-items:center;gap:10px;padding:13px 18px;border-bottom:1px solid var(--faint);background:var(--surface2)}
+.card-icon{font-size:15px}
+.card-title{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.card-body{padding:16px 18px}
+.grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media(max-width:700px){.grid-3{grid-template-columns:1fr 1fr}.grid-2{grid-template-columns:1fr}}
+@media(max-width:440px){.grid-3{grid-template-columns:1fr}}
+.field{display:flex;flex-direction:column;gap:5px}
+.field label{font-size:10px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--muted)}
+.field input,.field textarea,.field select{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:9px 12px;font-size:13px;color:var(--text);font-family:'Inter',sans-serif;transition:border-color .18s;width:100%}
+.field input:focus,.field textarea:focus,.field select:focus{outline:none;border-color:var(--accent)}
+.field input::placeholder{color:var(--faint)}
+.field-hint{font-size:10px;color:var(--faint);margin-top:2px}
+
+/* TAKT BOX */
+.takt-result{display:flex;flex-wrap:wrap;gap:12px;margin-top:16px}
+.takt-chip{border-radius:10px;padding:14px 20px;text-align:center;min-width:130px;flex:1}
+.takt-chip.main{background:rgba(188,140,255,.12);border:1px solid rgba(188,140,255,.3)}
+.takt-chip.info{background:var(--surface2);border:1px solid var(--border)}
+.takt-chip.warn{background:rgba(248,81,73,.1);border:1px solid rgba(248,81,73,.3)}
+.takt-chip.ok{background:rgba(63,185,80,.1);border:1px solid rgba(63,185,80,.3)}
+.takt-chip .tv{font-size:22px;font-weight:800;font-variant-numeric:tabular-nums}
+.takt-chip.main .tv{color:var(--accent)}
+.takt-chip.info .tv{color:var(--text)}
+.takt-chip.warn .tv{color:var(--red)}
+.takt-chip.ok .tv{color:var(--green)}
+.takt-chip .tl{font-size:10px;color:var(--muted);margin-top:3px;letter-spacing:.05em;text-transform:uppercase}
+
+/* TABLE */
+.data-table{width:100%;border-collapse:collapse;font-size:13px}
+.data-table th{text-align:left;padding:8px 10px;background:var(--surface2);color:var(--muted);font-size:11px;font-weight:600;letter-spacing:.04em;white-space:nowrap}
+.data-table td{padding:6px 8px;border-top:1px solid var(--faint);vertical-align:middle}
+.data-table td input,.data-table td select{background:transparent;border:none;color:var(--text);font-size:13px;font-family:'Inter',sans-serif;padding:3px 5px;width:100%}
+.data-table td input:focus{outline:1px solid var(--accent);border-radius:3px;background:var(--surface2)}
+.data-table td.num{text-align:right;font-variant-numeric:tabular-nums;padding-right:10px}
+.data-table tr.bottleneck td{background:rgba(248,81,73,.07)}
+.data-table tr.bottleneck td.op-name{color:var(--red);font-weight:700}
+.data-table tr.ok-row td.util-val{color:var(--green)}
+.data-table tr.warn-row td.util-val{color:var(--yellow)}
+.data-table tr.over-row td.util-val{color:var(--red);font-weight:700}
+.util-bar-wrap{width:100%;height:8px;background:var(--faint);border-radius:99px;overflow:hidden;min-width:60px}
+.util-bar{height:100%;border-radius:99px;transition:width .3s}
+.del-btn{background:transparent;border:none;color:var(--faint);cursor:pointer;font-size:14px;padding:0 4px;transition:color .15s}
+.del-btn:hover{color:var(--red)}
+.add-btn{display:inline-flex;align-items:center;gap:5px;margin-top:10px;padding:6px 14px;border-radius:6px;border:1px dashed var(--border);background:transparent;color:var(--muted);font-size:11px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;transition:all .18s}
+.add-btn:hover{border-color:var(--accent);color:var(--accent)}
+
+/* CHART */
+.chart-wrap{position:relative;width:100%;height:340px}
+canvas{display:block;width:100%;height:100%}
+
+/* ANALYSIS */
+.analysis-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px;margin-bottom:14px}
+.a-chip{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:12px 16px}
+.a-chip .av{font-size:18px;font-weight:800;color:var(--text);font-variant-numeric:tabular-nums}
+.a-chip .al{font-size:10px;color:var(--muted);margin-top:2px;letter-spacing:.05em;text-transform:uppercase}
+.alert-box{border-radius:10px;padding:13px 16px;font-size:12.5px;line-height:1.65;display:flex;gap:10px;align-items:flex-start}
+.alert-box.danger{background:rgba(248,81,73,.08);border:1px solid rgba(248,81,73,.25);color:var(--red)}
+.alert-box.warn{background:rgba(210,153,34,.08);border:1px solid rgba(210,153,34,.25);color:var(--yellow)}
+.alert-box.good{background:rgba(63,185,80,.08);border:1px solid rgba(63,185,80,.25);color:var(--green)}
+.alert-icon{font-size:16px;flex-shrink:0}
+
+/* NOTES */
+.insight-box{background:rgba(188,140,255,.07);border:1px solid rgba(188,140,255,.22);border-radius:10px;padding:14px 18px;margin-top:14px}
+.insight-box label{font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);display:block;margin-bottom:6px}
+.insight-box textarea{width:100%;background:transparent;border:none;color:var(--text);font-family:'Inter',sans-serif;font-size:13px;line-height:1.65;resize:vertical;min-height:60px}
+.insight-box textarea:focus{outline:none}
+.insight-box textarea::placeholder{color:rgba(188,140,255,.3)}
+
+/* TOAST */
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:#1e3a2e;border:1px solid var(--green);color:var(--green);padding:10px 22px;border-radius:99px;font-size:13px;font-weight:600;opacity:0;transition:all .3s;z-index:999;white-space:nowrap}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* PRINT */
+@media print{
+  .topbar,.btn,.add-btn,.del-btn{display:none!important}
+  body{background:#fff;color:#111}
+  .card{border-color:#ccc;background:#fff}
+  .card-head{background:#f3f3f3}
+  .field input,.field textarea,.data-table td input,.insight-box textarea{background:#f9f9f9;color:#111}
+  .takt-chip{background:#f5f5f5;border-color:#ccc}
+  .takt-chip .tv{color:#111}
+  .a-chip{background:#f5f5f5}
+}
+</style>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <a href="index.html" class="topbar-brand">← <span>Largotek</span> Lean Suite</a>
+  <div class="topbar-right">
+    <span class="saved-lbl" id="saved-lbl"></span>
+    <button class="btn" onclick="exportCSV()">📥 CSV</button>
+    <button class="btn btn-danger" onclick="clearAll()">🗑 Limpiar</button>
+    <button class="btn" onclick="saveLocal()">💾 Guardar</button>
+    <button class="btn btn-primary" onclick="window.print()">🖨 PDF</button>
+  </div>
+</div>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-eye">⚖️ Diagrama de Balance / Takt Time — Largotek Lean Suite</div>
+  <h1>Diagrama de Balance de Operadores</h1>
+  <p class="hero-sub">Calcula el <strong style="color:var(--accent)">Takt Time</strong> del proceso, compara la carga de trabajo de cada operador y detecta cuellos de botella visualmente. Basado en la demanda del cliente y el tiempo disponible.</p>
+</div>
+
+<div class="wrap">
+
+  <!-- META -->
+  <div class="card">
+    <div class="card-head"><span class="card-icon">🏷️</span><span class="card-title">Identificación del Proyecto</span></div>
+    <div class="card-body">
+      <div class="grid-3">
+        <div class="field"><label>Proceso / Línea</label><input id="m-proceso" placeholder="Ej: Línea de Ensamblado A"></div>
+        <div class="field"><label>Producto / Familia</label><input id="m-producto" placeholder="Ej: Motor Ref. XL-200"></div>
+        <div class="field"><label>Analista</label><input id="m-analista" placeholder="Nombre del responsable"></div>
+        <div class="field"><label>Fecha</label><input id="m-fecha" type="date"></div>
+        <div class="field"><label>Turno</label><input id="m-turno" placeholder="Ej: Turno Mañana"></div>
+        <div class="field"><label>Unidad de tiempo</label>
+          <select id="m-unidad" onchange="recalc()">
+            <option value="seg">Segundos (seg)</option>
+            <option value="min">Minutos (min)</option>
+          </select>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAKT TIME CALCULATOR -->
+  <div class="card">
+    <div class="card-head"><span class="card-icon">⏱️</span><span class="card-title">Calculadora de Takt Time</span></div>
+    <div class="card-body">
+      <div class="grid-3">
+        <div class="field">
+          <label>Tiempo disponible por turno</label>
+          <input id="tt-disponible" type="number" min="0" placeholder="Ej: 27000" oninput="recalc()">
+          <span class="field-hint">En la unidad seleccionada (ej: 480 min, 27000 seg)</span>
+        </div>
+        <div class="field">
+          <label>Paros / Descansos</label>
+          <input id="tt-paros" type="number" min="0" value="0" placeholder="Ej: 1800" oninput="recalc()">
+          <span class="field-hint">Tiempo no productivo en la misma unidad</span>
+        </div>
+        <div class="field">
+          <label>Demanda del cliente (unid/turno)</label>
+          <input id="tt-demanda" type="number" min="1" placeholder="Ej: 120" oninput="recalc()">
+          <span class="field-hint">Piezas requeridas por turno</span>
+        </div>
+      </div>
+      <div class="takt-result" id="takt-result">
+        <div class="takt-chip main"><div class="tv" id="tr-takt">—</div><div class="tl">Takt Time</div></div>
+        <div class="takt-chip info"><div class="tv" id="tr-neto">—</div><div class="tl">Tiempo Neto Disponible</div></div>
+        <div class="takt-chip info"><div class="tv" id="tr-demanda">—</div><div class="tl">Demanda / Turno</div></div>
+        <div class="takt-chip info"><div class="tv" id="tr-ops-ideal">—</div><div class="tl">Operadores Ideales</div></div>
+        <div class="takt-chip info" id="chip-efic"><div class="tv" id="tr-efic">—</div><div class="tl">Eficiencia de Línea</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TABLA DE OPERADORES -->
+  <div class="card">
+    <div class="card-head"><span class="card-icon">👷</span><span class="card-title">Carga de Trabajo por Operador</span></div>
+    <div class="card-body">
+      <table class="data-table" id="ops-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th style="min-width:180px">Operador / Estación</th>
+            <th style="min-width:140px">Tarea Principal</th>
+            <th style="text-align:right;min-width:110px">Tiempo de Ciclo</th>
+            <th style="min-width:140px">% Utilización</th>
+            <th style="min-width:80px;text-align:center">Estado</th>
+            <th style="min-width:140px">Observación</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="ops-body"></tbody>
+      </table>
+      <button class="add-btn" onclick="addOp()">+ Agregar operador / estación</button>
+    </div>
+  </div>
+
+  <!-- GRÁFICO DE BALANCE -->
+  <div class="card">
+    <div class="card-head"><span class="card-icon">📊</span><span class="card-title">Gráfico de Balance de Carga</span></div>
+    <div class="card-body">
+      <div class="chart-wrap"><canvas id="balance-canvas"></canvas></div>
+    </div>
+  </div>
+
+  <!-- ANÁLISIS -->
+  <div class="card">
+    <div class="card-head"><span class="card-icon">🔍</span><span class="card-title">Análisis de Línea</span></div>
+    <div class="card-body">
+      <div class="analysis-grid" id="analysis-chips"></div>
+      <div id="alerts-zone"></div>
+      <div class="insight-box">
+        <label>💡 Conclusiones y Acciones de Mejora</label>
+        <textarea id="m-conclusion" placeholder="Ej: El operador 3 (Estación de Ensamble Final) supera el Takt Time en 18 seg, convirtiéndose en el cuello de botella. Se propone redistribuir la tarea de 'colocación de tornillos' al Op.2 que tiene capacidad ociosa del 22%. Con esto la eficiencia de línea sube de 71% a 89%."></textarea>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div class="toast" id="toast">✅ Guardado en caché</div>
+
+<script>
+const KEY = 'largotek_balance_takt';
+const META = ['m-proceso','m-producto','m-analista','m-fecha','m-turno','m-unidad','tt-disponible','tt-paros','tt-demanda','m-conclusion'];
+let ops = [];
+let taktTime = 0;
+
+/* ── TAKT CALC ── */
+function recalc() {
+  const disp = parseFloat(document.getElementById('tt-disponible').value) || 0;
+  const paros = parseFloat(document.getElementById('tt-paros').value) || 0;
+  const dem = parseFloat(document.getElementById('tt-demanda').value) || 0;
+  const unidad = document.getElementById('m-unidad').value;
+  const neto = Math.max(0, disp - paros);
+  taktTime = dem > 0 ? neto / dem : 0;
+
+  const fmt = v => v > 0 ? v.toFixed(1) + ' ' + unidad : '—';
+  document.getElementById('tr-takt').textContent = fmt(taktTime);
+  document.getElementById('tr-neto').textContent = fmt(neto);
+  document.getElementById('tr-demanda').textContent = dem > 0 ? dem + ' uds' : '—';
+
+  // Operadores ideales
+  const totalCiclo = ops.reduce((s,o) => s + (parseFloat(o.ciclo)||0), 0);
+  const opsIdeal = taktTime > 0 && totalCiclo > 0 ? (totalCiclo / taktTime).toFixed(2) : '—';
+  document.getElementById('tr-ops-ideal').textContent = opsIdeal !== '—' ? opsIdeal + ' ops' : '—';
+
+  // Eficiencia de línea
+  let efic = '—';
+  if (taktTime > 0 && ops.length > 0 && totalCiclo > 0) {
+    efic = ((totalCiclo / (ops.length * taktTime)) * 100).toFixed(1) + '%';
+    const eficNum = parseFloat(efic);
+    const chip = document.getElementById('chip-efic');
+    chip.className = 'takt-chip ' + (eficNum >= 85 ? 'ok' : eficNum >= 65 ? 'warn' : 'danger');
+  }
+  document.getElementById('tr-efic').textContent = efic;
+
+  renderTable();
+  renderChart();
+  renderAnalysis();
+  autoSave();
+}
+
+/* ── OPS ── */
+function addOp(data={}) {
+  ops.push({ name: data.name||'', task: data.task||'', ciclo: data.ciclo||'', obs: data.obs||'' });
+  recalc();
+}
+
+function delOp(i) { ops.splice(i,1); recalc(); }
+
+function updOp(i, field, val) {
+  if(ops[i]===undefined) return;
+  ops[i][field] = val;
+  recalc();
+}
+
+/* ── RENDER TABLE ── */
+function renderTable() {
+  const tbody = document.getElementById('ops-body');
+  tbody.innerHTML = '';
+  ops.forEach((op, i) => {
+    const ciclo = parseFloat(op.ciclo)||0;
+    const util = taktTime > 0 && ciclo > 0 ? (ciclo/taktTime*100) : 0;
+    const utilStr = taktTime > 0 && ciclo > 0 ? util.toFixed(1)+'%' : '—';
+    const isBottleneck = taktTime > 0 && ciclo > taktTime;
+    const statusEmoji = taktTime === 0 ? '⬜' : ciclo > taktTime ? '🔴' : ciclo > taktTime*0.9 ? '🟡' : '🟢';
+    const statusText = taktTime === 0 ? '—' : ciclo > taktTime ? 'Cuello de botella' : ciclo > taktTime*0.9 ? 'Sobrecargado' : 'OK';
+    const barColor = util > 100 ? 'var(--red)' : util > 90 ? 'var(--yellow)' : 'var(--green)';
+    const rowClass = isBottleneck ? 'bottleneck' : util > 90 ? 'warn-row' : 'ok-row';
+
+    const tr = document.createElement('tr');
+    tr.className = rowClass;
+    tr.innerHTML = `
+      <td style="color:var(--muted);text-align:center;font-size:12px;width:28px">${i+1}</td>
+      <td class="op-name"><input value="${esc(op.name)}" placeholder="Ej: Juan / Estación 1" oninput="updOp(${i},'name',this.value)"></td>
+      <td><input value="${esc(op.task)}" placeholder="Tarea principal..." oninput="updOp(${i},'task',this.value)"></td>
+      <td class="num"><input type="number" min="0" step="0.1" value="${op.ciclo||''}" placeholder="0" style="text-align:right;max-width:90px" oninput="updOp(${i},'ciclo',this.value)"></td>
+      <td style="min-width:160px">
+        <div style="display:flex;align-items:center;gap:8px">
+          <div class="util-bar-wrap"><div class="util-bar" style="width:${Math.min(util,100)}%;background:${barColor}"></div></div>
+          <span class="util-val" style="font-size:12px;min-width:38px;text-align:right">${utilStr}</span>
+        </div>
+      </td>
+      <td style="text-align:center;font-size:11px;white-space:nowrap">${statusEmoji} <span style="color:var(--muted)">${statusText}</span></td>
+      <td><input value="${esc(op.obs)}" placeholder="Notas..." oninput="updOp(${i},'obs',this.value)"></td>
+      <td><button class="del-btn" onclick="delOp(${i})">✕</button></td>`;
+    tbody.appendChild(tr);
+  });
+}
+
+/* ── CHART ── */
+function renderChart() {
+  const canvas = document.getElementById('balance-canvas');
+  const dpr = window.devicePixelRatio||1;
+  canvas.width = canvas.offsetWidth*dpr;
+  canvas.height = canvas.offsetHeight*dpr;
+  const ctx = canvas.getContext('2d');
+  ctx.scale(dpr,dpr);
+  const W=canvas.offsetWidth, H=canvas.offsetHeight;
+  ctx.clearRect(0,0,W,H);
+
+  if(ops.length===0){
+    ctx.fillStyle='#8b949e'; ctx.font='13px Inter,sans-serif'; ctx.textAlign='center';
+    ctx.fillText('Agrega operadores para ver el gráfico de balance',W/2,H/2); return;
+  }
+
+  const pad={top:36,right:28,bottom:60,left:56};
+  const cW=W-pad.left-pad.right, cH=H-pad.top-pad.bottom;
+
+  const cycles = ops.map(o=>parseFloat(o.ciclo)||0);
+  const maxVal = Math.max(...cycles, taktTime*1.1, 1);
+  const barW = Math.min(cW/ops.length*0.55, 70);
+  const gap = cW/ops.length;
+
+  // Grid lines
+  const steps=5;
+  for(let i=0;i<=steps;i++){
+    const y=pad.top+cH-(cH*i/steps);
+    ctx.strokeStyle='#30363d'; ctx.lineWidth=1;
+    ctx.beginPath(); ctx.moveTo(pad.left,y); ctx.lineTo(pad.left+cW,y); ctx.stroke();
+    ctx.fillStyle='#8b949e'; ctx.font='10px Inter,sans-serif'; ctx.textAlign='right';
+    ctx.fillText((maxVal*i/steps).toFixed(0), pad.left-6, y+4);
+  }
+
+  // Bars
+  cycles.forEach((c,i)=>{
+    const bH = (c/maxVal)*cH;
+    const x = pad.left + i*gap + (gap-barW)/2;
+    const y = pad.top+cH-bH;
+    const overTakt = taktTime > 0 && c > taktTime;
+    const nearTakt = taktTime > 0 && c > taktTime*0.9 && !overTakt;
+    ctx.fillStyle = overTakt ? 'rgba(248,81,73,0.85)' : nearTakt ? 'rgba(210,153,34,0.85)' : 'rgba(188,140,255,0.75)';
+    if(ctx.roundRect){ctx.beginPath();ctx.roundRect(x,y,barW,bH,[4,4,0,0]);ctx.fill();}
+    else{ctx.fillRect(x,y,barW,bH);}
+
+    // Value on bar
+    if(bH>18){
+      ctx.fillStyle='#e6edf3'; ctx.font='bold 11px Inter,sans-serif'; ctx.textAlign='center';
+      ctx.fillText(c>0?c.toFixed(1):'0', x+barW/2, y+(bH>28?16:bH/2+4));
+    }
+    // Operator label
+    ctx.fillStyle='#8b949e'; ctx.font='10px Inter,sans-serif'; ctx.textAlign='center';
+    const lbl=(ops[i].name||('Op.'+(i+1))).substring(0,12);
+    ctx.save(); ctx.translate(x+barW/2,pad.top+cH+14); ctx.rotate(-0.35);
+    ctx.textAlign='right'; ctx.fillText(lbl,0,0); ctx.restore();
+  });
+
+  // Takt Time line
+  if(taktTime>0){
+    const ty = pad.top+cH-(taktTime/maxVal)*cH;
+    ctx.strokeStyle='#bc8cff'; ctx.lineWidth=2; ctx.setLineDash([7,4]);
+    ctx.beginPath(); ctx.moveTo(pad.left,ty); ctx.lineTo(pad.left+cW,ty); ctx.stroke();
+    ctx.setLineDash([]);
+    // Label
+    ctx.fillStyle='#bc8cff'; ctx.font='bold 11px Inter,sans-serif'; ctx.textAlign='left';
+    const unidad = document.getElementById('m-unidad').value;
+    ctx.fillText('Takt Time: '+taktTime.toFixed(1)+' '+unidad, pad.left+4, ty-6);
+  }
+
+  // Y axis label
+  ctx.save(); ctx.translate(13,pad.top+cH/2); ctx.rotate(-Math.PI/2);
+  ctx.fillStyle='#8b949e'; ctx.font='10px Inter,sans-serif'; ctx.textAlign='center';
+  const unidad2 = document.getElementById('m-unidad').value;
+  ctx.fillText('Tiempo de Ciclo ('+unidad2+')',0,0); ctx.restore();
+
+  // Legend
+  const lx=pad.left+cW-200, ly=pad.top+8;
+  [[`rgba(248,81,73,0.85)`,'Sobre Takt Time'],[`rgba(210,153,34,0.85)`,'Cerca del límite'],[`rgba(188,140,255,0.75)`,'Dentro del Takt']].forEach(([c,l],i)=>{
+    ctx.fillStyle=c; ctx.fillRect(lx,ly+i*18,12,12);
+    ctx.fillStyle='#8b949e'; ctx.font='10px Inter,sans-serif'; ctx.textAlign='left';
+    ctx.fillText(l,lx+16,ly+i*18+10);
+  });
+}
+
+/* ── ANALYSIS ── */
+function renderAnalysis() {
+  const cycles = ops.map(o=>parseFloat(o.ciclo)||0).filter(c=>c>0);
+  const totalCiclo = cycles.reduce((s,c)=>s+c,0);
+  const maxCiclo = cycles.length>0?Math.max(...cycles):0;
+  const minCiclo = cycles.length>0?Math.min(...cycles):0;
+  const bottlenecks = ops.filter(o=>taktTime>0&&parseFloat(o.ciclo)>taktTime);
+  const unidad = document.getElementById('m-unidad').value;
+
+  const chips = [
+    {v: ops.length, l:'Operadores'},
+    {v: totalCiclo>0?totalCiclo.toFixed(1)+' '+unidad:'—', l:'Contenido total de trabajo'},
+    {v: maxCiclo>0?maxCiclo.toFixed(1)+' '+unidad:'—', l:'Mayor tiempo de ciclo'},
+    {v: minCiclo>0?minCiclo.toFixed(1)+' '+unidad:'—', l:'Menor tiempo de ciclo'},
+    {v: bottlenecks.length, l:'Cuellos de botella'},
+  ];
+
+  const zone = document.getElementById('analysis-chips');
+  zone.innerHTML = chips.map(c=>`<div class="a-chip"><div class="av">${c.v}</div><div class="al">${c.l}</div></div>`).join('');
+
+  // Alerts
+  const alerts = [];
+  if(bottlenecks.length>0){
+    bottlenecks.forEach(op=>{
+      const exceso = (parseFloat(op.ciclo)-taktTime).toFixed(1);
+      alerts.push({type:'danger', icon:'🔴', msg:`<strong>${esc(op.name)||'Operador sin nombre'}</strong> excede el Takt Time en <strong>${exceso} ${unidad}</strong>. Es el cuello de botella — reasignar o reducir su contenido de trabajo.`});
+    });
+  }
+  const overloaded = ops.filter(o=>{ const u=taktTime>0?parseFloat(o.ciclo)/taktTime*100:0; return u>90&&u<=100; });
+  if(overloaded.length>0){
+    alerts.push({type:'warn', icon:'🟡', msg:`${overloaded.length} operador(es) con utilización >90%: ${overloaded.map(o=>esc(o.name)||'Sin nombre').join(', ')}. Riesgo de convertirse en cuello de botella ante variabilidad.`});
+  }
+  const idle = ops.filter(o=>{ const u=taktTime>0?parseFloat(o.ciclo)/taktTime*100:0; return u<60&&parseFloat(o.ciclo)>0; });
+  if(idle.length>0){
+    alerts.push({type:'warn', icon:'💡', msg:`${idle.length} operador(es) con utilización <60%: ${idle.map(o=>esc(o.name)||'Sin nombre').join(', ')}. Oportunidad de absorber tareas de operadores sobrecargados.`});
+  }
+  if(alerts.length===0&&ops.length>0&&taktTime>0){
+    alerts.push({type:'good',icon:'✅',msg:'Todos los operadores están dentro del Takt Time. La línea está balanceada correctamente.'});
+  }
+
+  document.getElementById('alerts-zone').innerHTML = alerts.map(a=>`<div class="alert-box ${a.type}" style="margin-bottom:8px"><span class="alert-icon">${a.icon}</span><span>${a.msg}</span></div>`).join('');
+}
+
+/* ── CSV ── */
+function exportCSV(){
+  const titulo = document.getElementById('m-proceso').value||'balance-takt';
+  const unidad = document.getElementById('m-unidad').value;
+  const tt = taktTime>0?taktTime.toFixed(2):'N/A';
+  let csv = `Proceso,${document.getElementById('m-proceso').value}\nProducto,${document.getElementById('m-producto').value}\nAnalista,${document.getElementById('m-analista').value}\nFecha,${document.getElementById('m-fecha').value}\nTakt Time,${tt} ${unidad}\n\n`;
+  csv += `#,Operador,Tarea Principal,Tiempo de Ciclo (${unidad}),% Utilización,Estado,Observación\n`;
+  ops.forEach((op,i)=>{
+    const c=parseFloat(op.ciclo)||0;
+    const util=taktTime>0&&c>0?(c/taktTime*100).toFixed(1)+'%':'—';
+    const estado=taktTime>0&&c>taktTime?'Cuello de botella':taktTime>0&&c>taktTime*0.9?'Sobrecargado':'OK';
+    csv+=`${i+1},"${op.name}","${op.task}",${c},${util},${estado},"${op.obs}"\n`;
+  });
+  const blob=new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8;'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download=(titulo.replace(/\s+/g,'-').toLowerCase()||'balance-takt')+'.csv';
+  a.click();
+}
+
+/* ── PERSIST ── */
+let saveTimer;
+function autoSave(){ clearTimeout(saveTimer); saveTimer=setTimeout(saveLocal,1200); }
+
+function saveLocal(){
+  const d={fields:{},ops:ops,ts:new Date().toISOString()};
+  META.forEach(id=>{ const el=document.getElementById(id); if(el) d.fields[id]=el.value; });
+  localStorage.setItem(KEY,JSON.stringify(d));
+  const t=new Date().toLocaleTimeString('es',{hour:'2-digit',minute:'2-digit'});
+  const el=document.getElementById('saved-lbl');
+  if(el) el.textContent='✓ Guardado '+t;
+  const toast=document.getElementById('toast');
+  toast.classList.add('show'); setTimeout(()=>toast.classList.remove('show'),2200);
+}
+
+function loadLocal(){
+  const raw=localStorage.getItem(KEY);
+  if(!raw){
+    // Demo data
+    document.getElementById('m-proceso').value='Línea de Ensamblado A';
+    document.getElementById('m-producto').value='Motor Ref. XL-200';
+    document.getElementById('tt-disponible').value='27000';
+    document.getElementById('tt-paros').value='1800';
+    document.getElementById('tt-demanda').value='120';
+    [
+      {name:'Juan / Est. 1',task:'Colocación de base',ciclo:'200',obs:''},
+      {name:'María / Est. 2',task:'Montaje de circuito',ciclo:'235',obs:'Tiempo alto por revisión QC'},
+      {name:'Carlos / Est. 3',task:'Ensamble final',ciclo:'218',obs:''},
+      {name:'Ana / Est. 4',task:'Prueba funcional',ciclo:'145',obs:'Capacidad ociosa disponible'},
+      {name:'Luis / Est. 5',task:'Empaque y etiquetado',ciclo:'190',obs:''},
+    ].forEach(d=>ops.push(d));
+    recalc();
+    return;
+  }
+  try{
+    const d=JSON.parse(raw);
+    META.forEach(id=>{ const el=document.getElementById(id); if(el&&d.fields&&d.fields[id]!=null) el.value=d.fields[id]; });
+    ops=d.ops||[];
+    recalc();
+    if(d.ts){
+      const t=new Date(d.ts).toLocaleString('es',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});
+      const el=document.getElementById('saved-lbl');
+      if(el) el.textContent='Último guardado: '+t;
+    }
+  }catch(e){ recalc(); }
+}
+
+function clearAll(){
+  if(!confirm('¿Limpiar todo el análisis de Balance / Takt Time?')) return;
+  localStorage.removeItem(KEY); location.reload();
+}
+
+function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;'); }
+
+document.querySelectorAll('input,textarea,select').forEach(el=>el.addEventListener('input',autoSave));
+window.addEventListener('load',loadLocal);
+window.addEventListener('resize',()=>{ renderChart(); });
+</script>
+<script src="branding.js"></script>
+</body>
+</html>
