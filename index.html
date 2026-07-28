@@ -12,24 +12,20 @@
     :root{
       --bg:#0d1117;--surface:#161b22;--surface2:#21262d;--border:#30363d;
       --text:#e6edf3;--muted:#8b949e;--faint:#484f58;
-      --d-color:#4f98a3;   /* Definir  — teal   */
-      --m-color:#d29922;   /* Medir    — amber  */
-      --a-color:#bc8cff;   /* Analizar — purple */
-      --i-color:#3fb950;   /* Mejorar  — green  */
-      --c-color:#f85149;   /* Controlar— red    */
+      --d-color:#4f98a3;
+      --m-color:#d29922;
+      --a-color:#bc8cff;
+      --i-color:#3fb950;
+      --c-color:#f85149;
       --radius:14px;--radius-sm:8px;
     }
     html{scroll-behavior:smooth}
     body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;flex-direction:column}
-
-    /* ── HERO ── */
     .hero{padding:56px 32px 40px;max-width:900px;margin:0 auto;text-align:center}
     .hero-eyebrow{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--d-color);margin-bottom:14px;font-weight:600}
     .hero-title{font-family:'Instrument Serif',serif;font-size:clamp(2rem,5vw,3.2rem);line-height:1.1;margin-bottom:14px}
     .hero-title em{color:var(--d-color);font-style:italic}
     .hero-sub{font-size:14.5px;color:var(--muted);max-width:540px;margin:0 auto 28px;line-height:1.75}
-
-    /* ── DMAIC RIBBON ── */
     .dmaic-ribbon{display:flex;justify-content:center;gap:8px;flex-wrap:wrap;margin-bottom:12px}
     .dmaic-pill{display:flex;align-items:center;gap:6px;padding:6px 16px;border-radius:99px;font-size:12px;font-weight:700;letter-spacing:.06em;text-decoration:none;border:1.5px solid transparent;transition:all .2s;cursor:pointer}
     .dmaic-pill:hover{filter:brightness(1.15)}
@@ -38,35 +34,24 @@
     .dmaic-pill.a{background:rgba(188,140,255,.15);color:var(--a-color);border-color:rgba(188,140,255,.35)}
     .dmaic-pill.i{background:rgba(63,185,80,.15);color:var(--i-color);border-color:rgba(63,185,80,.35)}
     .dmaic-pill.c{background:rgba(248,81,73,.15);color:var(--c-color);border-color:rgba(248,81,73,.35)}
-
-    /* ── STATS BAR ── */
     .stats-bar{display:flex;justify-content:center;gap:32px;padding:20px 32px;border-top:1px solid var(--border);border-bottom:1px solid var(--border);background:var(--surface);flex-wrap:wrap}
     .stat{text-align:center}
     .stat-val{font-size:20px;font-weight:700;color:var(--text)}
     .stat-lbl{font-size:10px;color:var(--muted);margin-top:2px;letter-spacing:.05em;text-transform:uppercase}
-
-    /* ── PHASES ── */
     .phases{max-width:1000px;margin:0 auto;padding:36px 28px 64px;flex:1}
     .phase-header{display:flex;align-items:center;gap:12px;margin:44px 0 16px;scroll-margin-top:20px}
     .phase-badge{display:flex;align-items:center;gap:8px;padding:5px 16px 5px 12px;border-radius:99px;border:1.5px solid currentColor;font-size:12px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;white-space:nowrap}
     .phase-badge .phase-letter{font-size:20px;font-weight:900;line-height:1}
     .phase-desc{font-size:12px;color:var(--muted);font-weight:400;letter-spacing:0;text-transform:none;margin-left:4px}
     .phase-line{flex:1;height:1px;background:var(--border)}
-
-    /* ── TOOL GRID ── */
     .tools-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(252px,1fr));gap:13px}
-
-    /* ── TOOL CARD (active) ── */
     .tool-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px;cursor:pointer;text-decoration:none;color:inherit;display:flex;flex-direction:column;gap:9px;transition:all .22s;position:relative;overflow:hidden}
     .tool-card::after{content:'';position:absolute;inset:0;opacity:0;transition:opacity .22s;background:var(--card-accent,var(--d-color));border-radius:var(--radius)}
     .tool-card:hover{border-color:var(--card-accent,var(--d-color));transform:translateY(-3px);box-shadow:0 10px 28px rgba(0,0,0,.38)}
     .tool-card:hover::after{opacity:.05}
     .tool-card .card-content{position:relative;z-index:1;display:flex;flex-direction:column;gap:9px;height:100%}
-
-    /* ── TOOL CARD (coming soon) ── */
     .tool-card.soon{opacity:.55;cursor:default;pointer-events:none}
     .tool-card.soon:hover{transform:none;box-shadow:none;border-color:var(--border)}
-
     .card-top{display:flex;align-items:flex-start;justify-content:space-between;gap:8px}
     .card-icon{font-size:26px;line-height:1}
     .card-badge{font-size:10px;font-weight:700;letter-spacing:.06em;padding:3px 8px;border-radius:99px;text-transform:uppercase;white-space:nowrap}
@@ -79,18 +64,15 @@
     .card-tag{font-size:10px;font-weight:600;padding:2px 8px;border-radius:99px;background:var(--surface2);color:var(--muted)}
     .card-arrow{font-size:14px;color:var(--muted);transition:transform .2s,color .2s}
     .tool-card:hover .card-arrow{transform:translateX(5px);color:var(--card-accent,var(--d-color))}
-
     @media(max-width:600px){.hero{padding:36px 18px 24px}.phases{padding:20px 16px 40px}.stats-bar{gap:18px}.dmaic-ribbon{gap:6px}.dmaic-pill{font-size:11px;padding:5px 12px}}
   </style>
 </head>
 <body>
 
-<!-- ═══════════ HERO ═══════════ -->
 <section class="hero">
   <div class="hero-eyebrow">Largotek · Yellow Belt · Lean Six Sigma</div>
   <h1 class="hero-title">Lean Six Sigma <em>Suite</em></h1>
   <p class="hero-sub">Plataforma integrada de herramientas para proyectos de mejora continua, organizada por la metodología <strong style="color:var(--d-color)">DMAIC</strong>. Desarrollado por <strong style="color:var(--d-color)">Largotek</strong>.</p>
-
   <div class="dmaic-ribbon">
     <a class="dmaic-pill d" href="#fase-d"><span class="phase-letter">D</span> Definir</a>
     <a class="dmaic-pill m" href="#fase-m"><span class="phase-letter">M</span> Medir</a>
@@ -100,18 +82,16 @@
   </div>
 </section>
 
-<!-- ═══════════ STATS ═══════════ -->
 <div class="stats-bar">
-  <div class="stat"><div class="stat-val">15</div><div class="stat-lbl">Herramientas</div></div>
+  <div class="stat"><div class="stat-val">16</div><div class="stat-lbl">Herramientas</div></div>
   <div class="stat"><div class="stat-val">5</div><div class="stat-lbl">Fases DMAIC</div></div>
   <div class="stat"><div class="stat-val">Yellow Belt</div><div class="stat-lbl">Nivel</div></div>
   <div class="stat"><div class="stat-val">Largotek</div><div class="stat-lbl">Desarrollado por</div></div>
 </div>
 
-<!-- ═══════════ PHASES ═══════════ -->
 <div class="phases">
 
-  <!-- ── D: DEFINIR ── -->
+  <!-- D: DEFINIR -->
   <div id="fase-d" class="phase-header">
     <div class="phase-badge" style="color:var(--d-color)">
       <span class="phase-letter">D</span>
@@ -136,14 +116,14 @@
         <div class="card-footer"><span class="card-tag">Toyota A3</span><span class="card-arrow">→</span></div>
       </div>
     </a>
-    <div class="tool-card soon" style="--card-accent:var(--d-color)">
+    <a class="tool-card" href="sipoc.html" style="--card-accent:var(--d-color)">
       <div class="card-content">
-        <div class="card-top"><div class="card-icon">🔗</div><div class="card-badge badge-soon">Próximamente</div></div>
+        <div class="card-top"><div class="card-icon">🔗</div><div class="card-badge badge-new">✨ Nuevo</div></div>
         <div class="card-title">SIPOC</div>
-        <div class="card-desc">Diagrama Suppliers → Inputs → Process → Outputs → Customers para delimitar el alcance.</div>
-        <div class="card-footer"><span class="card-tag">Scope</span><span class="card-arrow">→</span></div>
+        <div class="card-desc">Diagrama Suppliers → Inputs → Process → Outputs → Customers para delimitar el alcance del proyecto.</div>
+        <div class="card-footer"><span class="card-tag">Scope · Definir</span><span class="card-arrow">→</span></div>
       </div>
-    </div>
+    </a>
     <div class="tool-card soon" style="--card-accent:var(--d-color)">
       <div class="card-content">
         <div class="card-top"><div class="card-icon">🎯</div><div class="card-badge badge-soon">Próximamente</div></div>
@@ -154,7 +134,7 @@
     </div>
   </div>
 
-  <!-- ── M: MEDIR ── -->
+  <!-- M: MEDIR -->
   <div id="fase-m" class="phase-header">
     <div class="phase-badge" style="color:var(--m-color)">
       <span class="phase-letter">M</span>
@@ -205,7 +185,7 @@
     </div>
   </div>
 
-  <!-- ── A: ANALIZAR ── -->
+  <!-- A: ANALIZAR -->
   <div id="fase-a" class="phase-header">
     <div class="phase-badge" style="color:var(--a-color)">
       <span class="phase-letter">A</span>
@@ -264,7 +244,7 @@
     </div>
   </div>
 
-  <!-- ── I: MEJORAR ── -->
+  <!-- I: MEJORAR -->
   <div id="fase-i" class="phase-header">
     <div class="phase-badge" style="color:var(--i-color)">
       <span class="phase-letter">I</span>
@@ -309,7 +289,7 @@
       <div class="card-content">
         <div class="card-top"><div class="card-icon">💡</div><div class="card-badge badge-active">Disponible</div></div>
         <div class="card-title">Propuesta de Mejora — Almacén</div>
-        <div class="card-desc">Documento de propuesta de mejora con análisis de estado actual, soluciones y proyección de beneficios.</div>
+        <div class="card-desc">Documento de propuesta con análisis de estado actual, soluciones y proyección de beneficios.</div>
         <div class="card-footer"><span class="card-tag">Improvement Plan</span><span class="card-arrow">→</span></div>
       </div>
     </a>
@@ -347,7 +327,7 @@
     </div>
   </div>
 
-  <!-- ── C: CONTROLAR ── -->
+  <!-- C: CONTROLAR -->
   <div id="fase-c" class="phase-header">
     <div class="phase-badge" style="color:var(--c-color)">
       <span class="phase-letter">C</span>
@@ -368,7 +348,7 @@
       <div class="card-content">
         <div class="card-top"><div class="card-icon">📌</div><div class="card-badge badge-soon">Próximamente</div></div>
         <div class="card-title">Plan de Control</div>
-        <div class="card-desc">Documento que define qué controlar, cómo medirlo, frecuencia, responsable y reacción ante desviaciones.</div>
+        <div class="card-desc">Define qué controlar, cómo medirlo, frecuencia, responsable y reacción ante desviaciones.</div>
         <div class="card-footer"><span class="card-tag">Control Plan</span><span class="card-arrow">→</span></div>
       </div>
     </div>
