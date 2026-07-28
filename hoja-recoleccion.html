@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Hoja de Recolección de Datos — Largotek</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300..700&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0d1117;--surface:#161b22;--surface2:#21262d;--border:#30363d;
+  --text:#e6edf3;--muted:#8b949e;--faint:#3d444d;
+  --accent:#d29922;--green:#3fb950;--red:#f85149;--blue:#58a6ff;
+  --radius:14px
+}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:13px 28px;border-bottom:1px solid var(--border);background:var(--surface);flex-wrap:wrap;gap:8px}
+.topbar-brand{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:var(--muted);text-decoration:none}
+.topbar-brand span{color:var(--accent)}
+.topbar-right{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:7px 15px;border-radius:8px;border:1.5px solid var(--border);background:transparent;color:var(--muted);font-size:12px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;transition:all .18s}
+.btn:hover{border-color:var(--accent);color:var(--accent)}
+.btn-primary{background:var(--accent);color:#111;border-color:var(--accent)}
+.btn-primary:hover{opacity:.88}
+.btn-green{border-color:var(--green);color:var(--green)}
+.btn-green:hover{background:rgba(63,185,80,.12)}
+.btn-danger:hover{border-color:var(--red);color:var(--red)}
+.hero{padding:32px 32px 20px;max-width:1000px;margin:0 auto}
+.hero-eye{font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--accent);margin-bottom:8px}
+.hero h1{font-family:'Instrument Serif',serif;font-size:clamp(1.5rem,3vw,2.2rem);margin-bottom:6px}
+.hero-sub{font-size:13px;color:var(--muted);line-height:1.7}
+.wrap{max-width:1000px;margin:0 auto;padding:0 32px 80px}
+.saved-lbl{font-size:11px;color:var(--muted)}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:16px;overflow:hidden}
+.card-head{display:flex;align-items:center;gap:10px;padding:13px 18px;border-bottom:1px solid var(--faint);background:var(--surface2)}
+.card-icon{font-size:15px}
+.card-title{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.card-body{padding:16px 18px}
+.meta-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+@media(max-width:700px){.meta-grid{grid-template-columns:1fr 1fr}}
+@media(max-width:440px){.meta-grid{grid-template-columns:1fr}}
+.field{display:flex;flex-direction:column;gap:5px}
+.field label{font-size:10px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--muted)}
+.field input,.field textarea,.field select{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:9px 12px;font-size:13px;color:var(--text);font-family:'Inter',sans-serif;transition:border-color .18s;width:100%}
+.field input:focus,.field textarea:focus,.field select:focus{outline:none;border-color:var(--accent)}
+.field input::placeholder,.field textarea::placeholder{color:var(--faint)}
+
+/* TABS */
+.tabs{display:flex;gap:4px;border-bottom:1px solid var(--border);padding:0 18px;background:var(--surface2)}
+.tab{padding:10px 18px;font-size:12px;font-weight:600;cursor:pointer;color:var(--muted);border-bottom:2px solid transparent;transition:all .18s;background:none;border-top:none;border-left:none;border-right:none;font-family:'Inter',sans-serif}
+.tab.active{color:var(--accent);border-bottom-color:var(--accent)}
+.tab-panel{display:none}
+.tab-panel.active{display:block}
+
+/* DATA TABLE */
+.data-table{width:100%;border-collapse:collapse;font-size:13px}
+.data-table th{text-align:left;padding:8px 10px;background:var(--surface2);color:var(--muted);font-size:11px;font-weight:600;letter-spacing:.04em;white-space:nowrap}
+.data-table td{padding:6px 8px;border-top:1px solid var(--faint);vertical-align:middle}
+.data-table td input,.data-table td select{background:transparent;border:none;color:var(--text);font-size:13px;font-family:'Inter',sans-serif;padding:3px 5px;width:100%}
+.data-table td input:focus{outline:1px solid var(--accent);border-radius:3px;background:var(--surface2)}
+.data-table td.num{text-align:right;font-variant-numeric:tabular-nums;padding-right:12px}
+.data-table td.pct{color:var(--muted);font-size:11px;text-align:right;padding-right:8px}
+.data-table tr.highlight td{background:rgba(210,153,34,.07)}
+.del-btn{background:transparent;border:none;color:var(--faint);cursor:pointer;font-size:14px;padding:0 4px;transition:color .15s}
+.del-btn:hover{color:var(--red)}
+.add-btn{display:inline-flex;align-items:center;gap:5px;margin-top:10px;padding:6px 14px;border-radius:6px;border:1px dashed var(--border);background:transparent;color:var(--muted);font-size:11px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;transition:all .18s}
+.add-btn:hover{border-color:var(--accent);color:var(--accent)}
+
+/* TALLY */
+.tally-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px;padding:16px 18px}
+.tally-card{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:14px 16px;display:flex;flex-direction:column;gap:10px}
+.tally-name{font-size:12px;font-weight:700;color:var(--text);word-break:break-word}
+.tally-count{font-size:32px;font-weight:800;color:var(--accent);font-variant-numeric:tabular-nums;line-height:1}
+.tally-marks{font-size:11px;color:var(--muted);letter-spacing:.05em;min-height:16px;word-break:break-all;line-height:1.5}
+.tally-btns{display:flex;gap:6px}
+.tally-inc{flex:1;padding:8px;border-radius:7px;background:rgba(210,153,34,.15);border:1px solid rgba(210,153,34,.3);color:var(--accent);font-size:18px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif;transition:all .15s}
+.tally-inc:hover{background:rgba(210,153,34,.3)}
+.tally-dec{padding:8px 12px;border-radius:7px;background:var(--faint);border:none;color:var(--muted);font-size:14px;cursor:pointer;font-family:'Inter',sans-serif;transition:all .15s}
+.tally-dec:hover{background:var(--red);color:#fff}
+
+/* STATS */
+.stats-row{display:flex;gap:12px;flex-wrap:wrap;padding:0 0 4px}
+.stat-chip{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:10px 16px;text-align:center;min-width:100px}
+.stat-chip .sv{font-size:20px;font-weight:800;color:var(--text)}
+.stat-chip .sl{font-size:10px;color:var(--muted);margin-top:2px;letter-spacing:.05em;text-transform:uppercase}
+
+/* HISTOGRAM */
+.chart-wrap{position:relative;width:100%;height:300px}
+canvas{display:block;width:100%;height:100%}
+
+/* NOTES */
+.insight-box{background:rgba(210,153,34,.07);border:1px solid rgba(210,153,34,.22);border-radius:10px;padding:14px 18px;margin-top:14px}
+.insight-box label{font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);display:block;margin-bottom:6px}
+.insight-box textarea{width:100%;background:transparent;border:none;color:var(--text);font-family:'Inter',sans-serif;font-size:13px;line-height:1.65;resize:vertical;min-height:60px}
+.insight-box textarea:focus{outline:none}
+.insight-box textarea::placeholder{color:rgba(210,153,34,.3)}
+
+/* TOAST */
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:#1e3a2e;border:1px solid var(--green);color:var(--green);padding:10px 22px;border-radius:99px;font-size:13px;font-weight:600;opacity:0;transition:all .3s;z-index:999;white-space:nowrap}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* PRINT */
+@media print{
+  .topbar,.btn,.add-btn,.del-btn,.tally-btns,.tabs{display:none!important}
+  body{background:#fff;color:#111}
+  .card{border-color:#ccc;background:#fff}
+  .card-head{background:#f3f3f3}
+  .tab-panel{display:block!important}
+  .field input,.field textarea,.data-table td input,.insight-box textarea{background:#f9f9f9;color:#111}
+  .tally-card{background:#f5f5f5;border-color:#ccc}
+}
+</style>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <a href="index.html" class="topbar-brand">← <span>Largotek</span> Lean Suite</a>
+  <div class="topbar-right">
+    <span class="saved-lbl" id="saved-lbl"></span>
+    <button class="btn" onclick="exportCSV()">📥 CSV</button>
+    <button class="btn btn-danger" onclick="clearAll()">🗑 Limpiar</button>
+    <button class="btn" onclick="saveLocal()">💾 Guardar</button>
+    <button class="btn btn-primary" onclick="window.print()">🖨 PDF</button>
+  </div>
+</div>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-eye">📐 Hoja de Recolección de Datos — Largotek Lean Suite</div>
+  <h1>Hoja de Recolección de Datos</h1>
+  <p class="hero-sub">Captura estructurada de datos del proceso. Ingresa categorías, registra conteos con el modo tabla o con marcas de conteo (tally), obtén estadísticas resumen e histograma automático.</p>
+</div>
+
+<div class="wrap">
+
+  <!-- META -->
+  <div class="card">
+    <div class="card-head"><span class="card-icon">🏷️</span><span class="card-title">Identificación del Estudio</span></div>
+    <div class="card-body">
+      <div class="meta-grid">
+        <div class="field"><label>Título del estudio</label><input id="m-title" placeholder="Ej: Defectos por tipo — Línea A"></div>
+        <div class="field"><label>Proceso / Área</label><input id="m-area" placeholder="Ej: Ensamblado, Almacén Central"></div>
+        <div class="field"><label>Responsable</label><input id="m-resp" placeholder="Nombre del analista"></div>
+        <div class="field"><label>Fecha inicio</label><input id="m-date-ini" type="date"></div>
+        <div class="field"><label>Fecha fin</label><input id="m-date-fin" type="date"></div>
+        <div class="field"><label>Turno / Período</label><input id="m-turno" placeholder="Ej: Turno Mañana, Semana 1"></div>
+        <div class="field" style="grid-column:1/-1"><label>Objetivo de la recolección</label>
+          <textarea id="m-objetivo" style="min-height:48px" placeholder="Ej: Identificar los tipos de defectos más frecuentes en la línea A durante el turno de mañana para priorizar acciones correctivas."></textarea>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TABLA DE DATOS -->
+  <div class="card">
+    <div class="card-head"><span class="card-icon">📝</span><span class="card-title">Registro de Datos</span></div>
+    <div class="tabs">
+      <button class="tab active" onclick="switchTab('tabla')">📊 Tabla de Conteos</button>
+      <button class="tab" onclick="switchTab('tally')">✏️ Marcas de Conteo (Tally)</button>
+    </div>
+
+    <!-- TAB: TABLA -->
+    <div id="tab-tabla" class="tab-panel active">
+      <div class="card-body">
+        <table class="data-table" id="data-table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th style="min-width:200px">Categoría / Tipo de Dato</th>
+              <th style="min-width:80px;text-align:right">Conteo</th>
+              <th style="min-width:80px;text-align:right">% del Total</th>
+              <th style="min-width:140px">Turno / Período</th>
+              <th style="min-width:160px">Observación</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="data-body"></tbody>
+        </table>
+        <button class="add-btn" onclick="addRow()">+ Agregar categoría</button>
+      </div>
+    </div>
+
+    <!-- TAB: TALLY -->
+    <div id="tab-tally" class="tab-panel">
+      <div class="tally-grid" id="tally-grid"></div>
+      <div style="padding:0 18px 16px"><button class="add-btn" onclick="addRow()">+ Agregar categoría</button></div>
+    </div>
+  </div>
+
+  <!-- ESTADÍSTICAS -->
+  <div class="card">
+    <div class="card-head"><span class="card-icon">📊</span><span class="card-title">Estadísticas Resumen</span></div>
+    <div class="card-body">
+      <div class="stats-row" id="stats-row">
+        <div class="stat-chip"><div class="sv" id="st-total">0</div><div class="sl">Total Observaciones</div></div>
+        <div class="stat-chip"><div class="sv" id="st-cats">0</div><div class="sl">Categorías</div></div>
+        <div class="stat-chip"><div class="sv" id="st-max-cat">—</div><div class="sl">Categoría Top</div></div>
+        <div class="stat-chip"><div class="sv" id="st-max-val">0</div><div class="sl">Mayor Conteo</div></div>
+        <div class="stat-chip"><div class="sv" id="st-pct-top">0%</div><div class="sl">% Top Categoría</div></div>
+        <div class="stat-chip"><div class="sv" id="st-prom">0</div><div class="sl">Promedio / Categoría</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- HISTOGRAMA -->
+  <div class="card">
+    <div class="card-head"><span class="card-icon">📈</span><span class="card-title">Histograma de Frecuencias</span></div>
+    <div class="card-body">
+      <div class="chart-wrap"><canvas id="hist-canvas"></canvas></div>
+      <div class="insight-box">
+        <label>💡 Análisis / Conclusiones</label>
+        <textarea id="m-conclusion" placeholder="Ej: La categoría 'Defecto de soldadura' representa el 42% del total de defectos. Le sigue 'Rayado superficial' con 28%. Juntas suman el 70% — se recomienda atacar estas dos causas como prioridad en la fase de Analizar."></textarea>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div class="toast" id="toast">✅ Guardado en caché</div>
+
+<script>
+const KEY = 'largotek_hoja_recoleccion';
+const META = ['m-title','m-area','m-resp','m-date-ini','m-date-fin','m-turno','m-objetivo','m-conclusion'];
+let rows = [];
+let currentTab = 'tabla';
+
+/* ── TABS ── */
+function switchTab(t) {
+  currentTab = t;
+  document.querySelectorAll('.tab').forEach((b,i) => b.classList.toggle('active', (i===0&&t==='tabla')||(i===1&&t==='tally')));
+  document.getElementById('tab-tabla').classList.toggle('active', t==='tabla');
+  document.getElementById('tab-tally').classList.toggle('active', t==='tally');
+  if (t==='tally') renderTally();
+}
+
+/* ── ROWS ── */
+function addRow(data={}) {
+  rows.push({ cat: data.cat||'', count: data.count||0, turno: data.turno||'', obs: data.obs||'' });
+  renderAll();
+  autoSave();
+}
+
+function deleteRow(idx) {
+  rows.splice(idx,1);
+  renderAll();
+  autoSave();
+}
+
+function updateField(idx, field, val) {
+  if (rows[idx]===undefined) return;
+  if (field==='count') { rows[idx].count = parseInt(val)||0; }
+  else rows[idx][field] = val;
+  renderAll();
+  autoSave();
+}
+
+/* ── RENDER TABLE ── */
+function renderTable() {
+  const total = rows.reduce((s,r)=>s+(parseInt(r.count)||0),0);
+  const tbody = document.getElementById('data-body');
+  tbody.innerHTML='';
+  rows.forEach((r,i)=>{
+    const cnt = parseInt(r.count)||0;
+    const pct = total>0 ? (cnt/total*100).toFixed(1) : '0.0';
+    const isTop = cnt===Math.max(...rows.map(x=>parseInt(x.count)||0)) && cnt>0;
+    const tr = document.createElement('tr');
+    if(isTop) tr.classList.add('highlight');
+    tr.innerHTML=`
+      <td style="color:var(--muted);text-align:center;font-size:12px;width:32px">${i+1}</td>
+      <td><input value="${esc(r.cat)}" placeholder="Ej: Defecto de soldadura" oninput="updateField(${i},'cat',this.value)"></td>
+      <td class="num"><input type="number" min="0" value="${cnt}" style="text-align:right;max-width:80px" oninput="updateField(${i},'count',this.value)"></td>
+      <td class="pct">${pct}%</td>
+      <td><input value="${esc(r.turno)}" placeholder="Turno / Período" oninput="updateField(${i},'turno',this.value)"></td>
+      <td><input value="${esc(r.obs)}" placeholder="Notas..." oninput="updateField(${i},'obs',this.value)"></td>
+      <td><button class="del-btn" onclick="deleteRow(${i})">✕</button></td>`;
+    tbody.appendChild(tr);
+  });
+}
+
+/* ── RENDER TALLY ── */
+function renderTally() {
+  const grid = document.getElementById('tally-grid');
+  grid.innerHTML='';
+  rows.forEach((r,i)=>{
+    const cnt = parseInt(r.count)||0;
+    const marks = tallyMarks(cnt);
+    const div = document.createElement('div');
+    div.className='tally-card';
+    div.innerHTML=`
+      <div class="tally-name">${esc(r.cat)||'<em style="color:var(--faint)">Sin nombre</em>'}</div>
+      <div class="tally-count">${cnt}</div>
+      <div class="tally-marks">${marks}</div>
+      <div class="tally-btns">
+        <button class="tally-inc" onclick="tallyInc(${i})">+</button>
+        <button class="tally-dec" onclick="tallyDec(${i})">−</button>
+      </div>`;
+    grid.appendChild(div);
+  });
+}
+
+function tallyMarks(n) {
+  if(n===0) return '';
+  let s='', groups=Math.floor(n/5), rem=n%5;
+  for(let i=0;i<groups;i++) s+='<span style="margin-right:6px">𝍸𝍸𝍸𝍸𝍸</span>';
+  for(let i=0;i<rem;i++) s+='|';
+  return s || '';
+}
+
+function tallyInc(i){ rows[i].count=(parseInt(rows[i].count)||0)+1; renderAll(); autoSave(); }
+function tallyDec(i){ rows[i].count=Math.max(0,(parseInt(rows[i].count)||0)-1); renderAll(); autoSave(); }
+
+/* ── STATS ── */
+function renderStats() {
+  const counts = rows.map(r=>parseInt(r.count)||0);
+  const total = counts.reduce((s,c)=>s+c,0);
+  const maxVal = counts.length>0?Math.max(...counts):0;
+  const maxIdx = counts.indexOf(maxVal);
+  const topCat = maxIdx>=0?(rows[maxIdx].cat||'—'):'—';
+  const pctTop = total>0?(maxVal/total*100).toFixed(1)+'%':'0%';
+  const prom = rows.length>0?(total/rows.length).toFixed(1):0;
+  document.getElementById('st-total').textContent = total;
+  document.getElementById('st-cats').textContent = rows.length;
+  document.getElementById('st-max-cat').textContent = topCat.length>10?topCat.substring(0,9)+'…':topCat;
+  document.getElementById('st-max-val').textContent = maxVal;
+  document.getElementById('st-pct-top').textContent = pctTop;
+  document.getElementById('st-prom').textContent = prom;
+}
+
+/* ── HISTOGRAM ── */
+function renderHistogram() {
+  const canvas = document.getElementById('hist-canvas');
+  const dpr = window.devicePixelRatio||1;
+  canvas.width = canvas.offsetWidth*dpr;
+  canvas.height = canvas.offsetHeight*dpr;
+  const ctx = canvas.getContext('2d');
+  ctx.scale(dpr,dpr);
+  const W=canvas.offsetWidth, H=canvas.offsetHeight;
+  ctx.clearRect(0,0,W,H);
+
+  const data = rows.map(r=>({cat:r.cat||'Sin nombre',count:parseInt(r.count)||0})).filter(r=>r.count>0);
+  if(data.length===0){
+    ctx.fillStyle='#8b949e'; ctx.font='13px Inter,sans-serif'; ctx.textAlign='center';
+    ctx.fillText('Agrega categorías y conteos para ver el histograma',W/2,H/2); return;
+  }
+  const maxVal=Math.max(...data.map(d=>d.count));
+  const total=data.reduce((s,d)=>s+d.count,0);
+  const pad={top:30,right:20,bottom:56,left:50};
+  const cW=W-pad.left-pad.right, cH=H-pad.top-pad.bottom;
+  const barW=Math.min(cW/data.length*0.7,60);
+  const gap=cW/data.length;
+
+  // Grid
+  const steps=5;
+  for(let i=0;i<=steps;i++){
+    const y=pad.top+cH-(cH*i/steps);
+    ctx.strokeStyle='#30363d'; ctx.lineWidth=1;
+    ctx.beginPath(); ctx.moveTo(pad.left,y); ctx.lineTo(pad.left+cW,y); ctx.stroke();
+    ctx.fillStyle='#8b949e'; ctx.font='10px Inter,sans-serif'; ctx.textAlign='right';
+    ctx.fillText(Math.round(maxVal*i/steps),pad.left-6,y+4);
+  }
+
+  // Bars
+  const colors=['#d29922','#58a6ff','#3fb950','#bc8cff','#f85149','#e8c44a','#4f98a3','#ffa657'];
+  data.forEach((d,i)=>{
+    const bH=(d.count/maxVal)*cH;
+    const x=pad.left+i*gap+(gap-barW)/2;
+    const y=pad.top+cH-bH;
+    ctx.fillStyle=colors[i%colors.length];
+    if(ctx.roundRect){ctx.beginPath();ctx.roundRect(x,y,barW,bH,[4,4,0,0]);ctx.fill();}
+    else{ctx.fillRect(x,y,barW,bH);}
+    // Count label
+    ctx.fillStyle='#e6edf3'; ctx.font='bold 11px Inter,sans-serif'; ctx.textAlign='center';
+    if(bH>16) ctx.fillText(d.count,x+barW/2,y+(bH>28?16:bH/2+4));
+    // % label
+    ctx.fillStyle='#8b949e'; ctx.font='10px Inter,sans-serif';
+    ctx.fillText((d.count/total*100).toFixed(0)+'%',x+barW/2,y-6);
+    // X label
+    ctx.fillStyle='#8b949e'; ctx.font='10px Inter,sans-serif';
+    const lbl=d.cat.length>12?d.cat.substring(0,11)+'…':d.cat;
+    ctx.save(); ctx.translate(x+barW/2,pad.top+cH+14); ctx.rotate(-0.4);
+    ctx.textAlign='right'; ctx.fillText(lbl,0,0); ctx.restore();
+  });
+
+  // Y axis label
+  ctx.save(); ctx.translate(12,pad.top+cH/2); ctx.rotate(-Math.PI/2);
+  ctx.fillStyle='#8b949e'; ctx.font='10px Inter,sans-serif'; ctx.textAlign='center';
+  ctx.fillText('Frecuencia (conteo)',0,0); ctx.restore();
+}
+
+function renderAll(){
+  renderTable();
+  renderStats();
+  renderHistogram();
+  if(currentTab==='tally') renderTally();
+}
+
+/* ── CSV EXPORT ── */
+function exportCSV() {
+  const title = document.getElementById('m-title').value||'hoja-recoleccion';
+  const total = rows.reduce((s,r)=>s+(parseInt(r.count)||0),0);
+  let csv='Categoría,Conteo,% del Total,Turno/Período,Observación\n';
+  rows.forEach(r=>{
+    const cnt=parseInt(r.count)||0;
+    const pct=total>0?(cnt/total*100).toFixed(1)+'%':'0%';
+    csv+=`"${r.cat}",${cnt},${pct},"${r.turno}","${r.obs}"\n`;
+  });
+  csv+=`\nTotal,${total},100%,,\n`;
+  const blob=new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8;'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download=(title.replace(/\s+/g,'-').toLowerCase()||'hoja-recoleccion')+'.csv';
+  a.click();
+}
+
+/* ── PERSIST ── */
+let saveTimer;
+function autoSave(){ clearTimeout(saveTimer); saveTimer=setTimeout(saveLocal,1000); }
+
+function saveLocal(){
+  const d={ fields:{}, rows:rows, ts:new Date().toISOString() };
+  META.forEach(id=>{ const el=document.getElementById(id); if(el) d.fields[id]=el.value; });
+  localStorage.setItem(KEY,JSON.stringify(d));
+  const t=new Date().toLocaleTimeString('es',{hour:'2-digit',minute:'2-digit'});
+  const el=document.getElementById('saved-lbl');
+  if(el) el.textContent='✓ Guardado '+t;
+  const toast=document.getElementById('toast');
+  toast.classList.add('show'); setTimeout(()=>toast.classList.remove('show'),2200);
+}
+
+function loadLocal(){
+  const raw=localStorage.getItem(KEY);
+  if(!raw){
+    addRow({cat:'Defecto de soldadura',count:42,turno:'T. Mañana',obs:''});
+    addRow({cat:'Rayado superficial',count:28,turno:'T. Mañana',obs:''});
+    addRow({cat:'Error de ensamble',count:17,turno:'T. Tarde',obs:''});
+    addRow({cat:'Faltante de pieza',count:9,turno:'T. Tarde',obs:''});
+    addRow({cat:'Otro',count:4,turno:'',obs:''});
+    return;
+  }
+  try{
+    const d=JSON.parse(raw);
+    META.forEach(id=>{ const el=document.getElementById(id); if(el&&d.fields&&d.fields[id]!=null) el.value=d.fields[id]; });
+    rows=d.rows||[];
+    if(rows.length===0){ addRow({cat:'Categoría 1',count:0}); return; }
+    renderAll();
+    if(d.ts){
+      const t=new Date(d.ts).toLocaleString('es',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});
+      const el=document.getElementById('saved-lbl');
+      if(el) el.textContent='Último guardado: '+t;
+    }
+  }catch(e){ addRow({cat:'Error al cargar',count:0}); }
+}
+
+function clearAll(){
+  if(!confirm('¿Limpiar toda la hoja de recolección de datos?')) return;
+  localStorage.removeItem(KEY); location.reload();
+}
+
+function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;'); }
+
+document.querySelectorAll('input,textarea,select').forEach(el=>el.addEventListener('input',autoSave));
+window.addEventListener('load',loadLocal);
+window.addEventListener('resize',renderHistogram);
+</script>
+<script src="branding.js"></script>
+</body>
+</html>
