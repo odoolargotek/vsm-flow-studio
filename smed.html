@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>SMED — Cambios Rápidos — Largotek Lean Suite</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300..700&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0d1117;--surface:#161b22;--surface2:#21262d;--border:#30363d;
+  --text:#e6edf3;--muted:#8b949e;--faint:#3d444d;
+  --accent:#3fb950;--yellow:#e8c44a;--red:#f85149;--orange:#ffa657;--blue:#4f98a3;
+  --i-color:#3fb950;
+  --radius:14px;
+}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+
+/* TOPBAR */
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:13px 28px;border-bottom:1px solid var(--border);background:var(--surface)}
+.topbar-brand{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:var(--muted);text-decoration:none}
+.topbar-brand span{color:var(--accent)}
+.topbar-right{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:7px 15px;border-radius:8px;border:1.5px solid var(--border);background:transparent;color:var(--muted);font-size:12px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;transition:all .18s}
+.btn:hover{border-color:var(--accent);color:var(--accent)}
+.btn-primary{background:var(--accent);color:#fff;border-color:var(--accent)}
+.btn-primary:hover{background:#38a847}
+.btn-danger:hover{border-color:var(--red);color:var(--red)}
+.saved-lbl{font-size:11px;color:var(--muted)}
+
+/* HERO */
+.hero{padding:30px 32px 18px;max-width:1100px;margin:0 auto}
+.hero-eye{font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--i-color);margin-bottom:8px}
+.hero h1{font-family:'Instrument Serif',serif;font-size:clamp(1.4rem,2.8vw,2rem);margin-bottom:6px}
+.hero-sub{font-size:13px;color:var(--muted);line-height:1.7;max-width:760px}
+
+.wrap{max-width:1100px;margin:0 auto;padding:8px 28px 80px}
+
+/* CARD */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:20px;overflow:hidden}
+.card-head{display:flex;align-items:center;gap:10px;padding:12px 18px;border-bottom:1px solid var(--faint);background:var(--surface2)}
+.card-icon{font-size:15px}
+.card-title{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.card-sub{font-size:11px;color:var(--faint);margin-left:auto}
+.card-body{padding:16px 18px}
+
+/* FIELD */
+.field{display:flex;flex-direction:column;gap:5px}
+.field label{font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.field input,.field textarea,.field select{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:9px 12px;font-size:13px;color:var(--text);font-family:'Inter',sans-serif;transition:border-color .18s;width:100%}
+.field input:focus,.field textarea:focus,.field select:focus{outline:none;border-color:var(--accent)}
+.field input::placeholder,.field textarea::placeholder{color:var(--faint)}
+.three-col{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media(max-width:640px){.three-col,.two-col{grid-template-columns:1fr}}
+
+/* SUMMARY CHIPS */
+.chips-row{display:flex;flex-wrap:wrap;gap:8px;padding:6px 0}
+.chip{display:flex;align-items:center;gap:6px;padding:5px 14px;border-radius:99px;font-size:11px;font-weight:700;border:1.5px solid currentColor}
+.chip-val{font-size:18px;font-weight:900;line-height:1}
+
+/* FASES SMED */
+.phases-legend{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:16px}
+.phase-pill{display:flex;align-items:center;gap:6px;padding:5px 14px;border-radius:99px;font-size:11px;font-weight:700;border:1.5px solid transparent}
+.pill-int{background:rgba(248,81,73,.15);color:var(--red);border-color:rgba(248,81,73,.35)}
+.pill-ext{background:rgba(63,185,80,.15);color:var(--accent);border-color:rgba(63,185,80,.35)}
+.pill-conv{background:rgba(232,196,74,.15);color:var(--yellow);border-color:rgba(232,196,74,.35)}
+
+/* TABLE */
+.smed-wrap{overflow-x:auto;margin-bottom:8px}
+.smed-table{width:100%;border-collapse:collapse;font-size:12px;min-width:820px}
+.smed-table th{text-align:left;padding:8px 10px;background:var(--surface2);color:var(--muted);font-size:10px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;border-bottom:1px solid var(--border);white-space:nowrap}
+.smed-table td{padding:5px 6px;border-top:1px solid var(--faint);vertical-align:middle}
+.smed-table tr:hover td{background:rgba(255,255,255,.018)}
+.smed-table td input,.smed-table td textarea{width:100%;background:transparent;border:none;color:var(--text);font-size:12px;font-family:'Inter',sans-serif;padding:3px 4px;resize:none}
+.smed-table td input:focus,.smed-table td textarea:focus{outline:1px solid var(--accent);border-radius:3px;background:var(--surface2)}
+.smed-table td input::placeholder,.smed-table td textarea::placeholder{color:var(--faint)}
+.smed-table td select{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:5px;color:var(--text);font-size:11px;font-family:'Inter',sans-serif;padding:4px 5px}
+.smed-table td select:focus{outline:none;border-color:var(--accent)}
+
+/* TIPO BADGE */
+.tipo-int{background:rgba(248,81,73,.18);color:var(--red);padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700}
+.tipo-ext{background:rgba(63,185,80,.18);color:var(--accent);padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700}
+.tipo-conv{background:rgba(232,196,74,.18);color:var(--yellow);padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700}
+
+/* ROW NUM */
+.row-num{text-align:center;color:var(--muted);font-size:11px;font-weight:700}
+
+/* DEL BTN */
+.del-btn{background:transparent;border:none;color:var(--faint);cursor:pointer;font-size:13px;padding:2px 5px;transition:color .15s;display:block;margin:0 auto}
+.del-btn:hover{color:var(--red)}
+.add-btn{display:inline-flex;align-items:center;gap:5px;margin-top:8px;padding:6px 14px;border-radius:6px;border:1px dashed var(--border);background:transparent;color:var(--muted);font-size:11px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;transition:all .18s}
+.add-btn:hover{border-color:var(--accent);color:var(--accent)}
+
+/* TIME BAR */
+.bar-wrap{width:100%;background:var(--faint);border-radius:4px;height:8px;overflow:hidden;min-width:60px}
+.bar-fill{height:8px;border-radius:4px;transition:width .3s}
+
+/* WATERFALL / GANTT */
+.gantt-wrap{overflow-x:auto}
+.gantt-svg{display:block;width:100%;font-family:'Inter',sans-serif}
+
+/* OPORTUNIDADES */
+.opp-list{display:flex;flex-direction:column;gap:8px}
+.opp-card{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:12px 14px;display:grid;grid-template-columns:1fr auto;gap:8px;align-items:start}
+.opp-card.opp-high{border-left:3px solid var(--red)}
+.opp-card.opp-mid{border-left:3px solid var(--yellow)}
+.opp-card.opp-low{border-left:3px solid var(--accent)}
+.opp-title{font-size:12px;font-weight:700;margin-bottom:3px}
+.opp-desc{font-size:11px;color:var(--muted)}
+.opp-saving{font-size:12px;font-weight:700;color:var(--accent);white-space:nowrap;text-align:right}
+
+/* TOAST */
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:#1e2a3a;border:1px solid var(--accent);color:var(--accent);padding:10px 22px;border-radius:99px;font-size:13px;font-weight:600;opacity:0;transition:all .3s;z-index:999}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* PRINT */
+@media print{
+  .topbar,.btn,.add-btn,.del-btn{display:none!important}
+  body{background:#fff;color:#111}
+  .card,.opp-card{background:#fff!important;border-color:#ccc!important}
+}
+</style>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <a href="index.html" class="topbar-brand">← <span>Largotek</span> Lean Suite</a>
+  <div class="topbar-right">
+    <span class="saved-lbl" id="saved-lbl"></span>
+    <button class="btn btn-danger" onclick="clearAll()">🗑 Limpiar</button>
+    <button class="btn" onclick="exportCSV()">📊 CSV</button>
+    <button class="btn" onclick="saveLocal()">💾 Guardar</button>
+    <button class="btn btn-primary" onclick="window.print()">🖨 PDF</button>
+  </div>
+</div>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-eye">🟢 Mejorar — Largotek Lean Suite</div>
+  <h1>SMED — Cambios Rápidos</h1>
+  <p class="hero-sub">Separa actividades <strong style="color:var(--red)">Internas</strong> (máquina parada) de <strong style="color:var(--accent)">Externas</strong> (máquina corriendo) y convierte las internas en externas para reducir el tiempo de cambio. Meta: <strong style="color:var(--yellow)">&lt; 10 minutos</strong>.</p>
+</div>
+
+<div class="wrap">
+
+  <!-- INFO -->
+  <div class="card">
+    <div class="card-head"><span class="card-icon">🏷️</span><span class="card-title">Identificación del Cambio</span></div>
+    <div class="card-body">
+      <div class="three-col">
+        <div class="field"><label>Máquina / Línea</label><input id="p-maq" placeholder="Ej: Prensa P-04" oninput="autoSave()"></div>
+        <div class="field"><label>Producto Anterior</label><input id="p-from" placeholder="Ej: Modelo A" oninput="autoSave()"></div>
+        <div class="field"><label>Producto Nuevo</label><input id="p-to" placeholder="Ej: Modelo B" oninput="autoSave()"></div>
+        <div class="field"><label>Responsable SMED</label><input id="p-owner" placeholder="Nombre" oninput="autoSave()"></div>
+        <div class="field"><label>Fecha del estudio</label><input id="p-date" type="date" oninput="autoSave()"></div>
+        <div class="field"><label>Turno</label>
+          <select id="p-turno" onchange="autoSave()">
+            <option value="">-- Seleccionar --</option>
+            <option>1° Turno</option><option>2° Turno</option><option>3° Turno</option>
+          </select>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RESUMEN -->
+  <div class="card">
+    <div class="card-head"><span class="card-icon">📊</span><span class="card-title">Resumen del Cambio</span><span class="card-sub">Calculado automáticamente</span></div>
+    <div class="card-body">
+      <div class="chips-row">
+        <div class="chip" style="color:var(--muted)"><span class="chip-val" id="s-total">0</span> seg Tiempo Total Actual</div>
+        <div class="chip" style="color:var(--red)"><span class="chip-val" id="s-int">0</span> seg Internas</div>
+        <div class="chip" style="color:var(--accent)"><span class="chip-val" id="s-ext">0</span> seg Externas</div>
+        <div class="chip" style="color:var(--yellow)"><span class="chip-val" id="s-conv">0</span> seg Convertibles</div>
+        <div class="chip" style="color:var(--blue)"><span class="chip-val" id="s-meta">0</span> seg Tiempo Meta</div>
+        <div class="chip" style="color:var(--accent)"><span class="chip-val" id="s-saving">0</span> % Reducción</div>
+      </div>
+      <div style="margin-top:10px;font-size:11px;color:var(--muted)">Tiempo total en minutos: <strong id="s-total-min" style="color:var(--text)">0 min</strong> &nbsp;→&nbsp; Meta: <strong id="s-meta-min" style="color:var(--accent)">0 min</strong></div>
+    </div>
+  </div>
+
+  <!-- TABLA ACTIVIDADES -->
+  <div class="card">
+    <div class="card-head"><span class="card-icon">⏱️</span><span class="card-title">Registro de Actividades del Cambio</span><span class="card-sub">Interno = máquina parada · Externo = máquina en marcha</span></div>
+    <div class="card-body">
+      <div class="phases-legend">
+        <div class="phase-pill pill-int">🔴 Interna — Solo con máquina parada</div>
+        <div class="phase-pill pill-ext">🟢 Externa — Puede hacerse en marcha</div>
+        <div class="phase-pill pill-conv">🟡 Convertible — Puede pasar a Externa</div>
+      </div>
+      <div class="smed-wrap">
+        <table class="smed-table" id="smed-table">
+          <thead>
+            <tr>
+              <th style="width:28px">#</th>
+              <th style="min-width:160px">Actividad / Tarea</th>
+              <th style="min-width:90px">Tipo actual</th>
+              <th style="width:80px">Tiempo (seg)</th>
+              <th style="width:120px">Barra de tiempo</th>
+              <th style="min-width:120px">Oportunidad de mejora</th>
+              <th style="min-width:90px">Tipo propuesto</th>
+              <th style="width:80px">T. propuesto (seg)</th>
+              <th style="min-width:80px">Responsable</th>
+              <th style="min-width:72px">Fecha límite</th>
+              <th style="width:28px"></th>
+            </tr>
+          </thead>
+          <tbody id="smed-body"></tbody>
+        </table>
+      </div>
+      <button class="add-btn" onclick="addRow()">+ Agregar actividad</button>
+    </div>
+  </div>
+
+  <!-- DIAGRAMA DE TIEMPOS (Waterfall) -->
+  <div class="card">
+    <div class="card-head"><span class="card-icon">📊</span><span class="card-title">Diagrama de Tiempo — Actual vs. Propuesto</span><span class="card-sub">Barras apiladas por actividad</span></div>
+    <div class="card-body">
+      <div class="gantt-wrap" id="gantt-wrap">
+        <svg class="gantt-svg" id="gantt-svg" height="60"><text x="12" y="30" fill="#484f58" font-size="12">Agrega actividades para ver el diagrama.</text></svg>
+      </div>
+    </div>
+  </div>
+
+  <!-- OPORTUNIDADES GENERADAS -->
+  <div class="card">
+    <div class="card-head"><span class="card-icon">💡</span><span class="card-title">Oportunidades de Mejora Detectadas</span><span class="card-sub">Actividades convertibles o mejorables</span></div>
+    <div class="card-body">
+      <div class="opp-list" id="opp-list"><p style="font-size:12px;color:var(--muted)">Las oportunidades aparecerán aquí cuando marques actividades como Convertibles o ingreses una oportunidad.</p></div>
+    </div>
+  </div>
+
+  <!-- GUIA METODOLOGIA -->
+  <div class="card">
+    <div class="card-head"><span class="card-icon">📖</span><span class="card-title">Guía Metodológica SMED (4 Pasos)</span></div>
+    <div class="card-body">
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px">
+        <div style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:14px">
+          <div style="font-size:22px;margin-bottom:6px">🎥</div>
+          <div style="font-size:11px;font-weight:800;color:var(--muted);letter-spacing:.06em;text-transform:uppercase;margin-bottom:5px">Paso 1 — Observar y Cronometrar</div>
+          <div style="font-size:11.5px;color:var(--muted);line-height:1.6">Filma el cambio completo y registra cada actividad con su duración real. No improvises: trabaja con datos.</div>
+        </div>
+        <div style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:14px">
+          <div style="font-size:22px;margin-bottom:6px">🔴</div>
+          <div style="font-size:11px;font-weight:800;color:var(--red);letter-spacing:.06em;text-transform:uppercase;margin-bottom:5px">Paso 2 — Separar Internas / Externas</div>
+          <div style="font-size:11.5px;color:var(--muted);line-height:1.6">Clasifica cada actividad: ¿requiere que la máquina esté parada? Si no, es externa. Este paso solo ya reduce el tiempo hasta un 50%.</div>
+        </div>
+        <div style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:14px">
+          <div style="font-size:22px;margin-bottom:6px">🟡</div>
+          <div style="font-size:11px;font-weight:800;color:var(--yellow);letter-spacing:.06em;text-transform:uppercase;margin-bottom:5px">Paso 3 — Convertir Internas en Externas</div>
+          <div style="font-size:11.5px;color:var(--muted);line-height:1.6">Busca actividades internas que puedan hacerse antes o después del paro: preparó, herramientas, materiales, fixtures.</div>
+        </div>
+        <div style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:14px">
+          <div style="font-size:22px;margin-bottom:6px">⚡</div>
+          <div style="font-size:11px;font-weight:800;color:var(--accent);letter-spacing:.06em;text-transform:uppercase;margin-bottom:5px">Paso 4 — Optimizar Todo</div>
+          <div style="font-size:11.5px;color:var(--muted);line-height:1.6">Elimina ajustes con utillajes rápidos, estandariza secuencias, reduce desplazamientos y paralleliza tareas para llegar a &lt;10 min.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- NOTAS -->
+  <div class="card">
+    <div class="card-head"><span class="card-icon">📝</span><span class="card-title">Notas y Observaciones</span></div>
+    <div class="card-body">
+      <div class="field"><textarea id="p-notes" rows="3" placeholder="Observaciones del estudio, próxima revisión, restricciones..." oninput="autoSave()"></textarea></div>
+    </div>
+  </div>
+
+</div>
+<div class="toast" id="toast">✅ Guardado en caché</div>
+
+<script>
+const KEY = 'largotek_smed';
+const INFO = ['p-maq','p-from','p-to','p-owner','p-date','p-turno','p-notes'];
+
+let rowCount = 0;
+
+function tipoClass(t){
+  if(t==='INT') return 'tipo-int';
+  if(t==='EXT') return 'tipo-ext';
+  return 'tipo-conv';
+}
+function tipoLabel(t){
+  if(t==='INT') return '🔴 Interna';
+  if(t==='EXT') return '🟢 Externa';
+  return '🟡 Convertible';
+}
+
+function addRow(d={}){
+  rowCount++;
+  const tbody = document.getElementById('smed-body');
+  const tr = document.createElement('tr');
+  tr.innerHTML = `
+    <td class="row-num">${tbody.children.length+1}</td>
+    <td><input placeholder="Ej: Buscar herramientas" value="${d.act||''}" oninput="updateAll()"></td>
+    <td>
+      <select class="sel-tipo" onchange="updateAll()">
+        <option value="INT" ${d.tipo==='INT'||!d.tipo?'selected':''}>Interna</option>
+        <option value="EXT" ${d.tipo==='EXT'?'selected':''}>Externa</option>
+        <option value="CONV" ${d.tipo==='CONV'?'selected':''}>Convertible</option>
+      </select>
+    </td>
+    <td><input type="number" min="0" class="inp-t" placeholder="seg" value="${d.t||''}" oninput="updateAll()"></td>
+    <td><div class="bar-wrap"><div class="bar-fill bar-act" style="width:0%;background:var(--red)"></div></div></td>
+    <td><input placeholder="Ej: Preparar en máquina corriendo" value="${d.opp||''}" oninput="autoSave()"></td>
+    <td>
+      <select class="sel-prop" onchange="updateAll()">
+        <option value="INT" ${d.prop==='INT'?'selected':''}>Interna</option>
+        <option value="EXT" ${d.prop==='EXT'||!d.prop?'selected':''}>Externa</option>
+        <option value="CONV" ${d.prop==='CONV'?'selected':''}>Convertible</option>
+      </select>
+    </td>
+    <td><input type="number" min="0" class="inp-tp" placeholder="seg" value="${d.tp||''}" oninput="updateAll()"></td>
+    <td><input placeholder="Responsable" value="${d.resp||''}" oninput="autoSave()"></td>
+    <td><input type="date" value="${d.due||''}" oninput="autoSave()"></td>
+    <td><button class="del-btn" onclick="this.closest('tr').remove();renumber();updateAll()" title="Eliminar">✕</button></td>
+  `;
+  tbody.appendChild(tr);
+  updateAll();
+}
+
+function renumber(){
+  document.querySelectorAll('#smed-body tr').forEach((tr,i)=>{
+    const c=tr.querySelector('.row-num');if(c)c.textContent=i+1;
+  });
+}
+
+function updateAll(){
+  const rows = [...document.querySelectorAll('#smed-body tr')];
+  let total=0,totalInt=0,totalExt=0,totalConv=0,totalMeta=0;
+  const maxT = Math.max(...rows.map(tr=>parseInt(tr.querySelector('.inp-t')?.value)||0), 1);
+
+  rows.forEach(tr=>{
+    const t = parseInt(tr.querySelector('.inp-t')?.value)||0;
+    const tp = parseInt(tr.querySelector('.inp-tp')?.value)||t;
+    const tipo = tr.querySelector('.sel-tipo')?.value||'INT';
+    total+=t;
+    if(tipo==='INT') totalInt+=t;
+    else if(tipo==='EXT') totalExt+=t;
+    else totalConv+=t;
+    totalMeta+=tp;
+    // bar
+    const bar = tr.querySelector('.bar-act');
+    if(bar){
+      bar.style.width = Math.round(t/maxT*100)+'%';
+      bar.style.background = tipo==='INT'?'var(--red)':tipo==='EXT'?'var(--accent)':'var(--yellow)';
+    }
+  });
+
+  document.getElementById('s-total').textContent = total;
+  document.getElementById('s-int').textContent = totalInt;
+  document.getElementById('s-ext').textContent = totalExt;
+  document.getElementById('s-conv').textContent = totalConv;
+  document.getElementById('s-meta').textContent = totalMeta;
+  const saving = total>0?Math.round((total-totalMeta)/total*100):0;
+  document.getElementById('s-saving').textContent = saving>0?saving:0;
+  document.getElementById('s-total-min').textContent = (total/60).toFixed(1)+' min';
+  document.getElementById('s-meta-min').textContent = (totalMeta/60).toFixed(1)+' min';
+
+  renderGantt(rows);
+  renderOpps(rows);
+  autoSave();
+}
+
+function renderGantt(rows){
+  const svg = document.getElementById('gantt-svg');
+  if(!rows.length){svg.innerHTML='<text x="12" y="30" fill="#484f58" font-size="12">Agrega actividades para ver el diagrama.</text>';svg.setAttribute('height',60);return;}
+  const totalT = rows.reduce((s,tr)=>s+(parseInt(tr.querySelector('.inp-t')?.value)||0),0);
+  if(!totalT){svg.innerHTML='<text x="12" y="30" fill="#484f58" font-size="12">Ingresa tiempos para ver el diagrama.</text>';svg.setAttribute('height',60);return;}
+  const W = Math.max(svg.parentElement.offsetWidth-20,400);
+  const BAR_H = 28, PAD=8, LABEL_W=0;
+  const totalH = (BAR_H+PAD)*2+40;
+  svg.setAttribute('height',totalH);
+  svg.setAttribute('viewBox',`0 0 ${W} ${totalH}`);
+  let html='';
+  // Row 1: actual
+  html+=`<text x="0" y="16" fill="#8b949e" font-size="10" font-weight="700" letter-spacing=".06em">ACTUAL</text>`;
+  let cx=0;
+  rows.forEach((tr,i)=>{
+    const t=parseInt(tr.querySelector('.inp-t')?.value)||0;
+    const tipo=tr.querySelector('.sel-tipo')?.value||'INT';
+    const color=tipo==='INT'?'#f85149':tipo==='EXT'?'#3fb950':'#e8c44a';
+    const w=Math.max((t/totalT)*(W-2),1);
+    html+=`<rect x="${cx}" y="20" width="${w}" height="${BAR_H}" fill="${color}" rx="3" opacity=".85"><title>${tr.querySelectorAll('input')[0]?.value||'Actividad '+(i+1)}: ${t}s</title></rect>`;
+    if(w>22) html+=`<text x="${cx+4}" y="${20+BAR_H/2+4}" fill="#0d1117" font-size="9" font-weight="700">${t}s</text>`;
+    cx+=w;
+  });
+  // Row 2: propuesto
+  const totalTP=rows.reduce((s,tr)=>s+(parseInt(tr.querySelector('.inp-tp')?.value)||0),0)||totalT;
+  html+=`<text x="0" y="${20+BAR_H+PAD+14}" fill="#8b949e" font-size="10" font-weight="700" letter-spacing=".06em">PROPUESTO</text>`;
+  cx=0;
+  rows.forEach((tr,i)=>{
+    const tp=parseInt(tr.querySelector('.inp-tp')?.value)||parseInt(tr.querySelector('.inp-t')?.value)||0;
+    const prop=tr.querySelector('.sel-prop')?.value||'EXT';
+    const color=prop==='INT'?'#f85149':prop==='EXT'?'#3fb950':'#e8c44a';
+    const w=Math.max((tp/totalT)*(W-2),1);
+    html+=`<rect x="${cx}" y="${20+BAR_H+PAD+18}" width="${w}" height="${BAR_H}" fill="${color}" rx="3" opacity=".85"><title>${tr.querySelectorAll('input')[0]?.value||'Actividad '+(i+1)}: ${tp}s</title></rect>`;
+    if(w>22) html+=`<text x="${cx+4}" y="${20+BAR_H+PAD+18+BAR_H/2+4}" fill="#0d1117" font-size="9" font-weight="700">${tp}s</text>`;
+    cx+=w;
+  });
+  svg.innerHTML=html;
+}
+
+function renderOpps(rows){
+  const el=document.getElementById('opp-list');
+  const opps=rows.filter(tr=>{
+    const tipo=tr.querySelector('.sel-tipo')?.value;
+    const opp=tr.querySelectorAll('input')[4]?.value;
+    return tipo==='CONV'||opp;
+  });
+  if(!opps.length){el.innerHTML='<p style="font-size:12px;color:var(--muted)">Las oportunidades aparecerán aquí cuando marques actividades como Convertibles o ingreses una oportunidad.</p>';return;}
+  el.innerHTML=opps.map(tr=>{
+    const act=tr.querySelectorAll('input')[0]?.value||'Actividad';
+    const opp=tr.querySelectorAll('input')[4]?.value||'Convertir a actividad externa';
+    const t=parseInt(tr.querySelector('.inp-t')?.value)||0;
+    const tp=parseInt(tr.querySelector('.inp-tp')?.value)||t;
+    const saving=t-tp;
+    const tipo=tr.querySelector('.sel-tipo')?.value;
+    const cls=tipo==='CONV'?'opp-high':'opp-mid';
+    return `<div class="opp-card ${cls}">
+      <div><div class="opp-title">${act}</div><div class="opp-desc">${opp}</div></div>
+      <div class="opp-saving">${saving>0?'−'+saving+'s ahorro':t+'s'}</div>
+    </div>`;
+  }).join('');
+}
+
+// ─ SAVE / LOAD ─
+let saveTimer;
+function autoSave(){clearTimeout(saveTimer);saveTimer=setTimeout(saveLocal,900);}
+
+function saveLocal(){
+  const data={fields:{},rows:[]};
+  INFO.forEach(id=>{const el=document.getElementById(id);if(el)data.fields[id]=el.value;});
+  document.querySelectorAll('#smed-body tr').forEach(tr=>{
+    const inps=tr.querySelectorAll('input');
+    const sels=tr.querySelectorAll('select');
+    data.rows.push({act:inps[0]?.value,tipo:sels[0]?.value,t:inps[1]?.value,opp:inps[2]?.value,prop:sels[1]?.value,tp:inps[3]?.value,resp:inps[4]?.value,due:inps[5]?.value});
+  });
+  data.ts=new Date().toISOString();
+  localStorage.setItem(KEY,JSON.stringify(data));
+  const t=new Date().toLocaleTimeString('es',{hour:'2-digit',minute:'2-digit'});
+  const lbl=document.getElementById('saved-lbl');if(lbl)lbl.textContent='✓ Guardado '+t;
+  const toast=document.getElementById('toast');toast.classList.add('show');setTimeout(()=>toast.classList.remove('show'),2000);
+}
+
+function loadLocal(){
+  const raw=localStorage.getItem(KEY);
+  if(!raw){addRow();addRow();addRow();updateAll();return;}
+  try{
+    const data=JSON.parse(raw);
+    INFO.forEach(id=>{const el=document.getElementById(id);if(el&&data.fields?.[id]!=null)el.value=data.fields[id];});
+    (data.rows||[]).forEach(r=>addRow(r));
+    if(!data.rows?.length){addRow();addRow();addRow();}
+    if(data.ts){
+      const t=new Date(data.ts).toLocaleString('es',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});
+      const lbl=document.getElementById('saved-lbl');if(lbl)lbl.textContent='Último guardado: '+t;
+    }
+    updateAll();
+  }catch(e){addRow();addRow();addRow();updateAll();}
+}
+
+function clearAll(){
+  if(!confirm('¿Limpiar todo el SMED?'))return;
+  localStorage.removeItem(KEY);
+  location.reload();
+}
+
+function exportCSV(){
+  const headers=['#','Actividad','Tipo Actual','Tiempo Actual (seg)','Oportunidad','Tipo Propuesto','Tiempo Propuesto (seg)','Responsable','Fecha Limite'];
+  const rows=[headers.join(',')];
+  document.querySelectorAll('#smed-body tr').forEach((tr,i)=>{
+    const inps=tr.querySelectorAll('input');
+    const sels=tr.querySelectorAll('select');
+    const esc=v=>'"'+(v||'').replace(/"/g,'""')+'"';
+    rows.push([i+1,esc(inps[0]?.value),sels[0]?.value,inps[1]?.value,esc(inps[2]?.value),sels[1]?.value,inps[3]?.value,esc(inps[4]?.value),inps[5]?.value].join(','));
+  });
+  const proj=(document.getElementById('p-maq')?.value||'SMED').trim().replace(/\s+/g,'-');
+  const blob=new Blob([rows.join('\n')],{type:'text/csv;charset=utf-8;'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=proj+'-smed.csv';a.click();
+}
+
+window.addEventListener('load',loadLocal);
+</script>
+<script src="branding.js"></script>
+</body>
+</html>
