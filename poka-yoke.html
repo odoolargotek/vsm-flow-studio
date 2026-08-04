@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Poka Yoke — Largotek</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300..700&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0d1117;--surface:#161b22;--surface2:#21262d;--border:#30363d;
+  --text:#e6edf3;--muted:#8b949e;--faint:#3d444d;
+  --red:#f85149;--green:#5fc97a;--yellow:#e8c44a;--cyan:#4f98a3;
+  --violet:#bc8cff;--orange:#f0883e;--blue:#58a6ff;
+  --i-color:#3fb950;--radius:14px;
+}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:13px 28px;border-bottom:1px solid var(--border);background:var(--surface)}
+.topbar-brand{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:var(--muted);text-decoration:none}.topbar-brand span{color:var(--i-color)}
+.topbar-right{display:flex;align-items:center;gap:8px}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:7px 15px;border-radius:8px;border:1.5px solid var(--border);background:transparent;color:var(--muted);font-size:12px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;transition:all .18s}.btn:hover{border-color:var(--i-color);color:var(--i-color)}
+.btn-primary{background:var(--i-color);color:#111;border-color:var(--i-color)}.btn-primary:hover{opacity:.88}
+.btn-green{background:var(--green);color:#111;border-color:var(--green)}.btn-green:hover{opacity:.88}
+.saved-lbl{font-size:11px;color:var(--muted)}
+.hero{padding:32px 32px 20px;max-width:1100px;margin:0 auto}
+.hero-eye{font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--i-color);margin-bottom:8px}
+.hero h1{font-family:'Instrument Serif',serif;font-size:clamp(1.5rem,3vw,2.2rem);margin-bottom:6px}
+.hero-sub{font-size:13px;color:var(--muted);line-height:1.7}
+.wrap{max-width:1100px;margin:0 auto;padding:0 32px 80px}
+
+/* TABS */
+.tab-bar{display:flex;gap:4px;margin-bottom:20px;border-bottom:1px solid var(--border);padding-bottom:0}
+.tab{padding:10px 20px;border-radius:8px 8px 0 0;border:1px solid transparent;border-bottom:none;font-size:12px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif;color:var(--muted);background:transparent;transition:all .18s;margin-bottom:-1px}
+.tab.active{background:var(--surface);border-color:var(--border);color:var(--i-color)}
+.tab:hover:not(.active){color:var(--text)}
+.tab-panel{display:none}.tab-panel.active{display:block}
+
+/* CARD */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:16px;overflow:hidden}
+.card-head{display:flex;align-items:center;gap:10px;padding:12px 18px;border-bottom:1px solid var(--faint);background:var(--surface2)}
+.card-title{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.card-body{padding:18px 20px}
+
+/* FIELDS */
+.field{display:flex;flex-direction:column;gap:5px}
+.field label{font-size:10px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--muted)}
+.field input,.field select,.field textarea{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:9px 12px;font-size:13px;color:var(--text);font-family:'Inter',sans-serif;transition:border-color .18s;width:100%}
+.field input:focus,.field select:focus,.field textarea:focus{outline:none;border-color:var(--i-color)}
+.field textarea{resize:vertical;min-height:60px;line-height:1.65}
+.grid4{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:12px}@media(max-width:900px){.grid4{grid-template-columns:1fr 1fr}}@media(max-width:500px){.grid4{grid-template-columns:1fr}}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}@media(max-width:700px){.grid3{grid-template-columns:1fr 1fr}}@media(max-width:450px){.grid3{grid-template-columns:1fr}}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}@media(max-width:600px){.grid2{grid-template-columns:1fr}}
+.full{grid-column:1/-1}
+
+/* STATS */
+.stats-row{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:16px}@media(max-width:800px){.stats-row{grid-template-columns:repeat(3,1fr)}}@media(max-width:500px){.stats-row{grid-template-columns:repeat(2,1fr)}}
+.stat-box{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px 16px}
+.stat-label{font-size:10px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
+.stat-value{font-size:1.4rem;font-weight:800}
+
+/* MAIN TABLE */
+.py-table{width:100%;border-collapse:collapse;font-size:12px;min-width:1100px}
+.py-table th{text-align:left;padding:9px 10px;background:var(--surface2);color:var(--muted);font-size:10px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;border-bottom:1px solid var(--border);white-space:nowrap}
+.py-table td{padding:5px 6px;border-top:1px solid var(--faint);vertical-align:middle}
+.py-table td input,.py-table td select,.py-table td textarea{width:100%;background:transparent;border:1px solid transparent;color:var(--text);font-size:12px;font-family:'Inter',sans-serif;padding:4px 6px;border-radius:5px;transition:border .15s;resize:none}
+.py-table td input:focus,.py-table td select:focus,.py-table td textarea:focus{outline:none;border-color:var(--i-color);background:var(--surface2)}
+.py-table td select{background:var(--surface2);border-color:var(--border);cursor:pointer}
+.table-wrap{overflow-x:auto}
+.add-btn{display:inline-flex;align-items:center;gap:5px;margin-top:10px;padding:6px 14px;border-radius:6px;border:1px dashed var(--border);background:transparent;color:var(--muted);font-size:11px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;transition:all .18s}.add-btn:hover{border-color:var(--i-color);color:var(--i-color)}
+.del-btn{background:transparent;border:none;color:var(--faint);cursor:pointer;font-size:14px;padding:0 4px;transition:color .15s}.del-btn:hover{color:var(--red)}
+
+/* TYPE BADGES */
+.type-prev{color:var(--green);font-weight:700}
+.type-det{color:var(--cyan);font-weight:700}
+.type-warn{color:var(--yellow);font-weight:700}
+
+/* EFFECTIVENESS BARS */
+.eff-wrap{display:flex;align-items:center;gap:6px}
+.eff-bar-bg{flex:1;background:var(--surface2);border-radius:99px;height:6px;overflow:hidden;min-width:50px}
+.eff-bar{height:6px;border-radius:99px;background:var(--i-color);transition:width .3s}
+.eff-val{font-size:10px;color:var(--muted);min-width:26px;text-align:right}
+
+/* AUDIT */
+.audit-section{margin-bottom:20px}
+.audit-section-title{font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--i-color);margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid var(--faint)}
+.audit-item{display:flex;align-items:flex-start;gap:14px;padding:10px 0;border-bottom:1px solid var(--faint)}
+.audit-item:last-child{border-bottom:none}
+.audit-q{flex:1;font-size:12px;color:var(--text);line-height:1.5}
+.audit-q span{font-size:10px;color:var(--muted);display:block;margin-top:2px}
+.audit-opts{display:flex;gap:6px;flex-shrink:0}
+.audit-opt{padding:4px 12px;border-radius:99px;border:1.5px solid var(--border);font-size:11px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif;background:transparent;color:var(--muted);transition:all .15s}
+.audit-opt.yes.sel{background:rgba(95,201,122,.15);border-color:var(--green);color:var(--green)}
+.audit-opt.partial.sel{background:rgba(232,196,74,.12);border-color:var(--yellow);color:var(--yellow)}
+.audit-opt.no.sel{background:rgba(248,81,73,.12);border-color:var(--red);color:var(--red)}
+.audit-opt:hover{border-color:var(--text);color:var(--text)}
+.audit-score-bar{background:var(--surface2);border-radius:99px;height:10px;overflow:hidden;margin:8px 0 4px}
+.audit-score-fill{height:10px;border-radius:99px;transition:width .4s}
+
+/* MATRIX */
+.matrix-wrap{overflow-x:auto}
+.matrix{border-collapse:collapse;width:100%;min-width:600px}
+.matrix th,.matrix td{padding:10px 14px;border:1px solid var(--border);font-size:12px;text-align:center}
+.matrix th{background:var(--surface2);color:var(--muted);font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase}
+.matrix td.label{text-align:left;font-weight:600;color:var(--text)}
+.cell-1{background:rgba(248,81,73,.08);color:var(--red)}
+.cell-2{background:rgba(232,196,74,.08);color:var(--yellow)}
+.cell-3{background:rgba(95,201,122,.08);color:var(--green)}
+.cell-4{background:rgba(63,185,80,.18);color:var(--green);font-weight:800}
+
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:#1e3a2e;border:1px solid var(--green);color:var(--green);padding:10px 22px;border-radius:99px;font-size:13px;font-weight:600;opacity:0;transition:all .3s;z-index:999;white-space:nowrap}.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+@media print{.topbar,.btn,.add-btn,.del-btn,.tab-bar{display:none!important}body{background:#fff;color:#111}.card,.stat-box{border-color:#ccc;background:#fff}.card-head{background:#f0f0f0}.py-table th{background:#f0f0f0}}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <a href="index.html" class="topbar-brand">← <span>Largotek</span> Lean Suite</a>
+  <div class="topbar-right">
+    <span class="saved-lbl" id="saved-lbl"></span>
+    <button class="btn" onclick="clearAll()">🗑 Limpiar</button>
+    <button class="btn btn-green" onclick="exportCSV()">📥 CSV</button>
+    <button class="btn" onclick="saveLocal()">💾 Guardar</button>
+    <button class="btn btn-primary" onclick="window.print()">🖨 PDF</button>
+  </div>
+</div>
+
+<div class="hero">
+  <div class="hero-eye">🔧 Poka Yoke — Largotek Lean Suite · Fase I · A Prueba de Errores</div>
+  <h1>Poka Yoke — Dispositivos a Prueba de Errores</h1>
+  <p class="hero-sub">Registra, categoriza y evalúa los mecanismos de prevención y detección de errores del proceso. Incluye catálogo de dispositivos, auditoría de cobertura y matriz de riesgo vs. facilidad de implementación.</p>
+</div>
+
+<div class="wrap">
+
+  <div class="stats-row">
+    <div class="stat-box"><div class="stat-label">Dispositivos</div><div class="stat-value" id="s-total">0</div></div>
+    <div class="stat-box"><div class="stat-label">Preventivos</div><div class="stat-value" style="color:var(--green)" id="s-prev">0</div></div>
+    <div class="stat-box"><div class="stat-label">Detectivos</div><div class="stat-value" style="color:var(--cyan)" id="s-det">0</div></div>
+    <div class="stat-box"><div class="stat-label">Activos</div><div class="stat-value" style="color:var(--i-color)" id="s-active">0</div></div>
+    <div class="stat-box"><div class="stat-label">Score auditoría</div><div class="stat-value" id="s-audit">—</div></div>
+  </div>
+
+  <div class="tab-bar">
+    <button class="tab active" onclick="switchTab('catalogo',this)">🗒 Catálogo</button>
+    <button class="tab" onclick="switchTab('auditoria',this)">✔️ Auditoría</button>
+    <button class="tab" onclick="switchTab('matriz',this)">📊 Matriz Riesgo</button>
+    <button class="tab" onclick="switchTab('referencia',this)">📖 Referencia</button>
+  </div>
+
+  <!-- TAB 1: CATÁLOGO -->
+  <div id="tab-catalogo" class="tab-panel active">
+    <div class="card">
+      <div class="card-head"><span>🏷️</span><span class="card-title">Datos del proceso / proyecto</span></div>
+      <div class="card-body grid4">
+        <div class="field"><label>Proceso / Línea</label><input id="m-proceso" placeholder="Ej: Ensamblaje Línea 3"></div>
+        <div class="field"><label>Empresa / Planta</label><input id="m-empresa" placeholder="Ej: Largotek SRL"></div>
+        <div class="field"><label>Responsable</label><input id="m-resp" placeholder="Nombre"></div>
+        <div class="field"><label>Fecha de revisión</label><input id="m-fecha" type="date"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head"><span>🔧</span><span class="card-title">Catálogo de dispositivos Poka Yoke</span></div>
+      <div class="card-body">
+        <div class="table-wrap">
+          <table class="py-table">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Error / Defecto que previene</th>
+                <th>Estación / Paso</th>
+                <th>Tipo</th>
+                <th>Categoría</th>
+                <th>Descripción del dispositivo</th>
+                <th>Efectividad (%)</th>
+                <th>Estado</th>
+                <th>Responsable</th>
+                <th>Costo aprox.</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="py-body"></tbody>
+          </table>
+        </div>
+        <button class="add-btn" onclick="addRow()">+ Agregar dispositivo</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB 2: AUDITORÍA -->
+  <div id="tab-auditoria" class="tab-panel">
+    <div class="card">
+      <div class="card-head"><span>✔️</span><span class="card-title">Auditoría de cobertura Poka Yoke</span></div>
+      <div class="card-body" id="audit-body"></div>
+    </div>
+  </div>
+
+  <!-- TAB 3: MATRIZ -->
+  <div id="tab-matriz" class="tab-panel">
+    <div class="card">
+      <div class="card-head"><span>📊</span><span class="card-title">Matriz Riesgo del Error vs. Facilidad de Implementación</span></div>
+      <div class="card-body">
+        <p style="font-size:12px;color:var(--muted);margin-bottom:16px">Clasifica cada error según su riesgo (severidad × frecuencia) y la facilidad de implementar el Poka Yoke. Prioriza las celdas de <strong style="color:var(--green)">Alta prioridad</strong>.</p>
+        <div class="matrix-wrap">
+          <table class="matrix">
+            <thead>
+              <tr>
+                <th rowspan="2" style="text-align:left">Facilidad de implementación</th>
+                <th colspan="3">Riesgo del error (Severidad × Frecuencia)</th>
+              </tr>
+              <tr>
+                <th>Bajo (1-3)</th>
+                <th>Medio (4-6)</th>
+                <th>Alto (7-9)</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="label">🟢 Fácil</td>
+                <td class="cell-2">Media prioridad<br><small>Implementar cuando se pueda</small></td>
+                <td class="cell-3">Alta prioridad<br><small>Implementar pronto</small></td>
+                <td class="cell-4">★ Máxima prioridad<br><small>Implementar de inmediato</small></td>
+              </tr>
+              <tr>
+                <td class="label">🟡 Moderado</td>
+                <td class="cell-1">Baja prioridad<br><small>Evaluar costo-beneficio</small></td>
+                <td class="cell-2">Media prioridad<br><small>Planificar a corto plazo</small></td>
+                <td class="cell-3">Alta prioridad<br><small>Planificar a corto plazo</small></td>
+              </tr>
+              <tr>
+                <td class="label">🔴 Difícil</td>
+                <td class="cell-1">Muy baja prioridad<br><small>Considerar alternativas simples</small></td>
+                <td class="cell-1">Baja prioridad<br><small>Evaluar alternativas</small></td>
+                <td class="cell-2">Media prioridad<br><small>Buscar solución simplificada</small></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div style="margin-top:20px">
+          <div class="card-head" style="border-radius:8px 8px 0 0;border:1px solid var(--border)"><span>📝</span><span class="card-title">Clasificación de tus errores en la matriz</span></div>
+          <div style="border:1px solid var(--border);border-top:none;border-radius:0 0 8px 8px;padding:16px">
+            <div class="table-wrap">
+              <table class="py-table" style="min-width:700px">
+                <thead>
+                  <tr>
+                    <th>#</th>
+                    <th>Error / Defecto</th>
+                    <th>Severidad (1-9)</th>
+                    <th>Frecuencia (1-9)</th>
+                    <th>Riesgo</th>
+                    <th>Facilidad PY</th>
+                    <th>Prioridad</th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody id="matrix-body"></tbody>
+              </table>
+            </div>
+            <button class="add-btn" onclick="addMatrixRow()">+ Agregar error</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB 4: REFERENCIA -->
+  <div id="tab-referencia" class="tab-panel">
+    <div class="card">
+      <div class="card-head"><span>📖</span><span class="card-title">Guía de referencia Poka Yoke</span></div>
+      <div class="card-body">
+        <div class="grid2" style="gap:16px">
+
+          <div style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:16px">
+            <div style="font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--green);margin-bottom:12px">✅ Preventivos — Evitan que ocurra el error</div>
+            <div style="font-size:12px;color:var(--muted);line-height:1.8">
+              • <strong style="color:var(--text)">Guillas / Guiones:</strong> guas físicas que impiden la orientación incorrecta<br>
+              • <strong style="color:var(--text)">Pines de posicionamiento:</strong> aseguran que la pieza solo encaje en una posición<br>
+              • <strong style="color:var(--text)">Interlock eléctrico:</strong> el equipo no arranca si la condición no se cumple<br>
+              • <strong style="color:var(--text)">Límites de carrera:</strong> detienen el movimiento antes de una posición incorrecta<br>
+              • <strong style="color:var(--text)">Checklist digital:</strong> el sistema no avanza sin confirmar cada paso<br>
+              • <strong style="color:var(--text)">Torque controlado:</strong> llave que no supera el torque máximo<br>
+              • <strong style="color:var(--text)">Formulario obligatorio:</strong> campos requeridos en sistemas ERP/MES
+            </div>
+          </div>
+
+          <div style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:16px">
+            <div style="font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--cyan);margin-bottom:12px">🔍 Detectivos — Detectan el error antes de que avance</div>
+            <div style="font-size:12px;color:var(--muted);line-height:1.8">
+              • <strong style="color:var(--text)">Sensor fotoeléctrico:</strong> detecta presencia/ausencia de componente<br>
+              • <strong style="color:var(--text)">Sensor de peso:</strong> verifica que todos los componentes estén presentes<br>
+              • <strong style="color:var(--text)">Visión artificial:</strong> cámara valida dimensiones o marcas<br>
+              • <strong style="color:var(--text)">Contador automático:</strong> verifica que se ensamblaron todas las piezas<br>
+              • <strong style="color:var(--text)">Código de barras / QR:</strong> valida lote, versión y especificaciones<br>
+              • <strong style="color:var(--text)">Lector de torque:</strong> registra y alerta si el apriete no fue correcto<br>
+              • <strong style="color:var(--text)">Alarma Andon:</strong> alerta visual/sonora al detectar condición fuera de rango
+            </div>
+          </div>
+
+          <div style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:16px">
+            <div style="font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--yellow);margin-bottom:12px">⚠️ Advertencia — Alertan al operador antes del error</div>
+            <div style="font-size:12px;color:var(--muted);line-height:1.8">
+              • <strong style="color:var(--text)">Lámpara de advertencia:</strong> luz que indica condición de riesgo<br>
+              • <strong style="color:var(--text)">Alarma sonora:</strong> beep o sirena antes de condición crítica<br>
+              • <strong style="color:var(--text)">Marcas visuales en piso:</strong> zonas de riesgo delimitadas con color<br>
+              • <strong style="color:var(--text)">Pantalla de estado:</strong> muestra condición actual del proceso en tiempo real<br>
+              • <strong style="color:var(--text)">Etiqueta de advertencia:</strong> instrucciones visuales en punto de uso
+            </div>
+          </div>
+
+          <div style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:16px">
+            <div style="font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--violet);margin-bottom:12px">💡 Principios de diseño</div>
+            <div style="font-size:12px;color:var(--muted);line-height:1.8">
+              • <strong style="color:var(--text)">Simple:</strong> mínima complejidad, máxima confiabilidad<br>
+              • <strong style="color:var(--text)">Barato:</strong> preferir soluciones de bajo costo primero<br>
+              • <strong style="color:var(--text)">Físico &gt; Electrónico &gt; Software:</strong> escala de preferencia<br>
+              • <strong style="color:var(--text)">100% de cobertura:</strong> debe funcionar en cada unidad, no en muestra<br>
+              • <strong style="color:var(--text)">Retroalimentación inmediata:</strong> detectar en la misma estación<br>
+              • <strong style="color:var(--text)">Preventivo &gt; Detectivo:</strong> mejor evitar que detectar<br>
+              • <strong style="color:var(--text)">Diseñado con el operador:</strong> el usuario final valida la solución
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+<div class="toast" id="toast">✅ Guardado</div>
+
+<script>
+const KEY='largotek_pokayoke';
+const META=['m-proceso','m-empresa','m-resp','m-fecha'];
+let rows=[];let matrixRows=[];
+
+const TIPOS=['Preventivo','Detectivo','Advertencia'];
+const CATS=['Físico','Eléctrico/Sensor','Visual','Software/Digital','Procedural'];
+const ESTADOS=['Propuesto','En diseño','Implementado','Validado','Inactivo'];
+const FACILIDAD=['Fácil','Moderado','Difícil'];
+const PRIORIDADES=['Máxima','Alta','Media','Baja','Muy Baja'];
+
+const AUDIT_ITEMS=[
+  {section:'Identificación de errores',items:[
+    {q:'Se han identificado y documentado todos los errores posibles del proceso',hint:'Usando AMEF, lluvia de ideas o análisis de defectos históricos'},
+    {q:'Los errores están clasificados por severidad y frecuencia',hint:'La clasificación permite priorizar dónde aplicar Poka Yoke primero'},
+    {q:'Se conoce el costo de cada tipo de error (reproceso, scrap, reclamaciones)',hint:'Incluye tiempo perdido, material y costo de no calidad'},
+  ]},
+  {section:'Diseño de dispositivos',items:[
+    {q:'Para cada error crítico existe al menos un dispositivo Poka Yoke',hint:'Los errores con severidad alta no pueden depender únicamente de la atención del operador'},
+    {q:'Los dispositivos preventivos se priorizaron sobre los detectivos',hint:'Prevenir > Detectar > Corregir en la jerarquía de Poka Yoke'},
+    {q:'Los dispositivos fueron diseñados con participación del operador',hint:'El operador conoce los errores reales y las limitaciones físicas del puesto'},
+    {q:'El costo de cada dispositivo fue evaluado contra el costo del error',hint:'ROI del Poka Yoke debe ser positivo'},
+  ]},
+  {section:'Implementación y validación',items:[
+    {q:'Los dispositivos implementados cubren el 100% de las unidades (no muestra)',hint:'Un Poka Yoke que solo revisa muestras no es un Poka Yoke real'},
+    {q:'Cada dispositivo fue validado con pruebas reales de errores inducidos',hint:'Se probó que el dispositivo detecta/previene el error en condiciones reales'},
+    {q:'Existe un procedimiento documentado de mantenimiento de cada dispositivo',hint:'Los dispositivos Poka Yoke deben auditarse periódicamente para confirmar funcionamiento'},
+    {q:'Los operadores recibieron capacitación sobre el funcionamiento de los dispositivos',hint:'El operador debe saber qué hacer cuando el Poka Yoke detecta una anomalía'},
+  ]},
+  {section:'Monitoreo y mejora',items:[
+    {q:'Se registran las activaciones de los dispositivos detectivos (conteo de errores)',hint:'Cada activación es una oportunidad de aprendizaje y mejora'},
+    {q:'Los KPIs de calidad mejoraron tras implementar los dispositivos',hint:'Comparar tasa de defectos antes y después de la implementación'},
+    {q:'Se revisan periódicamente los errores no cubiertos por dispositivos existentes',hint:'Los procesos cambian; nuevos errores pueden aparecer con el tiempo'},
+  ]},
+];
+
+let auditAnswers={};
+
+function switchTab(id,btn){
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active'));
+  document.getElementById('tab-'+id).classList.add('active');
+  btn.classList.add('active');
+}
+
+function addRow(d={}){
+  rows.push({error:'',estacion:'',tipo:'Preventivo',categoria:'Físico',desc:'',efectividad:90,estado:'Propuesto',responsable:'',costo:'',...d});
+  renderRows();
+}
+
+function renderRows(){
+  const tbody=document.getElementById('py-body');tbody.innerHTML='';
+  rows.forEach((r,i)=>{
+    const eff=parseInt(r.efectividad)||0;
+    const tr=document.createElement('tr');
+    tr.innerHTML=`
+      <td style="color:var(--muted);text-align:center;font-size:11px">${i+1}</td>
+      <td style="min-width:180px"><input value="${esc(r.error)}" placeholder="Error o defecto" oninput="rows[${i}].error=this.value;autoSave()"></td>
+      <td style="min-width:130px"><input value="${esc(r.estacion)}" placeholder="Estación / Paso" oninput="rows[${i}].estacion=this.value;autoSave()"></td>
+      <td style="min-width:110px">
+        <select onchange="rows[${i}].tipo=this.value;renderRows()" style="background:var(--surface2);border:1px solid var(--border);border-radius:5px;color:var(--text);font-size:11px;padding:4px 6px;font-family:'Inter',sans-serif;width:100%">
+          ${TIPOS.map(v=>`<option value="${v}" ${r.tipo===v?'selected':''}>${v}</option>`).join('')}
+        </select>
+      </td>
+      <td style="min-width:130px">
+        <select onchange="rows[${i}].categoria=this.value;autoSave()" style="background:var(--surface2);border:1px solid var(--border);border-radius:5px;color:var(--text);font-size:11px;padding:4px 6px;font-family:'Inter',sans-serif;width:100%">
+          ${CATS.map(v=>`<option value="${v}" ${r.categoria===v?'selected':''}>${v}</option>`).join('')}
+        </select>
+      </td>
+      <td style="min-width:200px"><input value="${esc(r.desc)}" placeholder="Descripción del dispositivo" oninput="rows[${i}].desc=this.value;autoSave()"></td>
+      <td style="min-width:130px">
+        <div class="eff-wrap">
+          <input type="number" min="0" max="100" value="${eff}" oninput="rows[${i}].efectividad=this.value;renderRows()" style="width:48px;text-align:center;background:var(--surface2);border:1px solid var(--border);border-radius:5px;padding:4px;font-size:12px;color:var(--text);font-family:'Inter',sans-serif">
+          <div class="eff-bar-bg"><div class="eff-bar" style="width:${eff}%"></div></div>
+          <span class="eff-val">${eff}%</span>
+        </div>
+      </td>
+      <td style="min-width:110px">
+        <select onchange="rows[${i}].estado=this.value;renderRows()" style="background:var(--surface2);border:1px solid var(--border);border-radius:5px;color:var(--text);font-size:11px;padding:4px 6px;font-family:'Inter',sans-serif;width:100%">
+          ${ESTADOS.map(v=>`<option value="${v}" ${r.estado===v?'selected':''}>${v}</option>`).join('')}
+        </select>
+      </td>
+      <td style="min-width:120px"><input value="${esc(r.responsable)}" placeholder="Nombre" oninput="rows[${i}].responsable=this.value;autoSave()"></td>
+      <td style="min-width:100px"><input value="${esc(r.costo)}" placeholder="Ej: $150" oninput="rows[${i}].costo=this.value;autoSave()"></td>
+      <td><button class="del-btn" onclick="rows.splice(${i},1);renderRows()">✕</button></td>`;
+    tbody.appendChild(tr);
+  });
+  updateStats();
+  autoSave();
+}
+
+function addMatrixRow(d={}){
+  matrixRows.push({error:'',severidad:5,frecuencia:5,facilidad:'Moderado',...d});
+  renderMatrix();
+}
+
+function renderMatrix(){
+  const tbody=document.getElementById('matrix-body');if(!tbody)return;
+  tbody.innerHTML='';
+  matrixRows.forEach((r,i)=>{
+    const riesgo=(parseInt(r.severidad)||1)*(parseInt(r.frecuencia)||1);
+    const nivel=riesgo<=9?'Bajo (1-3)':riesgo<=36?'Medio (4-6)':'Alto (7-9)';
+    const prioMap={'Fácil':{Bajo:'Media','Medio (4-6)':'Alta','Alto (7-9)':'Máxima'},'Moderado':{Bajo:'Baja','Medio (4-6)':'Media','Alto (7-9)':'Alta'},'Difícil':{Bajo:'Muy Baja','Medio (4-6)':'Baja','Alto (7-9)':'Media'}};
+    const prio=(prioMap[r.facilidad]||{})[nivel]||'Media';
+    const prioColor={Máxima:vars('--green'),Alta:vars('--green'),Media:vars('--yellow'),Baja:vars('--muted'),'Muy Baja':vars('--faint')};
+    const tr=document.createElement('tr');
+    tr.innerHTML=`
+      <td style="color:var(--muted);text-align:center;font-size:11px">${i+1}</td>
+      <td style="min-width:160px"><input value="${esc(r.error)}" placeholder="Tipo de error" oninput="matrixRows[${i}].error=this.value;autoSave()"></td>
+      <td style="min-width:100px"><input type="number" min="1" max="9" value="${r.severidad}" oninput="matrixRows[${i}].severidad=this.value;renderMatrix()" style="width:60px;text-align:center;background:var(--surface2);border:1px solid var(--border);border-radius:5px;padding:4px;font-size:12px;color:var(--text);font-family:'Inter',sans-serif"></td>
+      <td style="min-width:100px"><input type="number" min="1" max="9" value="${r.frecuencia}" oninput="matrixRows[${i}].frecuencia=this.value;renderMatrix()" style="width:60px;text-align:center;background:var(--surface2);border:1px solid var(--border);border-radius:5px;padding:4px;font-size:12px;color:var(--text);font-family:'Inter',sans-serif"></td>
+      <td style="font-weight:700;color:${riesgo>36?vars('--red'):riesgo>9?vars('--yellow'):vars('--green')}">${riesgo} — ${nivel}</td>
+      <td style="min-width:100px">
+        <select onchange="matrixRows[${i}].facilidad=this.value;renderMatrix()" style="background:var(--surface2);border:1px solid var(--border);border-radius:5px;color:var(--text);font-size:11px;padding:4px 6px;font-family:'Inter',sans-serif;width:100%">
+          ${FACILIDAD.map(v=>`<option value="${v}" ${r.facilidad===v?'selected':''}>${v}</option>`).join('')}
+        </select>
+      </td>
+      <td style="font-weight:800;color:${prioColor[prio]||'var(--muted)'}">${prio}</td>
+      <td><button class="del-btn" onclick="matrixRows.splice(${i},1);renderMatrix()">✕</button></td>`;
+    tbody.appendChild(tr);
+  });
+  autoSave();
+}
+
+function vars(v){return getComputedStyle(document.documentElement).getPropertyValue(v).trim();}
+
+function renderAudit(){
+  const body=document.getElementById('audit-body');if(!body)return;
+  body.innerHTML='';
+  let total=0,answered=0,score=0;
+  AUDIT_ITEMS.forEach(section=>{
+    const sec=document.createElement('div');
+    sec.className='audit-section';
+    sec.innerHTML=`<div class="audit-section-title">${section.section}</div>`;
+    section.items.forEach((item,j)=>{
+      const key=section.section+'_'+j;
+      const val=auditAnswers[key]||'';
+      total++;
+      if(val){answered++;score+=val==='yes'?2:val==='partial'?1:0;}
+      const div=document.createElement('div');
+      div.className='audit-item';
+      div.innerHTML=`
+        <div class="audit-q">${item.q}<span>${item.hint}</span></div>
+        <div class="audit-opts">
+          <button class="audit-opt yes${val==='yes'?' sel':''}" onclick="auditAnswers['${key}']='yes';renderAudit();autoSave()">Sí</button>
+          <button class="audit-opt partial${val==='partial'?' sel':''}" onclick="auditAnswers['${key}']='partial';renderAudit();autoSave()">Parcial</button>
+          <button class="audit-opt no${val==='no'?' sel':''}" onclick="auditAnswers['${key}']='no';renderAudit();autoSave()">No</button>
+        </div>`;
+      sec.appendChild(div);
+    });
+    body.appendChild(sec);
+  });
+  const maxScore=total*2;
+  const pct=maxScore>0?Math.round(score/maxScore*100):0;
+  const color=pct>=75?'var(--green)':pct>=50?'var(--yellow)':'var(--red)';
+  const summary=document.createElement('div');
+  summary.style.cssText='background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:14px 16px;margin-top:8px';
+  summary.innerHTML=`
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+      <span style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted)">Score de cobertura</span>
+      <span style="font-size:1.5rem;font-weight:900;color:${color}">${pct}%</span>
+    </div>
+    <div class="audit-score-bar"><div class="audit-score-fill" style="width:${pct}%;background:${color}"></div></div>
+    <div style="font-size:11px;color:var(--muted);margin-top:6px">${answered} de ${total} preguntas respondidas · ${score} de ${maxScore} puntos</div>`;
+  body.appendChild(summary);
+  document.getElementById('s-audit').textContent=pct+'%';
+  document.getElementById('s-audit').style.color=color;
+}
+
+function updateStats(){
+  document.getElementById('s-total').textContent=rows.length;
+  document.getElementById('s-prev').textContent=rows.filter(r=>r.tipo==='Preventivo').length;
+  document.getElementById('s-det').textContent=rows.filter(r=>r.tipo==='Detectivo').length;
+  document.getElementById('s-active').textContent=rows.filter(r=>r.estado==='Implementado'||r.estado==='Validado').length;
+}
+
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;');}
+let timer;function autoSave(){clearTimeout(timer);timer=setTimeout(saveLocal,1200);}
+
+function saveLocal(){
+  const d={fields:{},rows,matrixRows,auditAnswers,ts:new Date().toISOString()};
+  META.forEach(id=>{const el=document.getElementById(id);if(el)d.fields[id]=el.value;});
+  localStorage.setItem(KEY,JSON.stringify(d));
+  const t=new Date().toLocaleTimeString('es-BO',{hour:'2-digit',minute:'2-digit'});
+  const lbl=document.getElementById('saved-lbl');if(lbl)lbl.textContent='✓ '+t;
+  const toast=document.getElementById('toast');toast.textContent='✅ Guardado';toast.classList.add('show');setTimeout(()=>toast.classList.remove('show'),2000);
+}
+
+function loadLocal(){
+  const raw=localStorage.getItem(KEY);
+  if(!raw){
+    addRow({error:'Orientación incorrecta de la pieza',estacion:'Estación 2 — Ensamblaje',tipo:'Preventivo',categoria:'Físico',desc:'Pin de posicionamiento asimétrico que impide insertar la pieza al revés',efectividad:100,estado:'Implementado',responsable:'Ing. de proceso',costo:'$25'});
+    addRow({error:'Tornillo olvidado (falta de torque)',estacion:'Estación 4 — Torque',tipo:'Detectivo',categoria:'Eléctrico/Sensor',desc:'Sensor de torque que registra cada apriete y bloquea el avance si falta alguno',efectividad:98,estado:'Validado',responsable:'Mantenimiento',costo:'$320'});
+    addRow({error:'Etiqueta equivocada en producto terminado',estacion:'Empaque final',tipo:'Detectivo',categoria:'Software/Digital',desc:'Lector de código de barras valida que la etiqueta coincide con la orden de producción antes de sellar la caja',efectividad:99,estado:'Propuesto',responsable:'Líer de línea',costo:'$180'});
+    addMatrixRow({error:'Orientación incorrecta',severidad:8,frecuencia:6,facilidad:'Fácil'});
+    addMatrixRow({error:'Tornillo olvidado',severidad:9,frecuencia:5,facilidad:'Moderado'});
+    addMatrixRow({error:'Etiqueta equivocada',severidad:7,frecuencia:3,facilidad:'Fácil'});
+    renderAudit();
+    return;
+  }
+  try{
+    const d=JSON.parse(raw);
+    META.forEach(id=>{const el=document.getElementById(id);if(el&&d.fields[id]!=null)el.value=d.fields[id];});
+    rows=d.rows||[];matrixRows=d.matrixRows||[];auditAnswers=d.auditAnswers||{};
+    renderRows();renderMatrix();renderAudit();
+    if(d.ts){const t=new Date(d.ts).toLocaleString('es-BO',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});const el=document.getElementById('saved-lbl');if(el)el.textContent='Últ: '+t;}
+  }catch(e){renderRows();renderMatrix();renderAudit();}
+}
+
+function clearAll(){if(!confirm('¿Limpiar Poka Yoke?'))return;localStorage.removeItem(KEY);location.reload();}
+
+function exportCSV(){
+  let csv='CATÁLOGO POKA YOKE\n';
+  csv+=['#','Error/Defecto','Estación','Tipo','Categoría','Descripción','Efectividad%','Estado','Responsable','Costo'].join(',')+'\n';
+  rows.forEach((r,i)=>csv+=[i+1,r.error,r.estacion,r.tipo,r.categoria,r.desc,r.efectividad,r.estado,r.responsable,r.costo].map(v=>`"${String(v||'').replace(/"/g,'""')}"`).join(',')+'\n');
+  const blob=new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8;'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='poka-yoke.csv';a.click();
+}
+
+document.querySelectorAll('input,select,textarea').forEach(el=>el.addEventListener('input',()=>autoSave()));
+window.addEventListener('load',()=>loadLocal());
+</script>
+<script src="branding.js"></script>
+</body>
+</html>
