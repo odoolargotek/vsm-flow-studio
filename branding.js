@@ -1,6 +1,7 @@
 /**
  * branding.js — Largotek Lean Suite v5.6
- * Inyecta logo real, navbar global, footer y toggle Light/Dark en todas las páginas.
+ * Inyecta logo real, navbar global, footer, toggle Light/Dark
+ * y módulo save-load (export/import JSON) en todas las páginas.
  */
 (function(){
 
@@ -32,10 +33,9 @@
     return `<a href="${l.href}" class="${cls}">${l.label}</a>`;
   }).join('');
 
-  // ── THEME ENGINE ──────────────────────────────────────────────────────────
+  // ── THEME ENGINE ───────────────────────────────────────────────────────
   const STORAGE_KEY = 'lk-theme';
 
-  // Variables CSS para modo oscuro
   const DARK_VARS = `
     --bg:#0d1117; --surface:#161b22; --surface2:#21262d; --border:#30363d;
     --text:#e6edf3; --muted:#8b949e; --faint:#484f58;
@@ -49,7 +49,6 @@
     --lk-footer-text:#4f6070; --lk-copyright:#2e3d4a;
   `;
 
-  // Variables CSS para modo claro
   const LIGHT_VARS = `
     --bg:#f5f7fa; --surface:#ffffff; --surface2:#eef1f5; --border:#d0d7de;
     --text:#1c2128; --muted:#57606a; --faint:#9198a1;
@@ -64,7 +63,6 @@
   `;
 
   function applyTheme(theme){
-    // Parchea :root con las variables del tema
     let varStyle = document.getElementById('lk-theme-vars');
     if(!varStyle){
       varStyle = document.createElement('style');
@@ -72,12 +70,8 @@
       document.head.appendChild(varStyle);
     }
     varStyle.textContent = `:root { ${theme === 'light' ? LIGHT_VARS : DARK_VARS} }`;
-
-    // Clase en <html> para reglas extra si las páginas la necesitan
     document.documentElement.setAttribute('data-theme', theme);
     localStorage.setItem(STORAGE_KEY, theme);
-
-    // Actualiza ícono del botón
     const btn = document.getElementById('lk-theme-btn');
     if(btn){
       btn.innerHTML = theme === 'light'
@@ -93,33 +87,23 @@
     applyTheme(current === 'dark' ? 'light' : 'dark');
   }
 
-  // Lee preferencia guardada o preferencia del sistema
   function getInitialTheme(){
     const saved = localStorage.getItem(STORAGE_KEY);
     if(saved === 'light' || saved === 'dark') return saved;
     return window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
   }
 
-  // ── CSS ──────────────────────────────────────────────────────────────────
+  // ── CSS ─────────────────────────────────────────────────────────────────
   const style = document.createElement('style');
   style.textContent = `
-    :root {
-      --lk-accent: #4f98a3;
-    }
+    :root { --lk-accent: #4f98a3; }
     .topnav { display: none !important; }
 
-    /* NAVBAR */
     #lk-navbar {
-      display: flex;
-      align-items: center;
-      padding: 0 24px;
-      height: 60px;
+      display: flex; align-items: center; padding: 0 24px; height: 60px;
       background: var(--lk-nav-bg, #0f1419);
       border-bottom: 1px solid var(--lk-nav-border, #1e2936);
-      position: sticky;
-      top: 0;
-      z-index: 1000;
-      gap: 0;
+      position: sticky; top: 0; z-index: 1000; gap: 0;
       transition: background .25s, border-color .25s;
     }
     #lk-navbar .lk-brand {
@@ -127,12 +111,10 @@
       text-decoration: none; flex-shrink: 0; padding-right: 4px;
     }
     #lk-navbar .lk-suite-badge {
-      font-size: 10px; font-weight: 700; letter-spacing: .1em;
-      text-transform: uppercase; color: var(--lk-accent);
-      background: rgba(79,152,163,.12);
-      border: 1px solid rgba(79,152,163,.25);
-      padding: 3px 8px; border-radius: 99px; margin-left: 10px;
-      white-space: nowrap; font-family: 'Inter', sans-serif; flex-shrink: 0;
+      font-size: 10px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase;
+      color: var(--lk-accent); background: rgba(79,152,163,.12);
+      border: 1px solid rgba(79,152,163,.25); padding: 3px 8px; border-radius: 99px;
+      margin-left: 10px; white-space: nowrap; font-family: 'Inter', sans-serif; flex-shrink: 0;
     }
     #lk-navbar .lk-divider {
       width: 1px; height: 26px;
@@ -159,39 +141,30 @@
       display: flex; align-items: center; gap: 8px; flex-shrink: 0; margin-left: 8px;
     }
     #lk-navbar .lk-web-link {
-      font-size: 12px; font-weight: 600; color: var(--lk-accent);
-      text-decoration: none; padding: 6px 14px;
-      border: 1px solid rgba(79,152,163,.35); border-radius: 8px;
+      font-size: 12px; font-weight: 600; color: var(--lk-accent); text-decoration: none;
+      padding: 6px 14px; border: 1px solid rgba(79,152,163,.35); border-radius: 8px;
       transition: all 150ms; font-family: 'Inter', sans-serif;
     }
     #lk-navbar .lk-web-link:hover { background: rgba(79,152,163,.12); border-color: var(--lk-accent); }
-
-    /* TOGGLE BUTTON */
     #lk-theme-btn {
       display: flex; align-items: center; justify-content: center;
       width: 34px; height: 34px; border-radius: 8px; border: none; cursor: pointer;
       background: var(--surface2, #21262d); color: var(--muted, #8b949e);
-      transition: background .2s, color .2s, transform .15s;
-      flex-shrink: 0;
+      transition: background .2s, color .2s, transform .15s; flex-shrink: 0;
     }
     #lk-theme-btn:hover {
       background: var(--lk-nav-link-hover-bg, #1c2535);
-      color: var(--lk-accent);
-      transform: rotate(20deg);
+      color: var(--lk-accent); transform: rotate(20deg);
     }
     #lk-theme-btn:active { transform: rotate(0deg) scale(.92); }
-
-    /* FOOTER */
     #lk-footer {
       border-top: 1px solid var(--lk-footer-border, #1e2936);
-      background: var(--lk-footer-bg, #0d1117);
-      padding: 36px 32px 28px;
+      background: var(--lk-footer-bg, #0d1117); padding: 36px 32px 28px;
       display: flex; flex-direction: column; align-items: center; gap: 16px;
       margin-top: auto; transition: background .25s, border-color .25s;
     }
     #lk-footer .lk-footer-top {
-      display: flex; align-items: center; gap: 20px;
-      flex-wrap: wrap; justify-content: center;
+      display: flex; align-items: center; gap: 20px; flex-wrap: wrap; justify-content: center;
     }
     #lk-footer .lk-footer-sep { width: 1px; height: 22px; background: var(--lk-footer-border, #2a3545); }
     #lk-footer .lk-footer-tagline {
@@ -207,41 +180,33 @@
       font-size: 11px; color: var(--lk-copyright, #2e3d4a);
       font-family: 'Inter', sans-serif; text-align: center; letter-spacing: .04em;
     }
-
-    /* Transiciones suaves al cambiar tema en body/surface */
     body { display: flex; flex-direction: column; min-height: 100vh;
       transition: background .25s, color .2s; }
   `;
   document.head.appendChild(style);
 
-  // ── APLICAR TEMA ANTES DEL RENDER (evita flash) ───────────────────────
+  // ── APLICAR TEMA (antes del render, evita flash) ────────────────────────
   const initialTheme = getInitialTheme();
   applyTheme(initialTheme);
 
-  // ── NAVBAR ────────────────────────────────────────────────────────────
+  // ── NAVBAR ─────────────────────────────────────────────────────────────
   const navbar = document.createElement('div');
   navbar.id = 'lk-navbar';
   navbar.innerHTML = `
     <a class="lk-brand" href="index.html">${LOGO_NAVBAR}</a>
     <span class="lk-suite-badge">Lean Suite</span>
     <div class="lk-divider"></div>
-    <nav class="lk-nav-links" aria-label="Herramientas">
-      ${linksHtml}
-    </nav>
+    <nav class="lk-nav-links" aria-label="Herramientas">${linksHtml}</nav>
     <div class="lk-nav-right">
       <button id="lk-theme-btn" aria-label="Cambiar tema"></button>
       <a class="lk-web-link" href="https://www.largotek.com" target="_blank" rel="noopener">largotek.com ↗</a>
     </div>
   `;
   document.body.insertBefore(navbar, document.body.firstChild);
-
-  // Asignar evento al botón (ya existe en el DOM)
   document.getElementById('lk-theme-btn').addEventListener('click', toggleTheme);
+  applyTheme(initialTheme); // fuerza ícono correcto post-render del botón
 
-  // Forzar render del ícono correcto ahora que el botón existe en el DOM
-  applyTheme(initialTheme);
-
-  // ── FOOTER ────────────────────────────────────────────────────────────
+  // ── FOOTER ─────────────────────────────────────────────────────────────
   const oldFooter = document.querySelector('footer');
   if(oldFooter) oldFooter.remove();
 
@@ -264,5 +229,13 @@
     </div>
   `;
   document.body.appendChild(footer);
+
+  // ── CARGAR MÓDULO SAVE-LOAD ─────────────────────────────────────────────
+  // Añade botón "Exportar JSON" / "Importar JSON" en cada herramienta
+  // y "Exportar Portafolio" / "Importar Portafolio" en index.html
+  const sl = document.createElement('script');
+  sl.src = 'js/save-load.js';
+  sl.defer = true;
+  document.head.appendChild(sl);
 
 })();
