@@ -58,6 +58,9 @@
     .badge-active{background:rgba(79,152,163,.18);color:var(--d-color)}
     .badge-new{background:rgba(63,185,80,.18);color:var(--i-color)}
     .badge-soon{background:rgba(72,79,88,.35);color:var(--faint)}
+    .dual-badge{display:flex;gap:4px;flex-wrap:wrap}
+    .badge-dual-d{background:rgba(79,152,163,.18);color:#4f98a3;font-size:9px;font-weight:700;padding:2px 7px;border-radius:99px}
+    .badge-dual-c{background:rgba(248,81,73,.15);color:#f85149;font-size:9px;font-weight:700;padding:2px 7px;border-radius:99px}
     .card-title{font-size:13.5px;font-weight:700;line-height:1.3}
     .card-desc{font-size:11.5px;color:var(--muted);line-height:1.6;flex:1}
     .card-footer{display:flex;align-items:center;justify-content:space-between;margin-top:auto}
@@ -83,7 +86,7 @@
 </section>
 
 <div class="stats-bar">
-  <div class="stat"><div class="stat-val">25</div><div class="stat-lbl">Herramientas</div></div>
+  <div class="stat"><div class="stat-val">26</div><div class="stat-lbl">Herramientas</div></div>
   <div class="stat"><div class="stat-val">5</div><div class="stat-lbl">Fases DMAIC</div></div>
   <div class="stat"><div class="stat-val">Yellow Belt</div><div class="stat-lbl">Nivel</div></div>
   <div class="stat"><div class="stat-val">Largotek</div><div class="stat-lbl">Desarrollado por</div></div>
@@ -130,6 +133,17 @@
         <div class="card-title">VOC / CTQs</div>
         <div class="card-desc">Voz del Cliente y árbol de Critical-to-Quality para traducir necesidades en métricas medibles.</div>
         <div class="card-footer"><span class="card-tag">VOC · CTQ</span><span class="card-arrow">→</span></div>
+      </div>
+    </a>
+    <a class="tool-card" href="beneficios-financieros.html" style="--card-accent:var(--d-color)">
+      <div class="card-content">
+        <div class="card-top">
+          <div class="card-icon">💰</div>
+          <div class="dual-badge"><span class="badge-dual-d">D Definir</span><span class="badge-dual-c">C Controlar</span></div>
+        </div>
+        <div class="card-title">Calculadora de Beneficios Financieros</div>
+        <div class="card-desc">Cuantifica el impacto económico: horas, distancias, inventario, defectos. Proyecta en Fase D y evidencia en Fase C con ROI y Payback.</div>
+        <div class="card-footer"><span class="card-tag">ROI · Ahorro · Payback</span><span class="card-arrow">→</span></div>
       </div>
     </a>
   </div>
@@ -360,14 +374,17 @@
         <div class="card-footer"><span class="card-tag">KPIs · Antes vs Después</span><span class="card-arrow">→</span></div>
       </div>
     </a>
-    <div class="tool-card soon" style="--card-accent:var(--c-color)">
+    <a class="tool-card" href="beneficios-financieros.html" style="--card-accent:var(--c-color)">
       <div class="card-content">
-        <div class="card-top"><div class="card-icon">💰</div><div class="card-badge badge-soon">Próximamente</div></div>
-        <div class="card-title">Beneficios Financieros</div>
-        <div class="card-desc">Traduce las mejoras operacionales en impacto económico: ahorro, ROI y proyección anual.</div>
-        <div class="card-footer"><span class="card-tag">ROI · Financiero</span><span class="card-arrow">→</span></div>
+        <div class="card-top">
+          <div class="card-icon">💰</div>
+          <div class="dual-badge"><span class="badge-dual-d">D Definir</span><span class="badge-dual-c">C Controlar</span></div>
+        </div>
+        <div class="card-title">Calculadora de Beneficios Financieros</div>
+        <div class="card-desc">Horas, distancias, inventario y defectos convertidos en ahorro mensual, anual, ROI y Payback. Proyecta en Fase D, evidencia en Fase C.</div>
+        <div class="card-footer"><span class="card-tag">ROI · Ahorro · Payback</span><span class="card-arrow">→</span></div>
       </div>
-    </div>
+    </a>
     <div class="tool-card soon" style="--card-accent:var(--c-color)">
       <div class="card-content">
         <div class="card-top"><div class="card-icon">🔁</div><div class="card-badge badge-soon">Próximamente</div></div>
