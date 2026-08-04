@@ -14,7 +14,8 @@
       --text:#e6edf3;--muted:#8b949e;--faint:#484f58;
       --accent:#4f98a3;--accent2:#3fb950;--warn:#d29922;--danger:#f85149;
       --purple:#bc8cff;--orange:#ffa657;
-      --op:#4f98a3;--insp:#d29922;--transp:#ffa657;--dem:#bc8cff;--alm:#3fb950;
+      /* Colores ASME estandarizados */
+      --op:#4f98a3;--insp:#d29922;--transp:#ffa657;--dem:#f85149;--alm:#bc8cff;
       --radius:14px;--radius-sm:8px;
     }
     body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;flex-direction:column}
@@ -53,7 +54,6 @@
     .summary-title{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:10px}
     .sym-stat-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;font-size:11px}
     .sym-stat-icon{display:inline-flex;align-items:center;gap:6px}
-    .sym-dot{width:10px;height:10px;border-radius:50%;display:inline-block;flex-shrink:0}
     .sym-stat-val{font-weight:700;color:var(--text)}
     .total-row{border-top:1px solid var(--border);padding-top:8px;margin-top:4px;display:flex;justify-content:space-between;font-size:11px;font-weight:700}
 
@@ -82,22 +82,11 @@
     tbody td.step-cell{color:var(--muted);font-weight:700;font-size:11px;text-align:center;width:38px}
     tbody td.desc-cell{min-width:200px}
     tbody td.num-cell{text-align:right;width:80px}
-    tbody td.sym-cell{text-align:center;width:44px}
-
-    /* symbol circles in table */
-    .sym-circle{width:22px;height:22px;border-radius:50%;border:2.5px solid currentColor;display:inline-flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;cursor:help}
-    .sym-circle.active{}
-    .sym-circle.inactive{opacity:.13;border-style:dashed}
-    .sym-tri{width:0;height:0;border-left:11px solid transparent;border-right:11px solid transparent;border-bottom:19px solid currentColor;display:inline-block;opacity:.15;cursor:help}
-    .sym-tri.active{opacity:1}
-    .sym-sq{width:22px;height:22px;border:2.5px solid currentColor;display:inline-flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;cursor:help}
-    .sym-sq.inactive{opacity:.13;border-style:dashed}
-    .sym-diam{width:22px;height:22px;transform:rotate(45deg);border:2.5px solid currentColor;display:inline-block;opacity:.15;cursor:help}
-    .sym-diam.active{opacity:1}
-
-    /* vertical connector line */
-    .connector-cell{width:20px;text-align:center;padding:0!important}
-    .v-line{display:block;width:2px;background:var(--border);height:100%;min-height:28px;margin:0 auto}
+    tbody td.sym-cell{text-align:center;width:44px;cursor:pointer;transition:transform .15s}
+    tbody td.sym-cell:hover{transform:scale(1.18)}
+    /* inactive symbols via opacity wrapper */
+    .sym-inactive{opacity:.13;display:inline-flex}
+    .sym-active{display:inline-flex}
 
     /* desc editable */
     .desc-input{background:transparent;border:none;color:var(--text);font-family:inherit;font-size:12px;width:100%;outline:none;padding:0}
@@ -113,27 +102,18 @@
     .row-ctrl .btn-up:hover{border-color:var(--accent);color:var(--accent)}
     .row-ctrl .btn-down:hover{border-color:var(--accent);color:var(--accent)}
 
-    /* tipo selector */
-    .type-sel{display:flex;gap:4px;align-items:center}
-    .type-btn{width:24px;height:24px;border-radius:50%;border:2px solid var(--border);background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:10px;transition:all .15s;title:''}
-    .type-btn:hover{transform:scale(1.15)}
-    .type-btn.sel-op{border-color:var(--op);background:rgba(79,152,163,.2)}
-    .type-btn.sel-insp{border-color:var(--insp);background:rgba(210,153,34,.2)}
-    .type-btn.sel-transp{border-color:var(--transp);background:rgba(255,166,87,.2)}
-    .type-btn.sel-dem{border-color:var(--dem);background:rgba(188,140,255,.2)}
-    .type-btn.sel-alm{border-color:var(--alm);background:rgba(63,185,80,.2)}
-
     /* toolbar */
     .cg-toolbar{display:flex;align-items:center;gap:10px;margin-bottom:16px;flex-wrap:wrap}
     .cg-toolbar .section-title{font-size:17px;font-weight:700;flex:1}
     .cg-toolbar .section-title span{color:var(--accent)}
 
-    /* no rows msg */
-    .empty-msg{text-align:center;color:var(--faint);padding:40px 20px;font-size:13px}
-
     /* legend */
     .legend-row{display:flex;gap:16px;flex-wrap:wrap;margin-bottom:18px;align-items:center}
     .leg-item{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--muted)}
+    .leg-item span.leg-label{font-size:10px;color:var(--muted)}
+
+    /* no rows msg */
+    .empty-msg{text-align:center;color:var(--faint);padding:40px 20px;font-size:13px}
 
     /* observations */
     .obs-box{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:18px 22px;margin-top:24px}
@@ -151,7 +131,7 @@
       thead th{background:#f4f4f4;color:#444}
       tbody tr{border-bottom:1px solid #ddd}
       .cg-header-box{border:1px solid #ccc;background:#fff}
-      .sym-circle.inactive,.sym-sq.inactive{opacity:.08}
+      .sym-inactive{opacity:.08!important}
     }
     @media(max-width:700px){.sidebar{display:none}.content-area{padding:16px}}
   </style>
@@ -202,11 +182,11 @@
     <div class="sb-section">Resumen</div>
     <div class="summary-box">
       <div class="summary-title">Conteo por actividad</div>
-      <div class="sym-stat-row"><span class="sym-stat-icon"><span class="sym-dot" style="background:var(--op)"></span> Operación</span><span class="sym-stat-val" id="cnt-op">0</span></div>
-      <div class="sym-stat-row"><span class="sym-stat-icon"><span class="sym-dot" style="background:var(--insp)"></span> Inspección</span><span class="sym-stat-val" id="cnt-insp">0</span></div>
-      <div class="sym-stat-row"><span class="sym-stat-icon"><span class="sym-dot" style="background:var(--transp)"></span> Transporte</span><span class="sym-stat-val" id="cnt-transp">0</span></div>
-      <div class="sym-stat-row"><span class="sym-stat-icon"><span class="sym-dot" style="background:var(--dem)"></span> Demora</span><span class="sym-stat-val" id="cnt-dem">0</span></div>
-      <div class="sym-stat-row"><span class="sym-stat-icon"><span class="sym-dot" style="background:var(--alm)"></span> Almacenamiento</span><span class="sym-stat-val" id="cnt-alm">0</span></div>
+      <div class="sym-stat-row"><span class="sym-stat-icon" id="stat-icon-operacion"></span><span class="sym-stat-val" id="cnt-op">0</span></div>
+      <div class="sym-stat-row"><span class="sym-stat-icon" id="stat-icon-inspeccion"></span><span class="sym-stat-val" id="cnt-insp">0</span></div>
+      <div class="sym-stat-row"><span class="sym-stat-icon" id="stat-icon-transporte"></span><span class="sym-stat-val" id="cnt-transp">0</span></div>
+      <div class="sym-stat-row"><span class="sym-stat-icon" id="stat-icon-demora"></span><span class="sym-stat-val" id="cnt-dem">0</span></div>
+      <div class="sym-stat-row"><span class="sym-stat-icon" id="stat-icon-almacen"></span><span class="sym-stat-val" id="cnt-alm">0</span></div>
       <div class="total-row"><span>Total actividades</span><span id="cnt-total">0</span></div>
 
       <div style="margin-top:16px">
@@ -244,31 +224,21 @@
         </div>
       </div>
 
-      <!-- Toolbar -->
+      <!-- Toolbar + Legend -->
       <div class="cg-toolbar">
         <div class="section-title">Diagrama de <span>Actividades</span></div>
-        <!-- Legend -->
-        <div class="legend-row">
-          <div class="leg-item"><svg width="16" height="16" viewBox="0 0 22 22"><circle cx="11" cy="11" r="9" fill="none" stroke="#4f98a3" stroke-width="2.5"/></svg> Operación</div>
-          <div class="leg-item"><svg width="16" height="16" viewBox="0 0 22 22"><polygon points="11,2 20,20 2,20" fill="none" stroke="#d29922" stroke-width="2.5"/></svg> Inspección</div>
-          <div class="leg-item"><svg width="16" height="16" viewBox="0 0 22 22"><polygon points="11,2 20,11 11,20 2,11" fill="none" stroke="#ffa657" stroke-width="2.5"/></svg> Transporte</div>
-          <div class="leg-item"><svg width="20" height="12" viewBox="0 0 22 12"><path d="M2,6 Q11,0 20,6" fill="none" stroke="#bc8cff" stroke-width="2.5"/></svg> Demora</div>
-          <div class="leg-item"><svg width="16" height="16" viewBox="0 0 22 22"><rect x="2" y="2" width="18" height="18" fill="none" stroke="#3fb950" stroke-width="2.5"/></svg> Almacen.</div>
-        </div>
       </div>
+      <!-- Legend rendered by JS after ProcessSymbols loads -->
+      <div class="legend-row" id="legend-row"></div>
 
       <!-- TABLE -->
       <div class="cg-wrap">
         <table id="cg-table">
           <thead>
-            <tr>
+            <tr id="thead-tr">
               <th style="width:38px">#</th>
               <th style="min-width:200px;text-align:left">Descripción de la Actividad</th>
-              <th class="sym-th" title="Operación"><svg width="18" height="18" viewBox="0 0 22 22"><circle cx="11" cy="11" r="9" fill="none" stroke="#4f98a3" stroke-width="2.5"/></svg></th>
-              <th class="sym-th" title="Inspección"><svg width="18" height="18" viewBox="0 0 22 22"><polygon points="11,2 20,20 2,20" fill="none" stroke="#d29922" stroke-width="2.5"/></svg></th>
-              <th class="sym-th" title="Transporte"><svg width="18" height="18" viewBox="0 0 22 22"><polygon points="11,2 20,11 11,20 2,11" fill="none" stroke="#ffa657" stroke-width="2.5"/></svg></th>
-              <th class="sym-th" title="Demora"><svg width="22" height="14" viewBox="0 0 22 14"><path d="M2,7 Q11,1 20,7" fill="none" stroke="#bc8cff" stroke-width="2.5"/><path d="M2,7 Q11,13 20,7" fill="none" stroke="#bc8cff" stroke-width="2.5"/></svg></th>
-              <th class="sym-th" title="Almacenamiento"><svg width="18" height="18" viewBox="0 0 22 22"><rect x="2" y="2" width="18" height="18" fill="none" stroke="#3fb950" stroke-width="2.5"/></svg></th>
+              <!-- Symbol columns injected by JS -->
               <th class="num-cell" style="text-align:right">Tiempo (min)</th>
               <th class="num-cell" style="text-align:right">Dist. (m)</th>
               <th style="width:80px;text-align:left">Responsable</th>
@@ -276,8 +246,7 @@
               <th style="width:60px"></th>
             </tr>
           </thead>
-          <tbody id="cg-tbody">
-          </tbody>
+          <tbody id="cg-tbody"></tbody>
         </table>
       </div>
 
@@ -293,34 +262,64 @@
   </div>
 </div>
 
+<!-- Librería centralizada de símbolos ASME -->
+<script src="js/process-symbols.js"></script>
 <script>
+// ═══════════════════════════════════════
+// ALIAS desde la librería centralizada
+// ═══════════════════════════════════════
+const PS = window.ProcessSymbols;
+const TYPES  = PS.TABLE_TYPES;  // ['operacion','inspeccion','transporte','demora','almacen']
+const TYPE_COLORS = PS.COLORS;
+const TYPE_LABELS = PS.LABELS;
+
+// Mapa legacy para compatibilidad JSON antiguo
+const LEGACY_MAP = { op:'operacion', insp:'inspeccion', transp:'transporte', dem:'demora', alm:'almacen' };
+function normType(t) { return LEGACY_MAP[t] || t || 'operacion'; }
+
+// ═══════════════════════════════════════
+// CONSTRUIR THEAD y LEYENDA
+// ═══════════════════════════════════════
+function buildTheadAndLegend() {
+  const tr = document.getElementById('thead-tr');
+  // Insertar columnas de símbolos antes de las columnas fijas (después de columna desc)
+  // Las columnas fijas son: tiempo, dist, resp, obs, ctrl => 5 al final
+  // Posición: después del 2do th (desc)
+  const fixedStart = tr.children[2]; // primer th fijo después de desc
+  TYPES.forEach(type => {
+    const th = document.createElement('th');
+    th.className = 'sym-th';
+    th.title = TYPE_LABELS[type] + ' — ' + PS.SUBLABELS[type];
+    th.innerHTML = PS.makeSVGLegend(type);
+    tr.insertBefore(th, fixedStart);
+  });
+
+  // Leyenda
+  const legRow = document.getElementById('legend-row');
+  TYPES.forEach(type => {
+    const div = document.createElement('div');
+    div.className = 'leg-item';
+    div.innerHTML = PS.makeSVGLegend(type) + `<span class="leg-label">${TYPE_LABELS[type]}</span>`;
+    legRow.appendChild(div);
+  });
+
+  // Iconos del sidebar resumen
+  TYPES.forEach((type, i) => {
+    const idMap = ['operacion','inspeccion','transporte','demora','almacen'];
+    const el = document.getElementById('stat-icon-' + type);
+    if (el) el.innerHTML = PS.makeSVGSmall(type) + ' <span style="margin-left:4px">' + TYPE_LABELS[type] + '</span>';
+  });
+}
+
 // ═══════════════════════════════════════
 // DATA MODEL
 // ═══════════════════════════════════════
-const TYPES = ['op','insp','transp','dem','alm'];
-const TYPE_COLORS = {op:'#4f98a3', insp:'#d29922', transp:'#ffa657', dem:'#bc8cff', alm:'#3fb950'};
-const TYPE_LABELS = {op:'Operación', insp:'Inspección', transp:'Transporte', dem:'Demora', alm:'Almacenamiento'};
-const TYPE_SYMBOLS = {
-  op: `<svg width="20" height="20" viewBox="0 0 22 22"><circle cx="11" cy="11" r="9" fill="rgba(79,152,163,.18)" stroke="#4f98a3" stroke-width="2.5"/></svg>`,
-  insp: `<svg width="20" height="20" viewBox="0 0 22 22"><polygon points="11,2 20,20 2,20" fill="rgba(210,153,34,.18)" stroke="#d29922" stroke-width="2.5"/></svg>`,
-  transp: `<svg width="20" height="20" viewBox="0 0 22 22"><polygon points="11,2 20,11 11,20 2,11" fill="rgba(255,166,87,.18)" stroke="#ffa657" stroke-width="2.5"/></svg>`,
-  dem: `<svg width="22" height="20" viewBox="0 0 22 20"><path d="M2,10 Q11,2 20,10" fill="none" stroke="#bc8cff" stroke-width="2.5"/><path d="M2,10 Q11,18 20,10" fill="none" stroke="#bc8cff" stroke-width="2.5"/></svg>`,
-  alm: `<svg width="20" height="20" viewBox="0 0 22 22"><rect x="2" y="2" width="18" height="18" fill="rgba(63,185,80,.18)" stroke="#3fb950" stroke-width="2.5"/></svg>`
-};
-
 let rows = [];
 let rowIdCounter = 0;
 
-function newRow(type='op') {
-  return {
-    id: 'r'+(++rowIdCounter),
-    desc: '',
-    type,
-    time: '',
-    dist: '',
-    resp: '',
-    obs: ''
-  };
+function newRow(type) {
+  type = normType(type || 'operacion');
+  return { id:'r'+(++rowIdCounter), desc:'', type, time:'', dist:'', resp:'', obs:'' };
 }
 
 // ═══════════════════════════════════════
@@ -341,26 +340,27 @@ function renderTable() {
 }
 
 function buildRowHTML(row, idx) {
-  const c = TYPE_COLORS[row.type];
-  const sym = TYPE_SYMBOLS[row.type];
-  // Build symbol columns — active for row type, inactive for others
-  const cols = TYPES.map(t => {
-    const active = t === row.type;
-    const col = TYPE_COLORS[t];
-    const icon = t === row.type ? TYPE_SYMBOLS[t] : dimSymbol(t);
-    // connector line between rows via vertical line hack — just show symbol
-    return `<td class="sym-cell" style="color:${col}">${icon}</td>`;
+  const type = normType(row.type);
+  const symLarge = PS.makeSVGSmall(type);
+
+  // Columnas de símbolos
+  const symCols = TYPES.map(t => {
+    const isActive = t === type;
+    const svgHtml = isActive
+      ? `<span class="sym-active">${PS.makeSVGSmall(t)}</span>`
+      : `<span class="sym-inactive">${PS.makeSVGSmall(t)}</span>`;
+    return `<td class="sym-cell" data-type="${t}" title="${TYPE_LABELS[t]}">${svgHtml}</td>`;
   }).join('');
 
   return `
     <td class="step-cell">${idx+1}</td>
     <td class="desc-cell">
       <div style="display:flex;align-items:center;gap:8px">
-        <div style="flex-shrink:0">${sym}</div>
+        <div style="flex-shrink:0">${symLarge}</div>
         <input class="desc-input" type="text" value="${esc(row.desc)}" placeholder="Descripción de la actividad…" data-field="desc">
       </div>
     </td>
-    ${cols}
+    ${symCols}
     <td class="num-cell"><input class="num-input" type="number" min="0" step="0.01" value="${esc(row.time)}" placeholder="—" data-field="time"></td>
     <td class="num-cell"><input class="num-input" type="number" min="0" step="0.1" value="${esc(row.dist)}" placeholder="—" data-field="dist"></td>
     <td><input class="desc-input" type="text" value="${esc(row.resp)}" placeholder="—" data-field="resp" style="max-width:90px"></td>
@@ -375,271 +375,211 @@ function buildRowHTML(row, idx) {
   `;
 }
 
-function dimSymbol(t) {
-  const col = TYPE_COLORS[t];
-  const maps = {
-    op: `<svg width="20" height="20" viewBox="0 0 22 22"><circle cx="11" cy="11" r="9" fill="none" stroke="${col}" stroke-width="2" opacity=".15"/></svg>`,
-    insp: `<svg width="20" height="20" viewBox="0 0 22 22"><polygon points="11,2 20,20 2,20" fill="none" stroke="${col}" stroke-width="2" opacity=".15"/></svg>`,
-    transp: `<svg width="20" height="20" viewBox="0 0 22 22"><polygon points="11,2 20,11 11,20 2,11" fill="none" stroke="${col}" stroke-width="2" opacity=".15"/></svg>`,
-    dem: `<svg width="22" height="20" viewBox="0 0 22 20"><path d="M2,10 Q11,2 20,10" fill="none" stroke="${col}" stroke-width="2" opacity=".15"/><path d="M2,10 Q11,18 20,10" fill="none" stroke="${col}" stroke-width="2" opacity=".15"/></svg>`,
-    alm: `<svg width="20" height="20" viewBox="0 0 22 22"><rect x="2" y="2" width="18" height="18" fill="none" stroke="${col}" stroke-width="2" opacity=".15"/></svg>`
-  };
-  return maps[t] || '';
-}
-
 function esc(v) {
-  if (v === undefined || v === null) return '';
+  if (v===undefined||v===null) return '';
   return String(v).replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 }
 
 function attachRowEvents(tr, row, idx) {
-  // editable inputs
   tr.querySelectorAll('[data-field]').forEach(input => {
-    input.addEventListener('change', e => {
-      const field = e.target.dataset.field;
-      row[field] = e.target.value;
-      updateSummary();
-    });
-    input.addEventListener('input', e => {
-      row[e.target.dataset.field] = e.target.value;
+    input.addEventListener('change', e => { row[e.target.dataset.field]=e.target.value; updateSummary(); });
+    input.addEventListener('input',  e => {
+      row[e.target.dataset.field]=e.target.value;
       if (['time','dist'].includes(e.target.dataset.field)) updateSummary();
     });
   });
 
-  // symbol cells click → change type
-  TYPES.forEach((t, i) => {
-    const cell = tr.querySelectorAll('.sym-cell')[i];
-    if (cell) {
-      cell.style.cursor = 'pointer';
-      cell.title = 'Cambiar a ' + TYPE_LABELS[t];
-      cell.addEventListener('click', () => {
-        row.type = t;
-        renderTable();
-      });
-    }
+  // Click en celda de símbolo → cambiar tipo
+  tr.querySelectorAll('.sym-cell').forEach(cell => {
+    cell.addEventListener('click', () => {
+      row.type = cell.dataset.type;
+      renderTable();
+    });
   });
 
-  // row controls
-  const btnUp = tr.querySelector('.btn-up');
-  const btnDown = tr.querySelector('.btn-down');
+  const btnUp  = tr.querySelector('.btn-up');
+  const btnDn  = tr.querySelector('.btn-down');
   const btnDel = tr.querySelector('.btn-del');
-
-  if (btnUp) btnUp.addEventListener('click', () => {
-    if (idx === 0) return;
-    [rows[idx-1], rows[idx]] = [rows[idx], rows[idx-1]];
-    renderTable();
-  });
-  if (btnDown) btnDown.addEventListener('click', () => {
-    if (idx === rows.length-1) return;
-    [rows[idx], rows[idx+1]] = [rows[idx+1], rows[idx]];
-    renderTable();
-  });
-  if (btnDel) btnDel.addEventListener('click', () => {
-    if (rows.length > 0 && !confirm('¿Eliminar esta actividad?')) return;
-    rows.splice(idx, 1);
-    renderTable();
-  });
+  if (btnUp)  btnUp.addEventListener('click',  () => { if (idx>0){[rows[idx-1],rows[idx]]=[rows[idx],rows[idx-1]];renderTable();}});
+  if (btnDn)  btnDn.addEventListener('click',  () => { if (idx<rows.length-1){[rows[idx],rows[idx+1]]=[rows[idx+1],rows[idx]];renderTable();}});
+  if (btnDel) btnDel.addEventListener('click', () => { if(!confirm('¿Eliminar esta actividad?'))return; rows.splice(idx,1); renderTable(); });
 }
 
 // ═══════════════════════════════════════
 // SUMMARY
 // ═══════════════════════════════════════
 function updateSummary() {
-  const counts = {op:0, insp:0, transp:0, dem:0, alm:0};
-  let totalTime = 0, vaTime = 0, totalDist = 0, transpDist = 0;
+  const counts = {operacion:0,inspeccion:0,transporte:0,demora:0,almacen:0};
+  let totalTime=0,vaTime=0,totalDist=0,transpDist=0;
   rows.forEach(r => {
-    counts[r.type] = (counts[r.type]||0)+1;
-    const t = parseFloat(r.time)||0;
-    const d = parseFloat(r.dist)||0;
-    totalTime += t;
-    if (r.type === 'op') vaTime += t;
-    totalDist += d;
-    if (r.type === 'transp') transpDist += d;
+    const t = normType(r.type);
+    counts[t]=(counts[t]||0)+1;
+    const tm=parseFloat(r.time)||0, d=parseFloat(r.dist)||0;
+    totalTime+=tm;
+    if (t==='operacion') vaTime+=tm;
+    totalDist+=d;
+    if (t==='transporte') transpDist+=d;
   });
-  document.getElementById('cnt-op').textContent = counts.op;
-  document.getElementById('cnt-insp').textContent = counts.insp;
-  document.getElementById('cnt-transp').textContent = counts.transp;
-  document.getElementById('cnt-dem').textContent = counts.dem;
-  document.getElementById('cnt-alm').textContent = counts.alm;
+  document.getElementById('cnt-op').textContent    = counts.operacion;
+  document.getElementById('cnt-insp').textContent  = counts.inspeccion;
+  document.getElementById('cnt-transp').textContent= counts.transporte;
+  document.getElementById('cnt-dem').textContent   = counts.demora;
+  document.getElementById('cnt-alm').textContent   = counts.almacen;
   document.getElementById('cnt-total').textContent = rows.length;
-  document.getElementById('sum-time').textContent = totalTime.toFixed(2);
-  document.getElementById('sum-va').textContent = vaTime.toFixed(2);
-  document.getElementById('pct-va').textContent = totalTime > 0 ? (vaTime/totalTime*100).toFixed(1)+'%' : '—';
-  document.getElementById('sum-dist').textContent = totalDist.toFixed(1);
-  document.getElementById('sum-dist-t').textContent = transpDist.toFixed(1);
+  document.getElementById('sum-time').textContent  = totalTime.toFixed(2);
+  document.getElementById('sum-va').textContent    = vaTime.toFixed(2);
+  document.getElementById('pct-va').textContent    = totalTime>0?(vaTime/totalTime*100).toFixed(1)+'%':'—';
+  document.getElementById('sum-dist').textContent  = totalDist.toFixed(1);
+  document.getElementById('sum-dist-t').textContent= transpDist.toFixed(1);
 }
 
 // ═══════════════════════════════════════
 // HEADER PREVIEW SYNC
 // ═══════════════════════════════════════
-const hdrFields = [
-  ['hdr-proceso','prev-proceso'],
-  ['hdr-elaborado','prev-elaborado'],
-  ['hdr-depto','prev-depto'],
-  ['hdr-hoja','prev-hoja'],
+const hdrFields=[
+  ['hdr-proceso','prev-proceso'],['hdr-elaborado','prev-elaborado'],
+  ['hdr-depto','prev-depto'],['hdr-hoja','prev-hoja']
 ];
-hdrFields.forEach(([inId, outId]) => {
-  const el = document.getElementById(inId);
-  const out = document.getElementById(outId);
-  if (!el||!out) return;
-  el.addEventListener('input', () => { out.textContent = el.value || '—'; });
+hdrFields.forEach(([inId,outId])=>{
+  const el=document.getElementById(inId),out=document.getElementById(outId);
+  if(!el||!out)return;
+  el.addEventListener('input',()=>{out.textContent=el.value||'—';});
 });
-
-['hdr-sujeto','hdr-metodo'].forEach(id => {
-  const el = document.getElementById(id);
-  const outId = id.replace('hdr-','prev-');
-  el.addEventListener('change', () => {
-    document.getElementById(outId).textContent = el.options[el.selectedIndex].text;
-  });
+['hdr-sujeto','hdr-metodo'].forEach(id=>{
+  const el=document.getElementById(id);
+  const outId=id.replace('hdr-','prev-');
+  el.addEventListener('change',()=>{document.getElementById(outId).textContent=el.options[el.selectedIndex].text;});
 });
-
-document.getElementById('hdr-fecha').addEventListener('input', e => {
-  const v = e.target.value;
-  document.getElementById('prev-fecha').textContent = v ? new Date(v+'T00:00:00').toLocaleDateString('es-BO',{day:'2-digit',month:'short',year:'numeric'}) : '—';
+document.getElementById('hdr-fecha').addEventListener('input',e=>{
+  const v=e.target.value;
+  document.getElementById('prev-fecha').textContent=v?new Date(v+'T00:00:00').toLocaleDateString('es-BO',{day:'2-digit',month:'short',year:'numeric'}):'—';
 });
 
 // ═══════════════════════════════════════
 // ADD ROW
 // ═══════════════════════════════════════
-document.getElementById('btn-add-row').addEventListener('click', () => {
-  rows.push(newRow('op'));
+document.getElementById('btn-add-row').addEventListener('click',()=>{
+  rows.push(newRow('operacion'));
   renderTable();
-  // scroll to last row
-  setTimeout(() => {
-    const tbody = document.getElementById('cg-tbody');
-    const last = tbody.lastElementChild;
-    if (last) last.scrollIntoView({behavior:'smooth', block:'center'});
-    const inp = last?.querySelector('.desc-input');
-    if (inp) inp.focus();
-  }, 50);
+  setTimeout(()=>{
+    const last=document.getElementById('cg-tbody').lastElementChild;
+    if(last){last.scrollIntoView({behavior:'smooth',block:'center'});}
+    const inp=last?.querySelector('.desc-input');
+    if(inp)inp.focus();
+  },50);
 });
 
 // ═══════════════════════════════════════
 // CLEAR
 // ═══════════════════════════════════════
-document.getElementById('btn-clear').addEventListener('click', () => {
-  if (rows.length === 0 || confirm('¿Limpiar todas las actividades?')) {
-    rows = [];
-    renderTable();
-  }
+document.getElementById('btn-clear').addEventListener('click',()=>{
+  if(rows.length===0||confirm('¿Limpiar todas las actividades?')){rows=[];renderTable();}
 });
 
 // ═══════════════════════════════════════
-// SAVE JSON
+// SAVE / LOAD JSON
 // ═══════════════════════════════════════
-function getHeaderData() {
-  return {
-    proceso: document.getElementById('hdr-proceso').value,
-    sujeto: document.getElementById('hdr-sujeto').value,
-    metodo: document.getElementById('hdr-metodo').value,
-    fecha: document.getElementById('hdr-fecha').value,
-    elaborado: document.getElementById('hdr-elaborado').value,
-    depto: document.getElementById('hdr-depto').value,
-    hoja: document.getElementById('hdr-hoja').value,
-    obs: document.getElementById('obs-general').value
+function getHeaderData(){
+  return{
+    proceso:document.getElementById('hdr-proceso').value,
+    sujeto:document.getElementById('hdr-sujeto').value,
+    metodo:document.getElementById('hdr-metodo').value,
+    fecha:document.getElementById('hdr-fecha').value,
+    elaborado:document.getElementById('hdr-elaborado').value,
+    depto:document.getElementById('hdr-depto').value,
+    hoja:document.getElementById('hdr-hoja').value,
+    obs:document.getElementById('obs-general').value
   };
 }
-
-document.getElementById('btn-export-json').addEventListener('click', () => {
-  const data = {header: getHeaderData(), rows, rowIdCounter};
-  const blob = new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
-  const a = document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='cursograma-analitico.json'; a.click();
+document.getElementById('btn-export-json').addEventListener('click',()=>{
+  const data={header:getHeaderData(),rows,rowIdCounter};
+  const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='cursograma-analitico.json';a.click();
 });
-
-// ═══════════════════════════════════════
-// LOAD JSON
-// ═══════════════════════════════════════
-document.getElementById('btn-import-json').addEventListener('click', () => document.getElementById('file-input').click());
-document.getElementById('file-input').addEventListener('change', e => {
-  const file = e.target.files[0]; if (!file) return;
-  const reader = new FileReader();
-  reader.onload = ev => {
-    try {
-      const data = JSON.parse(ev.target.result);
-      rowIdCounter = data.rowIdCounter || 0;
-      rows = data.rows || [];
-      const h = data.header || {};
-      ['proceso','sujeto','metodo','fecha','elaborado','depto','hoja'].forEach(k => {
-        const el = document.getElementById('hdr-'+k);
-        if (el && h[k] !== undefined) el.value = h[k];
+document.getElementById('btn-import-json').addEventListener('click',()=>document.getElementById('file-input').click());
+document.getElementById('file-input').addEventListener('change',e=>{
+  const file=e.target.files[0];if(!file)return;
+  const reader=new FileReader();
+  reader.onload=ev=>{
+    try{
+      const data=JSON.parse(ev.target.result);
+      rowIdCounter=data.rowIdCounter||0;
+      // Normalizar tipos legacy al cargar
+      rows=(data.rows||[]).map(r=>({...r, type:normType(r.type)}));
+      const h=data.header||{};
+      ['proceso','sujeto','metodo','fecha','elaborado','depto','hoja'].forEach(k=>{
+        const el=document.getElementById('hdr-'+k);
+        if(el&&h[k]!==undefined)el.value=h[k];
       });
-      if (h.obs) document.getElementById('obs-general').value = h.obs;
-      // trigger preview updates
-      hdrFields.forEach(([inId, outId]) => {
-        const el=document.getElementById(inId); const out=document.getElementById(outId);
-        if(el&&out) out.textContent = el.value||'—';
+      if(h.obs)document.getElementById('obs-general').value=h.obs;
+      hdrFields.forEach(([inId,outId])=>{
+        const el=document.getElementById(inId),out=document.getElementById(outId);
+        if(el&&out)out.textContent=el.value||'—';
       });
       renderTable();
-    } catch(err) { alert('Error al cargar: '+err.message); }
+    }catch(err){alert('Error al cargar: '+err.message);}
   };
   reader.readAsText(file);
-  e.target.value = '';
+  e.target.value='';
 });
 
 // ═══════════════════════════════════════
 // EXPORT CSV
 // ═══════════════════════════════════════
-document.getElementById('btn-export-csv').addEventListener('click', () => {
-  const h = getHeaderData();
-  const lines = [];
-  lines.push('Cursograma Analítico — ' + (h.proceso||'Sin nombre'));
-  lines.push('Sujeto,' + h.sujeto + ',Método,' + h.metodo + ',Fecha,' + h.fecha);
-  lines.push('Elaborado por,' + h.elaborado + ',Depto.,' + h.depto);
+document.getElementById('btn-export-csv').addEventListener('click',()=>{
+  const h=getHeaderData();
+  const lines=[];
+  lines.push('Cursograma Analítico — '+(h.proceso||'Sin nombre'));
+  lines.push('Sujeto,'+h.sujeto+',Método,'+h.metodo+',Fecha,'+h.fecha);
+  lines.push('Elaborado por,'+h.elaborado+',Depto.,'+h.depto);
   lines.push('');
   lines.push('#,Descripción,Tipo,Tiempo (min),Distancia (m),Responsable,Observaciones');
-  rows.forEach((r,i) => {
-    lines.push([i+1, csvQ(r.desc), TYPE_LABELS[r.type], r.time||'', r.dist||'', csvQ(r.resp), csvQ(r.obs)].join(','));
-  });
+  rows.forEach((r,i)=>{lines.push([i+1,csvQ(r.desc),TYPE_LABELS[normType(r.type)],r.time||'',r.dist||'',csvQ(r.resp),csvQ(r.obs)].join(','));});
   lines.push('');
-  lines.push('Observaciones generales,' + csvQ(h.obs));
-  const blob = new Blob([lines.join('\n')], {type:'text/csv;charset=utf-8;'});
-  const a = document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='cursograma-analitico.csv'; a.click();
+  lines.push('Observaciones generales,'+csvQ(h.obs));
+  const blob=new Blob([lines.join('\n')],{type:'text/csv;charset=utf-8;'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='cursograma-analitico.csv';a.click();
 });
-
-function csvQ(v) { v = String(v||''); if(v.includes(',')||v.includes('"')) v='"'+v.replace(/"/g,'""')+'"'; return v; }
+function csvQ(v){v=String(v||'');if(v.includes(',')||v.includes('"'))v='"'+v.replace(/"/g,'""')+'"';return v;}
 
 // ═══════════════════════════════════════
 // PRINT
 // ═══════════════════════════════════════
-document.getElementById('btn-print').addEventListener('click', () => window.print());
+document.getElementById('btn-print').addEventListener('click',()=>window.print());
 
 // ═══════════════════════════════════════
-// KEYBOARD SHORTCUTS
+// KEYBOARD
 // ═══════════════════════════════════════
-document.addEventListener('keydown', e => {
-  if ((e.ctrlKey||e.metaKey) && e.key === 'Enter') {
-    document.getElementById('btn-add-row').click();
-  }
+document.addEventListener('keydown',e=>{
+  if((e.ctrlKey||e.metaKey)&&e.key==='Enter'){document.getElementById('btn-add-row').click();}
 });
 
 // ═══════════════════════════════════════
-// INIT WITH EXAMPLE
+// INIT
 // ═══════════════════════════════════════
-window.addEventListener('load', () => {
-  // Set default date
-  document.getElementById('hdr-fecha').value = new Date().toISOString().slice(0,10);
-  document.getElementById('prev-fecha').textContent = new Date().toLocaleDateString('es-BO',{day:'2-digit',month:'short',year:'numeric'});
+window.addEventListener('load',()=>{
+  buildTheadAndLegend();
 
-  // Default header
-  document.getElementById('hdr-proceso').value = 'Proceso de Ejemplo';
-  document.getElementById('prev-proceso').textContent = 'Proceso de Ejemplo';
-  document.getElementById('prev-sujeto').textContent = 'Operario';
-  document.getElementById('prev-metodo').textContent = 'Actual';
+  document.getElementById('hdr-fecha').value=new Date().toISOString().slice(0,10);
+  document.getElementById('prev-fecha').textContent=new Date().toLocaleDateString('es-BO',{day:'2-digit',month:'short',year:'numeric'});
+  document.getElementById('hdr-proceso').value='Proceso de Ejemplo';
+  document.getElementById('prev-proceso').textContent='Proceso de Ejemplo';
+  document.getElementById('prev-sujeto').textContent='Operario';
+  document.getElementById('prev-metodo').textContent='Actual';
 
-  // Example rows
-  const examples = [
-    {type:'op',   desc:'Recibir orden de trabajo', time:'2', dist:'', resp:'Operario'},
-    {type:'transp',desc:'Trasladar materiales a estación', time:'1.5', dist:'15', resp:'Operario'},
-    {type:'op',   desc:'Preparar herramientas y materiales', time:'3', dist:'', resp:'Operario'},
-    {type:'op',   desc:'Ejecutar operación principal', time:'12', dist:'', resp:'Operario'},
-    {type:'insp', desc:'Verificar calidad del producto', time:'2', dist:'', resp:'Inspector'},
-    {type:'dem',  desc:'Espera aprobación de calidad', time:'5', dist:'', resp:''},
-    {type:'transp',desc:'Transportar a siguiente estación', time:'1', dist:'10', resp:'Operario'},
-    {type:'alm',  desc:'Almacenar producto terminado', time:'1', dist:'', resp:'Almacén'},
+  const examples=[
+    {type:'operacion',  desc:'Recibir orden de trabajo',          time:'2',   dist:'',  resp:'Operario'},
+    {type:'transporte', desc:'Trasladar materiales a estación',   time:'1.5', dist:'15',resp:'Operario'},
+    {type:'operacion',  desc:'Preparar herramientas y materiales',time:'3',   dist:'',  resp:'Operario'},
+    {type:'operacion',  desc:'Ejecutar operación principal',      time:'12',  dist:'',  resp:'Operario'},
+    {type:'inspeccion', desc:'Verificar calidad del producto',    time:'2',   dist:'',  resp:'Inspector'},
+    {type:'demora',     desc:'Espera aprobación de calidad',      time:'5',   dist:'',  resp:''},
+    {type:'transporte', desc:'Transportar a siguiente estación',  time:'1',   dist:'10',resp:'Operario'},
+    {type:'almacen',    desc:'Almacenar producto terminado',      time:'1',   dist:'',  resp:'Almacén'},
   ];
-  examples.forEach(ex => {
-    const r = newRow(ex.type);
-    r.desc = ex.desc; r.time = ex.time; r.dist = ex.dist; r.resp = ex.resp || '';
+  examples.forEach(ex=>{
+    const r=newRow(ex.type);
+    r.desc=ex.desc;r.time=ex.time;r.dist=ex.dist;r.resp=ex.resp||'';
     rows.push(r);
   });
   renderTable();
