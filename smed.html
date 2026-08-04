@@ -14,6 +14,10 @@
   --accent:#3fb950;--yellow:#e8c44a;--red:#f85149;--orange:#ffa657;--blue:#4f98a3;
   --i-color:#3fb950;
   --radius:14px;
+  /* ASME SMED: INT=operacion(teal), EXT=transporte(orange), CONV=demora(red) */
+  --int-color:#4f98a3;
+  --ext-color:#3fb950;
+  --conv-color:#e8c44a;
 }
 body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
 
@@ -60,12 +64,12 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-h
 .chip{display:flex;align-items:center;gap:6px;padding:5px 14px;border-radius:99px;font-size:11px;font-weight:700;border:1.5px solid currentColor}
 .chip-val{font-size:18px;font-weight:900;line-height:1}
 
-/* FASES SMED */
-.phases-legend{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:16px}
-.phase-pill{display:flex;align-items:center;gap:6px;padding:5px 14px;border-radius:99px;font-size:11px;font-weight:700;border:1.5px solid transparent}
-.pill-int{background:rgba(248,81,73,.15);color:var(--red);border-color:rgba(248,81,73,.35)}
-.pill-ext{background:rgba(63,185,80,.15);color:var(--accent);border-color:rgba(63,185,80,.35)}
-.pill-conv{background:rgba(232,196,74,.15);color:var(--yellow);border-color:rgba(232,196,74,.35)}
+/* FASES SMED — con símbolos ASME */
+.phases-legend{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:16px;align-items:center}
+.phase-pill{display:flex;align-items:center;gap:7px;padding:5px 14px;border-radius:99px;font-size:11px;font-weight:700;border:1.5px solid transparent}
+.pill-int{background:rgba(79,152,163,.15);color:var(--int-color);border-color:rgba(79,152,163,.35)}
+.pill-ext{background:rgba(63,185,80,.15);color:var(--ext-color);border-color:rgba(63,185,80,.35)}
+.pill-conv{background:rgba(232,196,74,.15);color:var(--conv-color);border-color:rgba(232,196,74,.35)}
 
 /* TABLE */
 .smed-wrap{overflow-x:auto;margin-bottom:8px}
@@ -79,10 +83,14 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-h
 .smed-table td select{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:5px;color:var(--text);font-size:11px;font-family:'Inter',sans-serif;padding:4px 5px}
 .smed-table td select:focus{outline:none;border-color:var(--accent)}
 
-/* TIPO BADGE */
-.tipo-int{background:rgba(248,81,73,.18);color:var(--red);padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700}
-.tipo-ext{background:rgba(63,185,80,.18);color:var(--accent);padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700}
-.tipo-conv{background:rgba(232,196,74,.18);color:var(--yellow);padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700}
+/* TIPO BADGE con símbolo ASME */
+.tipo-badge{display:inline-flex;align-items:center;gap:5px;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700}
+.tipo-int{background:rgba(79,152,163,.18);color:var(--int-color)}
+.tipo-ext{background:rgba(63,185,80,.18);color:var(--ext-color)}
+.tipo-conv{background:rgba(232,196,74,.18);color:var(--conv-color)}
+
+/* Celda icono tipo */
+.tipo-icon-cell{text-align:center;width:32px;vertical-align:middle;padding:4px 2px!important}
 
 /* ROW NUM */
 .row-num{text-align:center;color:var(--muted);font-size:11px;font-weight:700}
@@ -103,8 +111,8 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-h
 
 /* OPORTUNIDADES */
 .opp-list{display:flex;flex-direction:column;gap:8px}
-.opp-card{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:12px 14px;display:grid;grid-template-columns:1fr auto;gap:8px;align-items:start}
-.opp-card.opp-high{border-left:3px solid var(--red)}
+.opp-card{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:12px 14px;display:grid;grid-template-columns:auto 1fr auto;gap:10px;align-items:start}
+.opp-card.opp-high{border-left:3px solid var(--conv-color)}
 .opp-card.opp-mid{border-left:3px solid var(--yellow)}
 .opp-card.opp-low{border-left:3px solid var(--accent)}
 .opp-title{font-size:12px;font-weight:700;margin-bottom:3px}
@@ -141,7 +149,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-h
 <div class="hero">
   <div class="hero-eye">🟢 Mejorar — Largotek Lean Suite</div>
   <h1>SMED — Cambios Rápidos</h1>
-  <p class="hero-sub">Separa actividades <strong style="color:var(--red)">Internas</strong> (máquina parada) de <strong style="color:var(--accent)">Externas</strong> (máquina corriendo) y convierte las internas en externas para reducir el tiempo de cambio. Meta: <strong style="color:var(--yellow)">&lt; 10 minutos</strong>.</p>
+  <p class="hero-sub">Separa actividades <strong style="color:var(--int-color)">Internas</strong> (máquina parada) de <strong style="color:var(--ext-color)">Externas</strong> (máquina corriendo) y convierte las internas en externas para reducir el tiempo de cambio. Meta: <strong style="color:var(--conv-color)">&lt; 10 minutos</strong>.</p>
 </div>
 
 <div class="wrap">
@@ -172,13 +180,16 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-h
     <div class="card-body">
       <div class="chips-row">
         <div class="chip" style="color:var(--muted)"><span class="chip-val" id="s-total">0</span> seg Tiempo Total Actual</div>
-        <div class="chip" style="color:var(--red)"><span class="chip-val" id="s-int">0</span> seg Internas</div>
-        <div class="chip" style="color:var(--accent)"><span class="chip-val" id="s-ext">0</span> seg Externas</div>
-        <div class="chip" style="color:var(--yellow)"><span class="chip-val" id="s-conv">0</span> seg Convertibles</div>
+        <div class="chip" style="color:var(--int-color)"><span class="chip-val" id="s-int">0</span> seg Internas</div>
+        <div class="chip" style="color:var(--ext-color)"><span class="chip-val" id="s-ext">0</span> seg Externas</div>
+        <div class="chip" style="color:var(--conv-color)"><span class="chip-val" id="s-conv">0</span> seg Convertibles</div>
         <div class="chip" style="color:var(--blue)"><span class="chip-val" id="s-meta">0</span> seg Tiempo Meta</div>
-        <div class="chip" style="color:var(--accent)"><span class="chip-val" id="s-saving">0</span> % Reducción</div>
+        <div class="chip" style="color:var(--ext-color)"><span class="chip-val" id="s-saving">0</span> % Reducción</div>
       </div>
-      <div style="margin-top:10px;font-size:11px;color:var(--muted)">Tiempo total en minutos: <strong id="s-total-min" style="color:var(--text)">0 min</strong> &nbsp;→&nbsp; Meta: <strong id="s-meta-min" style="color:var(--accent)">0 min</strong></div>
+      <div style="margin-top:10px;font-size:11px;color:var(--muted)">Tiempo total en minutos: <strong id="s-total-min" style="color:var(--text)">0 min</strong> &nbsp;→&nbsp; Meta: <strong id="s-meta-min" style="color:var(--ext-color)">0 min</strong></div>
+
+      <!-- Leyenda ASME para SMED -->
+      <div id="smed-legend" style="margin-top:14px;display:flex;flex-wrap:wrap;gap:14px;align-items:center;"></div>
     </div>
   </div>
 
@@ -186,16 +197,14 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-h
   <div class="card">
     <div class="card-head"><span class="card-icon">⏱️</span><span class="card-title">Registro de Actividades del Cambio</span><span class="card-sub">Interno = máquina parada · Externo = máquina en marcha</span></div>
     <div class="card-body">
-      <div class="phases-legend">
-        <div class="phase-pill pill-int">🔴 Interna — Solo con máquina parada</div>
-        <div class="phase-pill pill-ext">🟢 Externa — Puede hacerse en marcha</div>
-        <div class="phase-pill pill-conv">🟡 Convertible — Puede pasar a Externa</div>
-      </div>
+      <!-- Phases legend with ASME symbols -->
+      <div class="phases-legend" id="phases-legend"></div>
       <div class="smed-wrap">
         <table class="smed-table" id="smed-table">
           <thead>
             <tr>
               <th style="width:28px">#</th>
+              <th style="width:30px" title="Símbolo ASME"></th>
               <th style="min-width:160px">Actividad / Tarea</th>
               <th style="min-width:90px">Tipo actual</th>
               <th style="width:80px">Tiempo (seg)</th>
@@ -237,28 +246,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-h
   <div class="card">
     <div class="card-head"><span class="card-icon">📖</span><span class="card-title">Guía Metodológica SMED (4 Pasos)</span></div>
     <div class="card-body">
-      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px">
-        <div style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:14px">
-          <div style="font-size:22px;margin-bottom:6px">🎥</div>
-          <div style="font-size:11px;font-weight:800;color:var(--muted);letter-spacing:.06em;text-transform:uppercase;margin-bottom:5px">Paso 1 — Observar y Cronometrar</div>
-          <div style="font-size:11.5px;color:var(--muted);line-height:1.6">Filma el cambio completo y registra cada actividad con su duración real. No improvises: trabaja con datos.</div>
-        </div>
-        <div style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:14px">
-          <div style="font-size:22px;margin-bottom:6px">🔴</div>
-          <div style="font-size:11px;font-weight:800;color:var(--red);letter-spacing:.06em;text-transform:uppercase;margin-bottom:5px">Paso 2 — Separar Internas / Externas</div>
-          <div style="font-size:11.5px;color:var(--muted);line-height:1.6">Clasifica cada actividad: ¿requiere que la máquina esté parada? Si no, es externa. Este paso solo ya reduce el tiempo hasta un 50%.</div>
-        </div>
-        <div style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:14px">
-          <div style="font-size:22px;margin-bottom:6px">🟡</div>
-          <div style="font-size:11px;font-weight:800;color:var(--yellow);letter-spacing:.06em;text-transform:uppercase;margin-bottom:5px">Paso 3 — Convertir Internas en Externas</div>
-          <div style="font-size:11.5px;color:var(--muted);line-height:1.6">Busca actividades internas que puedan hacerse antes o después del paro: preparó, herramientas, materiales, fixtures.</div>
-        </div>
-        <div style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:14px">
-          <div style="font-size:22px;margin-bottom:6px">⚡</div>
-          <div style="font-size:11px;font-weight:800;color:var(--accent);letter-spacing:.06em;text-transform:uppercase;margin-bottom:5px">Paso 4 — Optimizar Todo</div>
-          <div style="font-size:11.5px;color:var(--muted);line-height:1.6">Elimina ajustes con utillajes rápidos, estandariza secuencias, reduce desplazamientos y paralleliza tareas para llegar a &lt;10 min.</div>
-        </div>
-      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px" id="guide-grid"></div>
     </div>
   </div>
 
@@ -273,21 +261,86 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-h
 </div>
 <div class="toast" id="toast">✅ Guardado en caché</div>
 
+<!-- Librería centralizada de símbolos ASME -->
+<script src="js/process-symbols.js"></script>
 <script>
+const PS = window.ProcessSymbols;
 const KEY = 'largotek_smed';
 const INFO = ['p-maq','p-from','p-to','p-owner','p-date','p-turno','p-notes'];
 
+// Mapa SMED tipo → símbolo ASME
+// INT (Interna, máquina parada) → operacion (círculo: trabajo que se EJECUTA)
+// EXT (Externa, en marcha)       → transporte (flecha: se puede MOVER/realizar fuera)
+// CONV (Convertible)             → demora (D: es una ESPERA/retraso que debe eliminarse)
+const TIPO_ASME = {
+  INT:  { type:'operacion',  color:'#4f98a3', label:'Interna',     sub:'Máquina parada' },
+  EXT:  { type:'transporte', color:'#3fb950', label:'Externa',     sub:'Máquina en marcha' },
+  CONV: { type:'demora',     color:'#e8c44a', label:'Convertible', sub:'Pasar a externa' },
+};
+
 let rowCount = 0;
 
-function tipoClass(t){
-  if(t==='INT') return 'tipo-int';
-  if(t==='EXT') return 'tipo-ext';
-  return 'tipo-conv';
+// ─── INIT UI ──────────────────────────────────────────────────────
+function initUI() {
+  buildPhasesLegend();
+  buildSmedLegend();
+  buildGuideGrid();
 }
-function tipoLabel(t){
-  if(t==='INT') return '🔴 Interna';
-  if(t==='EXT') return '🟢 Externa';
-  return '🟡 Convertible';
+
+function buildPhasesLegend() {
+  const el = document.getElementById('phases-legend');
+  el.innerHTML = Object.entries(TIPO_ASME).map(([key, info]) => `
+    <div class="phase-pill pill-${key.toLowerCase()}" style="color:${info.color};background:rgba(${hexToRgb(info.color)},.12);border-color:rgba(${hexToRgb(info.color)},.35)">
+      ${PS.makeSVGSmall(info.type, info.color)}
+      <span>${info.label} — ${info.sub}</span>
+    </div>
+  `).join('');
+}
+
+function buildSmedLegend() {
+  const el = document.getElementById('smed-legend');
+  el.innerHTML = '<span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-right:4px">Símbolos ASME:</span>' +
+    Object.entries(TIPO_ASME).map(([key, info]) => `
+      <span style="display:inline-flex;align-items:center;gap:5px;font-size:11px;color:${info.color}">
+        ${PS.makeSVGSmall(info.type, info.color)}
+        <span>${info.label}</span>
+      </span>
+    `).join('');
+}
+
+function buildGuideGrid() {
+  const steps = [
+    { icon:'🎥', color:'var(--muted)', title:'Paso 1 — Observar y Cronometrar',
+      body:'Filma el cambio completo y registra cada actividad con su duración real. No improvises: trabaja con datos.' },
+    { icon:'INT', color:'var(--int-color)', title:'Paso 2 — Separar Internas / Externas',
+      body:'Clasifica cada actividad: ¿requiere que la máquina esté parada? Si no, es externa. Este paso solo ya reduce el tiempo hasta un 50%.' },
+    { icon:'CONV', color:'var(--conv-color)', title:'Paso 3 — Convertir Internas en Externas',
+      body:'Busca actividades internas que puedan hacerse antes o después del paro: preparación, herramientas, materiales, fixtures.' },
+    { icon:'⚡', color:'var(--ext-color)', title:'Paso 4 — Optimizar Todo',
+      body:'Elimina ajustes con utillajes rápidos, estandariza secuencias, reduce desplazamientos y paraleliza tareas para llegar a <10 min.' },
+  ];
+  const grid = document.getElementById('guide-grid');
+  grid.innerHTML = steps.map(s => {
+    const iconHtml = TIPO_ASME[s.icon]
+      ? PS.makeSVGMedium(TIPO_ASME[s.icon].type, TIPO_ASME[s.icon].color)
+      : `<span style="font-size:22px">${s.icon}</span>`;
+    return `<div style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:14px">
+      <div style="margin-bottom:6px;display:flex;align-items:center;gap:6px">${iconHtml}</div>
+      <div style="font-size:11px;font-weight:800;color:${s.color};letter-spacing:.06em;text-transform:uppercase;margin-bottom:5px">${s.title}</div>
+      <div style="font-size:11.5px;color:var(--muted);line-height:1.6">${s.body}</div>
+    </div>`;
+  }).join('');
+}
+
+function hexToRgb(hex) {
+  const r=parseInt(hex.slice(1,3),16),g=parseInt(hex.slice(3,5),16),b=parseInt(hex.slice(5,7),16);
+  return `${r},${g},${b}`;
+}
+
+// ─── ROWS ────────────────────────────────────────────────────────
+function getTipoIcon(tipo) {
+  const info = TIPO_ASME[tipo] || TIPO_ASME['INT'];
+  return PS.makeSVGSmall(info.type, info.color);
 }
 
 function addRow(d={}){
@@ -296,16 +349,17 @@ function addRow(d={}){
   const tr = document.createElement('tr');
   tr.innerHTML = `
     <td class="row-num">${tbody.children.length+1}</td>
+    <td class="tipo-icon-cell" id="icon-cell-${rowCount}">${getTipoIcon(d.tipo||'INT')}</td>
     <td><input placeholder="Ej: Buscar herramientas" value="${d.act||''}" oninput="updateAll()"></td>
     <td>
-      <select class="sel-tipo" onchange="updateAll()">
+      <select class="sel-tipo" onchange="updateIconCell(this);updateAll()">
         <option value="INT" ${d.tipo==='INT'||!d.tipo?'selected':''}>Interna</option>
         <option value="EXT" ${d.tipo==='EXT'?'selected':''}>Externa</option>
         <option value="CONV" ${d.tipo==='CONV'?'selected':''}>Convertible</option>
       </select>
     </td>
     <td><input type="number" min="0" class="inp-t" placeholder="seg" value="${d.t||''}" oninput="updateAll()"></td>
-    <td><div class="bar-wrap"><div class="bar-fill bar-act" style="width:0%;background:var(--red)"></div></div></td>
+    <td><div class="bar-wrap"><div class="bar-fill bar-act" style="width:0%"></div></div></td>
     <td><input placeholder="Ej: Preparar en máquina corriendo" value="${d.opp||''}" oninput="autoSave()"></td>
     <td>
       <select class="sel-prop" onchange="updateAll()">
@@ -321,6 +375,12 @@ function addRow(d={}){
   `;
   tbody.appendChild(tr);
   updateAll();
+}
+
+function updateIconCell(sel) {
+  const tr = sel.closest('tr');
+  const iconCell = tr.querySelector('.tipo-icon-cell');
+  if (iconCell) iconCell.innerHTML = getTipoIcon(sel.value);
 }
 
 function renumber(){
@@ -343,12 +403,16 @@ function updateAll(){
     else if(tipo==='EXT') totalExt+=t;
     else totalConv+=t;
     totalMeta+=tp;
-    // bar
+    // bar color por tipo ASME
     const bar = tr.querySelector('.bar-act');
+    const info = TIPO_ASME[tipo] || TIPO_ASME['INT'];
     if(bar){
       bar.style.width = Math.round(t/maxT*100)+'%';
-      bar.style.background = tipo==='INT'?'var(--red)':tipo==='EXT'?'var(--accent)':'var(--yellow)';
+      bar.style.background = info.color;
     }
+    // Actualizar icono si el tipo cambió (seguridad)
+    const iconCell = tr.querySelector('.tipo-icon-cell');
+    if(iconCell) iconCell.innerHTML = getTipoIcon(tipo);
   });
 
   document.getElementById('s-total').textContent = total;
@@ -372,36 +436,47 @@ function renderGantt(rows){
   const totalT = rows.reduce((s,tr)=>s+(parseInt(tr.querySelector('.inp-t')?.value)||0),0);
   if(!totalT){svg.innerHTML='<text x="12" y="30" fill="#484f58" font-size="12">Ingresa tiempos para ver el diagrama.</text>';svg.setAttribute('height',60);return;}
   const W = Math.max(svg.parentElement.offsetWidth-20,400);
-  const BAR_H = 28, PAD=8, LABEL_W=0;
-  const totalH = (BAR_H+PAD)*2+40;
+  const BAR_H=28, PAD=8;
+  const totalH=(BAR_H+PAD)*2+50;
   svg.setAttribute('height',totalH);
   svg.setAttribute('viewBox',`0 0 ${W} ${totalH}`);
   let html='';
-  // Row 1: actual
-  html+=`<text x="0" y="16" fill="#8b949e" font-size="10" font-weight="700" letter-spacing=".06em">ACTUAL</text>`;
+
+  // Fila 1: Actual
+  html+=`<text x="0" y="14" fill="#8b949e" font-size="10" font-weight="700" letter-spacing=".06em">ACTUAL</text>`;
   let cx=0;
   rows.forEach((tr,i)=>{
     const t=parseInt(tr.querySelector('.inp-t')?.value)||0;
     const tipo=tr.querySelector('.sel-tipo')?.value||'INT';
-    const color=tipo==='INT'?'#f85149':tipo==='EXT'?'#3fb950':'#e8c44a';
+    const info=TIPO_ASME[tipo]||TIPO_ASME['INT'];
     const w=Math.max((t/totalT)*(W-2),1);
-    html+=`<rect x="${cx}" y="20" width="${w}" height="${BAR_H}" fill="${color}" rx="3" opacity=".85"><title>${tr.querySelectorAll('input')[0]?.value||'Actividad '+(i+1)}: ${t}s</title></rect>`;
-    if(w>22) html+=`<text x="${cx+4}" y="${20+BAR_H/2+4}" fill="#0d1117" font-size="9" font-weight="700">${t}s</text>`;
+    html+=`<rect x="${cx}" y="18" width="${w}" height="${BAR_H}" fill="${info.color}" rx="3" opacity=".85"><title>${tr.querySelectorAll('input')[0]?.value||'Actividad '+(i+1)}: ${t}s (${info.label})</title></rect>`;
+    if(w>24) html+=`<text x="${cx+4}" y="${18+BAR_H/2+4}" fill="#0d1117" font-size="9" font-weight="700">${t}s</text>`;
     cx+=w;
   });
-  // Row 2: propuesto
-  const totalTP=rows.reduce((s,tr)=>s+(parseInt(tr.querySelector('.inp-tp')?.value)||0),0)||totalT;
-  html+=`<text x="0" y="${20+BAR_H+PAD+14}" fill="#8b949e" font-size="10" font-weight="700" letter-spacing=".06em">PROPUESTO</text>`;
+
+  // Fila 2: Propuesto
+  html+=`<text x="0" y="${18+BAR_H+PAD+14}" fill="#8b949e" font-size="10" font-weight="700" letter-spacing=".06em">PROPUESTO</text>`;
   cx=0;
   rows.forEach((tr,i)=>{
     const tp=parseInt(tr.querySelector('.inp-tp')?.value)||parseInt(tr.querySelector('.inp-t')?.value)||0;
     const prop=tr.querySelector('.sel-prop')?.value||'EXT';
-    const color=prop==='INT'?'#f85149':prop==='EXT'?'#3fb950':'#e8c44a';
+    const info=TIPO_ASME[prop]||TIPO_ASME['EXT'];
     const w=Math.max((tp/totalT)*(W-2),1);
-    html+=`<rect x="${cx}" y="${20+BAR_H+PAD+18}" width="${w}" height="${BAR_H}" fill="${color}" rx="3" opacity=".85"><title>${tr.querySelectorAll('input')[0]?.value||'Actividad '+(i+1)}: ${tp}s</title></rect>`;
-    if(w>22) html+=`<text x="${cx+4}" y="${20+BAR_H+PAD+18+BAR_H/2+4}" fill="#0d1117" font-size="9" font-weight="700">${tp}s</text>`;
+    html+=`<rect x="${cx}" y="${18+BAR_H+PAD+18}" width="${w}" height="${BAR_H}" fill="${info.color}" rx="3" opacity=".85"><title>${tr.querySelectorAll('input')[0]?.value||'Actividad '+(i+1)}: ${tp}s (${info.label})</title></rect>`;
+    if(w>24) html+=`<text x="${cx+4}" y="${18+BAR_H+PAD+18+BAR_H/2+4}" fill="#0d1117" font-size="9" font-weight="700">${tp}s</text>`;
     cx+=w;
   });
+
+  // Mini leyenda de colores debajo del Gantt
+  const lyY = 18+BAR_H*2+PAD+30;
+  let lx = 0;
+  Object.values(TIPO_ASME).forEach(info=>{
+    html+=`<rect x="${lx}" y="${lyY}" width="12" height="12" fill="${info.color}" rx="2"/>`;
+    html+=`<text x="${lx+16}" y="${lyY+10}" fill="#8b949e" font-size="10">${info.label}</text>`;
+    lx+=80;
+  });
+
   svg.innerHTML=html;
 }
 
@@ -409,26 +484,29 @@ function renderOpps(rows){
   const el=document.getElementById('opp-list');
   const opps=rows.filter(tr=>{
     const tipo=tr.querySelector('.sel-tipo')?.value;
-    const opp=tr.querySelectorAll('input')[4]?.value;
+    const opp=tr.querySelectorAll('input')[1]?.value; // input[1] = opp field (after act)
     return tipo==='CONV'||opp;
   });
   if(!opps.length){el.innerHTML='<p style="font-size:12px;color:var(--muted)">Las oportunidades aparecerán aquí cuando marques actividades como Convertibles o ingreses una oportunidad.</p>';return;}
   el.innerHTML=opps.map(tr=>{
-    const act=tr.querySelectorAll('input')[0]?.value||'Actividad';
-    const opp=tr.querySelectorAll('input')[4]?.value||'Convertir a actividad externa';
+    const inps=tr.querySelectorAll('input');
+    const act=inps[0]?.value||'Actividad';
+    const opp=inps[1]?.value||'Convertir a actividad externa';
     const t=parseInt(tr.querySelector('.inp-t')?.value)||0;
     const tp=parseInt(tr.querySelector('.inp-tp')?.value)||t;
     const saving=t-tp;
-    const tipo=tr.querySelector('.sel-tipo')?.value;
+    const tipo=tr.querySelector('.sel-tipo')?.value||'INT';
+    const info=TIPO_ASME[tipo]||TIPO_ASME['INT'];
     const cls=tipo==='CONV'?'opp-high':'opp-mid';
     return `<div class="opp-card ${cls}">
+      <div style="padding-top:2px">${PS.makeSVGSmall(info.type, info.color)}</div>
       <div><div class="opp-title">${act}</div><div class="opp-desc">${opp}</div></div>
       <div class="opp-saving">${saving>0?'−'+saving+'s ahorro':t+'s'}</div>
     </div>`;
   }).join('');
 }
 
-// ─ SAVE / LOAD ─
+// ─── SAVE / LOAD ─────────────────────────────────────────────────
 let saveTimer;
 function autoSave(){clearTimeout(saveTimer);saveTimer=setTimeout(saveLocal,900);}
 
@@ -448,6 +526,7 @@ function saveLocal(){
 }
 
 function loadLocal(){
+  initUI();
   const raw=localStorage.getItem(KEY);
   if(!raw){addRow();addRow();addRow();updateAll();return;}
   try{
@@ -460,7 +539,7 @@ function loadLocal(){
       const lbl=document.getElementById('saved-lbl');if(lbl)lbl.textContent='Último guardado: '+t;
     }
     updateAll();
-  }catch(e){addRow();addRow();addRow();updateAll();}
+  }catch(e){initUI();addRow();addRow();addRow();updateAll();}
 }
 
 function clearAll(){
