@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Lecciones Aprendidas — Largotek</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300..700&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#0d1117;--surface:#161b22;--surface2:#21262d;--border:#30363d;--text:#e6edf3;--muted:#8b949e;--faint:#3d444d;--red:#f85149;--green:#5fc97a;--yellow:#e8c44a;--cyan:#4f98a3;--violet:#bc8cff;--orange:#f78c3f;--radius:14px}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:13px 28px;border-bottom:1px solid var(--border);background:var(--surface)}
+.topbar-brand{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:var(--muted);text-decoration:none}.topbar-brand span{color:var(--red)}
+.topbar-right{display:flex;align-items:center;gap:8px}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:7px 15px;border-radius:8px;border:1.5px solid var(--border);background:transparent;color:var(--muted);font-size:12px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;transition:all .18s}.btn:hover{border-color:var(--red);color:var(--red)}.btn-primary{background:var(--red);color:#fff;border-color:var(--red)}.btn-primary:hover{opacity:.88}.btn-green{background:var(--green);color:#111;border-color:var(--green)}.btn-green:hover{opacity:.88}
+.saved-lbl{font-size:11px;color:var(--muted)}
+.hero{padding:32px 32px 20px;max-width:1100px;margin:0 auto}
+.hero-eye{font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--red);margin-bottom:8px}
+.hero h1{font-family:'Instrument Serif',serif;font-size:clamp(1.5rem,3vw,2.2rem);margin-bottom:6px}
+.hero-sub{font-size:13px;color:var(--muted);line-height:1.7}
+.wrap{max-width:1100px;margin:0 auto;padding:0 32px 80px}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:16px;overflow:hidden}
+.card-head{display:flex;align-items:center;gap:10px;padding:13px 18px;border-bottom:1px solid var(--faint);background:var(--surface2)}
+.card-title{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.card-body{padding:18px 20px}
+.meta-grid{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:12px}@media(max-width:800px){.meta-grid{grid-template-columns:1fr 1fr}}@media(max-width:460px){.meta-grid{grid-template-columns:1fr}}
+.field{display:flex;flex-direction:column;gap:5px}
+.field label{font-size:10px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--muted)}
+.field input,.field select,.field textarea{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:9px 12px;font-size:13px;color:var(--text);font-family:'Inter',sans-serif;transition:border-color .18s;width:100%}
+.field input:focus,.field select:focus,.field textarea:focus{outline:none;border-color:var(--red)}
+.field-full{grid-column:1/-1}
+.field textarea{resize:vertical;min-height:64px;line-height:1.65}
+
+/* STATS */
+.stats-row{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:16px}@media(max-width:800px){.stats-row{grid-template-columns:repeat(3,1fr)}}@media(max-width:500px){.stats-row{grid-template-columns:repeat(2,1fr)}}
+.stat-box{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px 16px}
+.stat-label{font-size:10px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
+.stat-value{font-size:1.4rem;font-weight:800}
+
+/* LECCIONES TABLE */
+.lec-table{width:100%;border-collapse:collapse;font-size:12px;min-width:980px}
+.lec-table th{text-align:left;padding:9px 10px;background:var(--surface2);color:var(--muted);font-size:10px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;border-bottom:1px solid var(--border);white-space:nowrap}
+.lec-table td{padding:6px 6px;border-top:1px solid var(--faint);vertical-align:middle}
+.lec-table td input,.lec-table td select,.lec-table td textarea{width:100%;background:transparent;border:1px solid transparent;color:var(--text);font-size:12px;font-family:'Inter',sans-serif;padding:4px 6px;border-radius:5px;transition:border .15s;resize:none}
+.lec-table td input:focus,.lec-table td select:focus,.lec-table td textarea:focus{outline:none;border-color:var(--red);background:var(--surface2)}
+.lec-table td select{background:var(--surface2);border-color:var(--border);cursor:pointer}
+.table-wrap{overflow-x:auto}
+.add-btn{display:inline-flex;align-items:center;gap:5px;margin-top:10px;padding:6px 14px;border-radius:6px;border:1px dashed var(--border);background:transparent;color:var(--muted);font-size:11px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;transition:all .18s}.add-btn:hover{border-color:var(--red);color:var(--red)}
+.del-btn{background:transparent;border:none;color:var(--faint);cursor:pointer;font-size:14px;padding:0 4px;transition:color .15s}.del-btn:hover{color:var(--red)}
+
+/* CATEGORY COLORS */
+.cat-exito{color:var(--green)}
+.cat-dificultad{color:var(--yellow)}
+.cat-error{color:var(--red)}
+.cat-rec{color:var(--cyan)}
+.cat-sorpresa{color:var(--violet)}
+
+/* FILTER TABS */
+.filter-tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px}
+.f-tab{padding:5px 13px;border-radius:99px;border:1.5px solid var(--border);background:transparent;color:var(--muted);font-size:11px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif;transition:all .18s}
+.f-tab.active,.f-tab:hover{border-color:var(--red);color:var(--red);background:rgba(248,81,73,.07)}
+
+/* SEMAFORO / IMPACTO */
+.imp-high{color:var(--green);font-weight:700}
+.imp-med{color:var(--yellow);font-weight:700}
+.imp-low{color:var(--muted)}
+
+/* CIERRE */
+.cierre-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}@media(max-width:700px){.cierre-grid{grid-template-columns:1fr}}
+.text-area-card{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:14px 16px}
+.text-area-card label{font-size:10px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:8px}
+.text-area-card textarea{width:100%;background:transparent;border:none;color:var(--text);font-family:'Inter',sans-serif;font-size:13px;line-height:1.65;resize:vertical;min-height:100px}.text-area-card textarea:focus{outline:none}
+
+/* FIRMAS */
+.firma-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}@media(max-width:600px){.firma-grid{grid-template-columns:1fr}}
+.firma-box{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:14px 16px}
+.firma-box label{font-size:10px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:8px}
+.firma-box input{width:100%;background:transparent;border:none;border-bottom:1px solid var(--border);color:var(--text);font-family:'Inter',sans-serif;font-size:13px;padding:4px 0}.firma-box input:focus{outline:none;border-bottom-color:var(--red)}
+.firma-sub{font-size:10px;color:var(--faint);margin-top:6px;text-align:center}
+
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:#1e3a2e;border:1px solid var(--green);color:var(--green);padding:10px 22px;border-radius:99px;font-size:13px;font-weight:600;opacity:0;transition:all .3s;z-index:999;white-space:nowrap}.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+@media print{.topbar,.btn,.add-btn,.del-btn,.filter-tabs{display:none!important}body{background:#fff;color:#111}.card,.stat-box,.text-area-card,.firma-box{border-color:#ccc;background:#fff}.lec-table th{background:#f0f0f0;color:#333}}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <a href="index.html" class="topbar-brand">← <span>Largotek</span> Lean Suite</a>
+  <div class="topbar-right">
+    <span class="saved-lbl" id="saved-lbl"></span>
+    <button class="btn" onclick="clearAll()">🗑 Limpiar</button>
+    <button class="btn btn-green" onclick="exportCSV()">📥 CSV</button>
+    <button class="btn" onclick="saveLocal()">💾 Guardar</button>
+    <button class="btn btn-primary" onclick="window.print()">🖨 PDF</button>
+  </div>
+</div>
+
+<div class="hero">
+  <div class="hero-eye">📚 Lecciones Aprendidas — Largotek Lean Suite · Cierre Fase C</div>
+  <h1>Lecciones Aprendidas del Proyecto</h1>
+  <p class="hero-sub">Documenta éxitos, dificultades, errores, sorpresas y recomendaciones del proyecto. Alimenta la base de conocimiento institucional para futuros proyectos Yellow Belt y Green Belt.</p>
+</div>
+
+<div class="wrap">
+
+  <!-- META -->
+  <div class="card">
+    <div class="card-head"><span>🏷️</span><span class="card-title">Datos del proyecto</span></div>
+    <div class="card-body meta-grid">
+      <div class="field"><label>Nombre del proyecto</label><input id="m-proyecto" placeholder="Ej: Reducción de lead time almacén"></div>
+      <div class="field"><label>Empresa / Planta</label><input id="m-empresa" placeholder="Ej: Largotek SRL"></div>
+      <div class="field"><label>Fecha de cierre</label><input id="m-fecha" type="date"></div>
+      <div class="field"><label>Black Belt / Responsable</label><input id="m-lider" placeholder="Nombre completo"></div>
+      <div class="field"><label>Proceso / Área</label><input id="m-area" placeholder="Ej: Almacén — Picking"></div>
+      <div class="field"><label>Duración del proyecto</label><input id="m-duracion" placeholder="Ej: 3 meses"></div>
+      <div class="field"><label>Equipo del proyecto</label><input id="m-equipo" placeholder="Ej: 4 personas — Almacén, Calidad"></div>
+      <div class="field"><label>Estado final</label>
+        <select id="m-estado">
+          <option value="exitoso">✅ Exitoso</option>
+          <option value="parcial">🟡 Parcialmente logrado</option>
+          <option value="reformulado">🔁 Reformulado</option>
+          <option value="cerrado">📌 Cerrado sin meta</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <!-- STATS -->
+  <div class="stats-row">
+    <div class="stat-box"><div class="stat-label">Total lecciones</div><div class="stat-value" id="s-total">0</div></div>
+    <div class="stat-box"><div class="stat-label">✅ Éxitos</div><div class="stat-value" style="color:var(--green)" id="s-exito">0</div></div>
+    <div class="stat-box"><div class="stat-label">⚠ Dificultades</div><div class="stat-value" style="color:var(--yellow)" id="s-dif">0</div></div>
+    <div class="stat-box"><div class="stat-label">📢 Recomendaciones</div><div class="stat-value" style="color:var(--cyan)" id="s-rec">0</div></div>
+    <div class="stat-box"><div class="stat-label">💡 Impacto alto</div><div class="stat-value" style="color:var(--violet)" id="s-alto">0</div></div>
+  </div>
+
+  <!-- TABLA -->
+  <div class="card">
+    <div class="card-head">
+      <span>📝</span><span class="card-title">Registro de lecciones</span>
+      <div style="margin-left:auto;display:flex;gap:6px;flex-wrap:wrap">
+        <button class="f-tab active" onclick="filterCat('todos',this)">Todos</button>
+        <button class="f-tab" onclick="filterCat('exito',this)">✅ Éxito</button>
+        <button class="f-tab" onclick="filterCat('dificultad',this)">⚠ Dificultad</button>
+        <button class="f-tab" onclick="filterCat('error',this)">❌ Error</button>
+        <button class="f-tab" onclick="filterCat('recomendacion',this)">📢 Recomendación</button>
+        <button class="f-tab" onclick="filterCat('sorpresa',this)">✨ Sorpresa</button>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="table-wrap">
+        <table class="lec-table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Tipo</th>
+              <th>Fase DMAIC</th>
+              <th>Descripción de la lección</th>
+              <th>Causa / contexto</th>
+              <th>Acción correctiva / Recomendación</th>
+              <th>Impacto</th>
+              <th>Aplicable a</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="lec-body"></tbody>
+        </table>
+      </div>
+      <button class="add-btn" onclick="addRow()">+ Agregar lección</button>
+    </div>
+  </div>
+
+  <!-- CIERRE NARRATIVO -->
+  <div class="card">
+    <div class="card-head"><span>🎯</span><span class="card-title">Resumen ejecutivo de cierre</span></div>
+    <div class="card-body">
+      <div class="cierre-grid">
+        <div class="text-area-card">
+          <label>💪 Mayores logros del proyecto</label>
+          <textarea id="c-logros" placeholder="Ej: Se redujo el lead time de 23 a 8 días, se eliminó el WIP intermedio y se implementó flujo continuo entre recepción y despacho."></textarea>
+        </div>
+        <div class="text-area-card">
+          <label>🚧 Principales obstáculos encontrados</label>
+          <textarea id="c-obstaculos" placeholder="Ej: Resistencia inicial del equipo al cambio de layout, falta de datos históricos en el sistema ERP."></textarea>
+        </div>
+        <div class="text-area-card">
+          <label>🔄 Qué haríamos diferente</label>
+          <textarea id="c-diferente" placeholder="Ej: Involucrar al equipo desde la fase de Definir para reducir resistencia. Validar disponibilidad de datos antes de Medir."></textarea>
+        </div>
+        <div class="text-area-card">
+          <label>📢 Recomendaciones para futuros proyectos</label>
+          <textarea id="c-recomendaciones" placeholder="Ej: Asignar un champion dedicado, no compartido. Usar VSM digital desde el inicio. Capacitar al equipo en 5S antes de iniciar la fase de Mejorar."></textarea>
+        </div>
+        <div class="text-area-card">
+          <label>🔒 Acciones de sostenibilidad definidas</label>
+          <textarea id="c-sostenibilidad" placeholder="Ej: Auditoría 5S mensual, revisión semanal del plan de control, indicador de lead time en tablero visual del área."></textarea>
+        </div>
+        <div class="text-area-card">
+          <label>💡 Conocimiento transferible a otras áreas</label>
+          <textarea id="c-transferible" placeholder="Ej: La metodología de mapeo VSM + balance de línea puede replicarse en el área de producción con resultados similares."></textarea>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FIRMAS -->
+  <div class="card">
+    <div class="card-head"><span>✍️</span><span class="card-title">Aprobación y cierre formal</span></div>
+    <div class="card-body">
+      <div class="firma-grid">
+        <div class="firma-box">
+          <label>Black Belt / Líder del proyecto</label>
+          <input id="f-bb" placeholder="Nombre">
+          <div style="border-top:1px solid var(--border);margin-top:28px;padding-top:6px">
+            <input id="f-bb-fecha" type="date">
+          </div>
+          <div class="firma-sub">Firma · Fecha</div>
+        </div>
+        <div class="firma-box">
+          <label>Champion / Patrocinador</label>
+          <input id="f-champ" placeholder="Nombre">
+          <div style="border-top:1px solid var(--border);margin-top:28px;padding-top:6px">
+            <input id="f-champ-fecha" type="date">
+          </div>
+          <div class="firma-sub">Firma · Fecha</div>
+        </div>
+        <div class="firma-box">
+          <label>Gerente / Responsable del Área</label>
+          <input id="f-gerente" placeholder="Nombre">
+          <div style="border-top:1px solid var(--border);margin-top:28px;padding-top:6px">
+            <input id="f-gerente-fecha" type="date">
+          </div>
+          <div class="firma-sub">Firma · Fecha</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+<div class="toast" id="toast">✅ Guardado en caché</div>
+
+<script>
+const KEY='largotek_lecciones';
+const META=['m-proyecto','m-empresa','m-fecha','m-lider','m-area','m-duracion','m-equipo','m-estado','c-logros','c-obstaculos','c-diferente','c-recomendaciones','c-sostenibilidad','c-transferible','f-bb','f-bb-fecha','f-champ','f-champ-fecha','f-gerente','f-gerente-fecha'];
+let rows=[];
+let currentFilter='todos';
+
+const TIPOS={
+  exito:{icon:'✅',label:'Éxito',cls:'cat-exito'},
+  dificultad:{icon:'⚠️',label:'Dificultad',cls:'cat-dificultad'},
+  error:{icon:'❌',label:'Error',cls:'cat-error'},
+  recomendacion:{icon:'📢',label:'Recomendación',cls:'cat-rec'},
+  sorpresa:{icon:'✨',label:'Sorpresa',cls:'cat-sorpresa'}
+};
+const FASES=['Definir','Medir','Analizar','Mejorar','Controlar','General'];
+const IMPACTOS=['Alto','Medio','Bajo'];
+
+function addRow(d={}){
+  rows.push({tipo:'exito',fase:'General',desc:'',causa:'',accion:'',impacto:'Alto',aplicable:'',...d});
+  renderTable();
+}
+
+function renderTable(){
+  const tbody=document.getElementById('lec-body');
+  tbody.innerHTML='';
+  rows.forEach((r,i)=>{
+    if(currentFilter!=='todos'&&r.tipo!==currentFilter)return;
+    const t=TIPOS[r.tipo]||TIPOS.exito;
+    const impCls=r.impacto==='Alto'?'imp-high':r.impacto==='Medio'?'imp-med':'imp-low';
+    const tr=document.createElement('tr');
+    tr.innerHTML=`
+      <td style="color:var(--muted);text-align:center;font-size:11px">${i+1}</td>
+      <td style="min-width:130px">
+        <select onchange="rows[${i}].tipo=this.value;renderTable()" style="background:var(--surface2);border:1px solid var(--border);border-radius:5px;color:var(--text);font-size:11px;padding:4px 6px;font-family:'Inter',sans-serif;width:100%">
+          ${Object.entries(TIPOS).map(([v,t2])=>`<option value="${v}" ${r.tipo===v?'selected':''}>${t2.icon} ${t2.label}</option>`).join('')}
+        </select>
+      </td>
+      <td style="min-width:110px">
+        <select onchange="rows[${i}].fase=this.value;autoSave()" style="background:var(--surface2);border:1px solid var(--border);border-radius:5px;color:var(--text);font-size:11px;padding:4px 6px;font-family:'Inter',sans-serif;width:100%">
+          ${FASES.map(f=>`<option value="${f}" ${r.fase===f?'selected':''}>${f}</option>`).join('')}
+        </select>
+      </td>
+      <td style="min-width:200px"><textarea rows="2" oninput="rows[${i}].desc=this.value;autoSave()">${esc(r.desc)}</textarea></td>
+      <td style="min-width:160px"><textarea rows="2" oninput="rows[${i}].causa=this.value;autoSave()">${esc(r.causa)}</textarea></td>
+      <td style="min-width:180px"><textarea rows="2" oninput="rows[${i}].accion=this.value;autoSave()">${esc(r.accion)}</textarea></td>
+      <td style="min-width:80px">
+        <select onchange="rows[${i}].impacto=this.value;renderTable()" style="background:var(--surface2);border:1px solid var(--border);border-radius:5px;font-size:11px;padding:4px 6px;font-family:'Inter',sans-serif;width:100%" class="${impCls}">
+          ${IMPACTOS.map(v=>`<option value="${v}" ${r.impacto===v?'selected':''}>${v}</option>`).join('')}
+        </select>
+      </td>
+      <td style="min-width:130px"><input value="${esc(r.aplicable)}" placeholder="Ej: Toda la planta" oninput="rows[${i}].aplicable=this.value;autoSave()"></td>
+      <td><button class="del-btn" onclick="rows.splice(${i},1);renderTable()">✕</button></td>`;
+    tbody.appendChild(tr);
+  });
+  updateStats();
+  autoSave();
+}
+
+function updateStats(){
+  document.getElementById('s-total').textContent=rows.length;
+  document.getElementById('s-exito').textContent=rows.filter(r=>r.tipo==='exito').length;
+  document.getElementById('s-dif').textContent=rows.filter(r=>r.tipo==='dificultad'||r.tipo==='error').length;
+  document.getElementById('s-rec').textContent=rows.filter(r=>r.tipo==='recomendacion').length;
+  document.getElementById('s-alto').textContent=rows.filter(r=>r.impacto==='Alto').length;
+}
+
+function filterCat(cat,btn){
+  currentFilter=cat;
+  document.querySelectorAll('.f-tab').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderTable();
+}
+
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;');}
+let timer;function autoSave(){clearTimeout(timer);timer=setTimeout(saveLocal,1200);}
+
+function saveLocal(){
+  const d={fields:{},rows,ts:new Date().toISOString()};
+  META.forEach(id=>{const el=document.getElementById(id);if(el)d.fields[id]=el.value;});
+  localStorage.setItem(KEY,JSON.stringify(d));
+  const t=new Date().toLocaleTimeString('es-BO',{hour:'2-digit',minute:'2-digit'});
+  const lbl=document.getElementById('saved-lbl');if(lbl)lbl.textContent='✓ Guardado '+t;
+  const toast=document.getElementById('toast');toast.classList.add('show');setTimeout(()=>toast.classList.remove('show'),2200);
+}
+
+function loadLocal(){
+  const raw=localStorage.getItem(KEY);
+  if(!raw){
+    addRow({tipo:'exito',fase:'Mejorar',desc:'El rediseño del layout eliminó completamente el WIP entre estaciones',causa:'Flujo de una pieza implementado exitosamente',accion:'Documentar y replicar en línea 2',impacto:'Alto',aplicable:'Líneas de producción'});
+    addRow({tipo:'dificultad',fase:'Medir',desc:'Datos históricos incompletos en el sistema ERP',causa:'No existía rutina de registro sistemático',accion:'Implementar hoja de recolección manual por 4 semanas antes de iniciar el proyecto',impacto:'Alto',aplicable:'Todos los proyectos futuros'});
+    addRow({tipo:'recomendacion',fase:'Definir',desc:'Involucrar al equipo operativo desde la fase de Definir',causa:'Resistencia al cambio en fases avanzadas por falta de involucramiento temprano',accion:'Realizar taller de sensibilización en semana 1 del proyecto',impacto:'Alto',aplicable:'Todos los proyectos DMAIC'});
+    addRow({tipo:'sorpresa',fase:'Controlar',desc:'El equipo adoptó el plan de control más rápido de lo esperado',causa:'Cultura de mejora previa y líderes naturales en el equipo',accion:'Identificar y desarrollar estos líderes como futuros champions',impacto:'Medio',aplicable:'Área de almacén'});
+    return;
+  }
+  try{
+    const d=JSON.parse(raw);
+    META.forEach(id=>{const el=document.getElementById(id);if(el&&d.fields[id]!=null)el.value=d.fields[id];});
+    rows=d.rows||[];
+    renderTable();
+    if(d.ts){const t=new Date(d.ts).toLocaleString('es-BO',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});const el=document.getElementById('saved-lbl');if(el)el.textContent='Último guardado: '+t;}
+  }catch(e){renderTable();}
+}
+
+function clearAll(){if(!confirm('¿Limpiar lecciones aprendidas?'))return;localStorage.removeItem(KEY);location.reload();}
+
+function exportCSV(){
+  const headers=['#','Tipo','Fase','Descripcion','Causa / Contexto','Accion / Recomendacion','Impacto','Aplicable a'];
+  const csv=[headers.join(',')];
+  rows.forEach((r,i)=>{
+    const t=TIPOS[r.tipo];
+    csv.push([i+1,t?t.label:r.tipo,r.fase,r.desc,r.causa,r.accion,r.impacto,r.aplicable].map(v=>`"${String(v||'').replace(/"/g,'""')}"`).join(','));
+  });
+  const blob=new Blob(['\uFEFF'+csv.join('\n')],{type:'text/csv;charset=utf-8;'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='lecciones-aprendidas.csv';a.click();
+}
+
+document.querySelectorAll('input,select,textarea').forEach(el=>el.addEventListener('input',()=>autoSave()));
+window.addEventListener('load',()=>{loadLocal();renderTable();});
+</script>
+<script src="branding.js"></script>
+</body>
+</html>
