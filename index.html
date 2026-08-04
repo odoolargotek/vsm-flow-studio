@@ -12,11 +12,8 @@
     :root{
       --bg:#0d1117;--surface:#161b22;--surface2:#21262d;--border:#30363d;
       --text:#e6edf3;--muted:#8b949e;--faint:#484f58;
-      --d-color:#4f98a3;
-      --m-color:#d29922;
-      --a-color:#bc8cff;
-      --i-color:#3fb950;
-      --c-color:#f85149;
+      --d-color:#4f98a3;--m-color:#d29922;--a-color:#bc8cff;
+      --i-color:#3fb950;--c-color:#f85149;
       --radius:14px;--radius-sm:8px;
     }
     html{scroll-behavior:smooth}
@@ -27,7 +24,7 @@
     .hero-title em{color:var(--d-color);font-style:italic}
     .hero-sub{font-size:14.5px;color:var(--muted);max-width:540px;margin:0 auto 28px;line-height:1.75}
     .dmaic-ribbon{display:flex;justify-content:center;gap:8px;flex-wrap:wrap;margin-bottom:12px}
-    .dmaic-pill{display:flex;align-items:center;gap:6px;padding:6px 16px;border-radius:99px;font-size:12px;font-weight:700;letter-spacing:.06em;text-decoration:none;border:1.5px solid transparent;transition:all .2s;cursor:pointer}
+    .dmaic-pill{display:flex;align-items:center;gap:6px;padding:6px 16px;border-radius:99px;font-size:12px;font-weight:700;letter-spacing:.06em;text-decoration:none;border:1.5px solid transparent;transition:all .2s}
     .dmaic-pill:hover{filter:brightness(1.15)}
     .dmaic-pill.d{background:rgba(79,152,163,.15);color:var(--d-color);border-color:rgba(79,152,163,.35)}
     .dmaic-pill.m{background:rgba(210,153,34,.15);color:var(--m-color);border-color:rgba(210,153,34,.35)}
@@ -36,7 +33,7 @@
     .dmaic-pill.c{background:rgba(248,81,73,.15);color:var(--c-color);border-color:rgba(248,81,73,.35)}
     .stats-bar{display:flex;justify-content:center;gap:32px;padding:20px 32px;border-top:1px solid var(--border);border-bottom:1px solid var(--border);background:var(--surface);flex-wrap:wrap}
     .stat{text-align:center}
-    .stat-val{font-size:20px;font-weight:700;color:var(--text)}
+    .stat-val{font-size:20px;font-weight:700}
     .stat-lbl{font-size:10px;color:var(--muted);margin-top:2px;letter-spacing:.05em;text-transform:uppercase}
     .phases{max-width:1000px;margin:0 auto;padding:36px 28px 64px;flex:1}
     .phase-header{display:flex;align-items:center;gap:12px;margin:44px 0 16px;scroll-margin-top:20px}
@@ -45,7 +42,7 @@
     .phase-desc{font-size:12px;color:var(--muted);font-weight:400;letter-spacing:0;text-transform:none;margin-left:4px}
     .phase-line{flex:1;height:1px;background:var(--border)}
     .tools-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(252px,1fr));gap:13px}
-    .tool-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px;cursor:pointer;text-decoration:none;color:inherit;display:flex;flex-direction:column;gap:9px;transition:all .22s;position:relative;overflow:hidden}
+    .tool-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px;text-decoration:none;color:inherit;display:flex;flex-direction:column;gap:9px;transition:all .22s;position:relative;overflow:hidden;cursor:pointer}
     .tool-card::after{content:'';position:absolute;inset:0;opacity:0;transition:opacity .22s;background:var(--card-accent,var(--d-color));border-radius:var(--radius)}
     .tool-card:hover{border-color:var(--card-accent,var(--d-color));transform:translateY(-3px);box-shadow:0 10px 28px rgba(0,0,0,.38)}
     .tool-card:hover::after{opacity:.05}
@@ -86,7 +83,7 @@
 </section>
 
 <div class="stats-bar">
-  <div class="stat"><div class="stat-val">26</div><div class="stat-lbl">Herramientas</div></div>
+  <div class="stat"><div class="stat-val">27</div><div class="stat-lbl">Herramientas</div></div>
   <div class="stat"><div class="stat-val">5</div><div class="stat-lbl">Fases DMAIC</div></div>
   <div class="stat"><div class="stat-val">Yellow Belt</div><div class="stat-lbl">Nivel</div></div>
   <div class="stat"><div class="stat-val">Largotek</div><div class="stat-lbl">Desarrollado por</div></div>
@@ -137,10 +134,7 @@
     </a>
     <a class="tool-card" href="beneficios-financieros.html" style="--card-accent:var(--d-color)">
       <div class="card-content">
-        <div class="card-top">
-          <div class="card-icon">💰</div>
-          <div class="dual-badge"><span class="badge-dual-d">D Definir</span><span class="badge-dual-c">C Controlar</span></div>
-        </div>
+        <div class="card-top"><div class="card-icon">💰</div><div class="dual-badge"><span class="badge-dual-d">D Definir</span><span class="badge-dual-c">C Controlar</span></div></div>
         <div class="card-title">Calculadora de Beneficios Financieros</div>
         <div class="card-desc">Cuantifica el impacto económico: horas, distancias, inventario, defectos. Proyecta en Fase D y evidencia en Fase C con ROI y Payback.</div>
         <div class="card-footer"><span class="card-tag">ROI · Ahorro · Payback</span><span class="card-arrow">→</span></div>
@@ -317,7 +311,7 @@
     </a>
     <a class="tool-card" href="smed.html" style="--card-accent:var(--i-color)">
       <div class="card-content">
-        <div class="card-top"><div class="card-icon">⏱️</div><div class="card-badge badge-new">✨ Nuevo</div></div>
+        <div class="card-top"><div class="card-icon">⏱️</div><div class="card-badge badge-active">Disponible</div></div>
         <div class="card-title">SMED — Cambios Rápidos</div>
         <div class="card-desc">Separa actividades internas y externas, diagrama actual vs. propuesto y cuantifica % de reducción del tiempo de cambio.</div>
         <div class="card-footer"><span class="card-tag">Single Minute Exchange</span><span class="card-arrow">→</span></div>
@@ -376,13 +370,18 @@
     </a>
     <a class="tool-card" href="beneficios-financieros.html" style="--card-accent:var(--c-color)">
       <div class="card-content">
-        <div class="card-top">
-          <div class="card-icon">💰</div>
-          <div class="dual-badge"><span class="badge-dual-d">D Definir</span><span class="badge-dual-c">C Controlar</span></div>
-        </div>
+        <div class="card-top"><div class="card-icon">💰</div><div class="dual-badge"><span class="badge-dual-d">D Definir</span><span class="badge-dual-c">C Controlar</span></div></div>
         <div class="card-title">Calculadora de Beneficios Financieros</div>
         <div class="card-desc">Horas, distancias, inventario y defectos convertidos en ahorro mensual, anual, ROI y Payback. Proyecta en Fase D, evidencia en Fase C.</div>
         <div class="card-footer"><span class="card-tag">ROI · Ahorro · Payback</span><span class="card-arrow">→</span></div>
+      </div>
+    </a>
+    <a class="tool-card" href="lecciones-aprendidas.html" style="--card-accent:var(--c-color)">
+      <div class="card-content">
+        <div class="card-top"><div class="card-icon">📚</div><div class="card-badge badge-new">✨ Nuevo</div></div>
+        <div class="card-title">Lecciones Aprendidas</div>
+        <div class="card-desc">Éxitos, dificultades, errores y recomendaciones del proyecto. Cierre formal con firmas de Black Belt, Champion y Gerente.</div>
+        <div class="card-footer"><span class="card-tag">Lessons Learned · Cierre</span><span class="card-arrow">→</span></div>
       </div>
     </a>
     <div class="tool-card soon" style="--card-accent:var(--c-color)">
@@ -391,14 +390,6 @@
         <div class="card-title">KATA — Ciclos de Mejora</div>
         <div class="card-desc">Tableros Kata, lista de obstáculos, registro de ciclos de mejora y tarjeta de preguntas Toyota.</div>
         <div class="card-footer"><span class="card-tag">Toyota Kata</span><span class="card-arrow">→</span></div>
-      </div>
-    </div>
-    <div class="tool-card soon" style="--card-accent:var(--c-color)">
-      <div class="card-content">
-        <div class="card-top"><div class="card-icon">📚</div><div class="card-badge badge-soon">Próximamente</div></div>
-        <div class="card-title">Lecciones Aprendidas</div>
-        <div class="card-desc">Registro de hallazgos clave, éxitos, dificultades y recomendaciones para futuros proyectos.</div>
-        <div class="card-footer"><span class="card-tag">Lessons Learned</span><span class="card-arrow">→</span></div>
       </div>
     </div>
   </div>
