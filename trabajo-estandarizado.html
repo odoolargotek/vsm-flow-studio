@@ -14,7 +14,6 @@
       --text:#e6edf3;--muted:#8b949e;--faint:#484f58;
       --accent:#4f98a3;--accent2:#3fb950;--warn:#d29922;--danger:#f85149;
       --purple:#bc8cff;--orange:#ffa657;
-      /* Colores ASME estandarizados */
       --op:#4f98a3;--insp:#d29922;--transp:#ffa657;--dem:#f85149;--alm:#bc8cff;
       --radius:14px;--radius-sm:8px;
     }
@@ -45,21 +44,15 @@
     .hdr-form input:focus,.hdr-form select:focus{border-color:var(--accent)}
     .field-row{display:flex;flex-direction:column;gap:3px}
 
-    /* PALETTE — símbolos ASME */
     .palette-section{padding:12px 14px;border-bottom:1px solid var(--border)}
     .palette-title{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:10px}
     .palette-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px}
-    .palette-item{
-      display:flex;flex-direction:column;align-items:center;gap:4px;
-      padding:8px 4px;border:1px solid var(--border);border-radius:8px;
-      cursor:grab;background:var(--surface2);transition:all .15s;user-select:none;
-    }
+    .palette-item{display:flex;flex-direction:column;align-items:center;gap:4px;padding:8px 4px;border:1px solid var(--border);border-radius:8px;cursor:grab;background:var(--surface2);transition:all .15s;user-select:none;}
     .palette-item:hover{border-color:var(--accent);background:rgba(79,152,163,.08);transform:translateY(-1px)}
     .palette-item.dragging{opacity:.5}
     .palette-item-label{font-size:9px;color:var(--muted);text-align:center;font-weight:600;line-height:1.2}
     .palette-item-sub{font-size:8px;color:var(--faint);text-align:center}
 
-    /* SUMMARY */
     .summary-box{padding:12px 14px;border-bottom:1px solid var(--border)}
     .summary-title{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:8px}
     .sym-stat-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:5px;font-size:11px}
@@ -67,7 +60,6 @@
     .sym-stat-val{font-weight:700}
     .total-row{border-top:1px solid var(--border);padding-top:8px;margin-top:4px;display:flex;justify-content:space-between;font-size:11px;font-weight:700}
 
-    /* CANVAS AREA */
     .content-area{flex:1;overflow:hidden;display:flex;flex-direction:column;position:relative}
     .canvas-toolbar{padding:10px 16px;border-bottom:1px solid var(--border);background:var(--surface);display:flex;align-items:center;gap:10px;flex-wrap:wrap;z-index:10}
     .canvas-toolbar .section-title{font-size:14px;font-weight:700;flex:1}
@@ -77,26 +69,17 @@
     .zoom-btn:hover{border-color:var(--accent);color:var(--accent)}
     #zoom-label{min-width:38px;text-align:center;font-size:11px}
 
-    /* Legend in canvas toolbar */
     .legend-strip{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
     .leg-item{display:flex;align-items:center;gap:4px;font-size:10px;color:var(--muted)}
 
-    /* MODE BADGE */
-    .mode-badge{
-      padding:5px 12px;border-radius:99px;font-size:11px;font-weight:700;
-      background:rgba(79,152,163,.15);color:var(--accent);border:1px solid rgba(79,152,163,.3);
-      cursor:pointer;transition:all .2s;user-select:none;
-    }
+    .mode-badge{padding:5px 12px;border-radius:99px;font-size:11px;font-weight:700;background:rgba(79,152,163,.15);color:var(--accent);border:1px solid rgba(79,152,163,.3);cursor:pointer;transition:all .2s;user-select:none;}
     .mode-badge.mode-connect{background:rgba(248,81,73,.15);color:var(--danger);border-color:rgba(248,81,73,.3)}
     .mode-badge.mode-delete{background:rgba(210,153,34,.15);color:var(--warn);border-color:rgba(210,153,34,.3)}
 
-    /* CANVAS */
     .canvas-wrap{flex:1;overflow:hidden;position:relative;cursor:default}
     #canvas-svg{width:100%;height:100%;display:block;background:var(--bg)}
-    /* Grid dots */
     #canvas-svg{background-image:radial-gradient(circle,var(--faint) 1px,transparent 1px);background-size:24px 24px}
 
-    /* NODES */
     .te-node{cursor:move;}
     .te-node .node-body{filter:drop-shadow(0 2px 6px rgba(0,0,0,.4))}
     .te-node .node-label{font-family:'Inter',sans-serif;font-size:10px;fill:var(--text,#e6edf3);pointer-events:none;user-select:none}
@@ -107,56 +90,36 @@
     .te-node.selected .node-body{filter:drop-shadow(0 0 8px currentColor) drop-shadow(0 2px 6px rgba(0,0,0,.4))}
     .te-node.connecting-source .node-body{filter:drop-shadow(0 0 10px gold)}
 
-    /* CONNECTIONS */
     .te-edge{pointer-events:stroke;cursor:pointer;}
     .te-edge-path{stroke-width:2;fill:none;marker-end:url(#arrow)}
     .te-edge:hover .te-edge-path{stroke-width:3}
     .te-edge.selected .te-edge-path{stroke-width:3;stroke-dasharray:6 3}
 
-    /* PROPERTIES PANEL */
-    .props-panel{
-      position:absolute;right:12px;top:12px;width:210px;
-      background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);
-      padding:14px;z-index:20;display:none;
-    }
+    .props-panel{position:absolute;right:12px;top:12px;width:210px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:14px;z-index:20;display:none;}
     .props-panel.open{display:block}
     .props-panel h3{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:10px}
     .props-row{margin-bottom:8px}
     .props-row label{font-size:10px;color:var(--muted);display:block;margin-bottom:3px}
-    .props-row input,.props-row select,.props-row textarea{
-      width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:5px;
-      color:var(--text);font-family:inherit;font-size:11px;padding:5px 7px;outline:none}
+    .props-row input,.props-row select,.props-row textarea{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:5px;color:var(--text);font-family:inherit;font-size:11px;padding:5px 7px;outline:none}
     .props-row input:focus,.props-row select:focus{border-color:var(--accent)}
     .props-close{position:absolute;top:8px;right:10px;background:none;border:none;color:var(--muted);cursor:pointer;font-size:16px}
     .props-close:hover{color:var(--danger)}
 
-    /* INSTRUCTIONS */
-    .instructions{
-      position:absolute;left:12px;bottom:12px;z-index:20;
-      background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);
-      padding:10px 14px;font-size:10px;color:var(--muted);max-width:260px;
-    }
+    .instructions{position:absolute;left:12px;bottom:12px;z-index:20;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px 14px;font-size:10px;color:var(--muted);max-width:260px;}
     .instructions b{color:var(--text)}
     .instr-close{float:right;background:none;border:none;color:var(--faint);cursor:pointer;font-size:13px;margin-left:8px;line-height:1}
     .instr-close:hover{color:var(--danger)}
 
-    /* LEGEND collapsible */
-    .legend-panel{
-      position:absolute;right:12px;bottom:12px;z-index:20;
-      background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);
-      min-width:160px;
-    }
-    .legend-hdr{
-      display:flex;align-items:center;justify-content:space-between;
-      padding:8px 12px;cursor:pointer;user-select:none;font-size:10px;font-weight:700;
-      text-transform:uppercase;letter-spacing:.07em;color:var(--muted);
-    }
+    .legend-panel{position:absolute;right:12px;bottom:12px;z-index:20;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);min-width:160px;}
+    .legend-hdr{display:flex;align-items:center;justify-content:space-between;padding:8px 12px;cursor:pointer;user-select:none;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);}
     .legend-hdr:hover{color:var(--text)}
     .legend-body{padding:8px 12px 10px}
     .legend-body .leg-item{margin-bottom:5px}
     .legend-toggle{font-size:11px}
 
-    @media print{header,.sidebar,.canvas-toolbar,.props-panel,.instructions,.legend-panel{display:none!important}.main{display:block}.content-area{padding:0}body{background:#fff}}
+    /* ─── PRINT: no usar window.print() directo, usamos printDiagram() ─── */
+    @media print { body { display:none !important; } }
+
     @media(max-width:700px){.sidebar{display:none}}
   </style>
 </head>
@@ -171,7 +134,7 @@
     <button class="btn btn-ghost" id="btn-import-json">📂 Cargar</button>
     <input type="file" id="file-input" accept=".json" style="display:none">
     <button class="btn btn-ghost" id="btn-export-svg">⬇ SVG</button>
-    <button class="btn btn-primary" id="btn-print">🖨 Imprimir</button>
+    <button class="btn btn-primary" id="btn-print">🖨 Imprimir / PDF</button>
   </div>
 </header>
 
@@ -230,14 +193,12 @@
       </svg>
     </div>
 
-    <!-- Properties panel -->
     <div class="props-panel" id="props-panel">
       <button class="props-close" id="props-close">×</button>
       <h3>Propiedades</h3>
       <div id="props-content"></div>
     </div>
 
-    <!-- Instructions -->
     <div class="instructions" id="instructions">
       <button class="instr-close" id="instr-close">×</button>
       <b>Cómo usar:</b><br>
@@ -247,7 +208,6 @@
       • <b>Supr/Del</b> elimina lo seleccionado
     </div>
 
-    <!-- Legend panel -->
     <div class="legend-panel" id="legend-panel">
       <div class="legend-hdr" id="legend-hdr">
         <span>Leyenda</span><span class="legend-toggle" id="legend-toggle">▾</span>
@@ -258,19 +218,15 @@
   </div>
 </div>
 
-<!-- Librería centralizada de símbolos ASME -->
 <script src="js/process-symbols.js"></script>
 <script>
 const PS = window.ProcessSymbols;
 
-// ═══════════════════════════════════════
-// STATE
-// ═══════════════════════════════════════
 let nodes = [], edges = [], nodeIdCounter = 0, edgeIdCounter = 0;
 let scale = 1, panX = 0, panY = 0;
-let dragState = null;     // {type:'node'|'pan', ...}
-let mode = 'move';        // 'move' | 'connect' | 'delete'
-let connectSource = null; // node id
+let dragState = null;
+let mode = 'move';
+let connectSource = null;
 let selectedId = null;
 const NODE_W = 110, NODE_H = 72;
 
@@ -307,7 +263,6 @@ function buildPalette() {
 }
 
 function buildLegend() {
-  // Legend strip in toolbar
   const strip = document.getElementById('legend-strip');
   strip.innerHTML = '';
   PS.PALETTE_ITEMS.forEach(item => {
@@ -317,7 +272,6 @@ function buildLegend() {
     strip.appendChild(div);
   });
 
-  // Collapsible legend panel bottom-right
   const body = document.getElementById('legend-body');
   body.innerHTML = '';
   PS.PALETTE_ITEMS.forEach(item => {
@@ -328,7 +282,6 @@ function buildLegend() {
     body.appendChild(div);
   });
 
-  // Toggle
   let collapsed = false;
   document.getElementById('legend-hdr').addEventListener('click', () => {
     collapsed = !collapsed;
@@ -359,15 +312,12 @@ function buildSummary() {
 function getNodeSVGShape(type, w, h, color) {
   const fill  = PS.COLORS[type] || color || '#4f98a3';
   const alpha = 'rgba(' + hexToRgb(fill) + ',0.15)';
-  // Use a foreignObject-like approach: embed the ProcessSymbols SVG as image
-  // Actually render native SVG shapes directly for crispness
   switch (type) {
     case 'operacion':
       return `<ellipse cx="${w/2}" cy="${h/2}" rx="${w/2-4}" ry="${h/2-4}" fill="${alpha}" stroke="${fill}" stroke-width="2.5"/>`;
     case 'inspeccion':
       return `<rect x="4" y="4" width="${w-8}" height="${h-8}" fill="${alpha}" stroke="${fill}" stroke-width="2.5"/>`;
     case 'transporte': {
-      // Arrow shape pointing right
       const ah = h * 0.5, tip = w * 0.32, bh = h * 0.32;
       const x0=4, x1=w-tip-4, cy=h/2;
       const pts=[
@@ -377,7 +327,6 @@ function getNodeSVGShape(type, w, h, color) {
       return `<polygon points="${pts}" fill="${alpha}" stroke="${fill}" stroke-width="2.5" stroke-linejoin="round"/>`;
     }
     case 'demora': {
-      // D shape
       const p=4, hw=(w-p*2)*0.5, hh=(h-p*2)/2;
       const d=`M ${p} ${p} L ${p+hw} ${p} A ${hw} ${hh} 0 0 1 ${p+hw} ${h-p} L ${p} ${h-p} Z`;
       return `<path d="${d}" fill="${alpha}" stroke="${fill}" stroke-width="2.5"/>`;
@@ -417,14 +366,12 @@ function renderNodes() {
     const color = PS.COLORS[node.type] || '#4f98a3';
     const w = NODE_W * scale, h = NODE_H * scale;
 
-    // Shape via native SVG
     const bodyG = document.createElementNS('http://www.w3.org/2000/svg','g');
     bodyG.setAttribute('class','node-body');
     bodyG.setAttribute('color', color);
     bodyG.innerHTML = getNodeSVGShape(node.type, w, h, color);
     g.appendChild(bodyG);
 
-    // Label
     const label = document.createElementNS('http://www.w3.org/2000/svg','text');
     label.setAttribute('class','node-label');
     label.setAttribute('x', w/2);
@@ -436,7 +383,6 @@ function renderNodes() {
     label.textContent = truncate(node.label || PS.LABELS[node.type], 16);
     g.appendChild(label);
 
-    // Time badge
     if (node.time) {
       const tb = document.createElementNS('http://www.w3.org/2000/svg','text');
       tb.setAttribute('class','node-time');
@@ -450,7 +396,6 @@ function renderNodes() {
       g.appendChild(tb);
     }
 
-    // Port (connection point, center-right)
     const port = document.createElementNS('http://www.w3.org/2000/svg','circle');
     port.setAttribute('class','node-port');
     port.setAttribute('cx', w);
@@ -461,7 +406,6 @@ function renderNodes() {
     port.setAttribute('stroke-width','2');
     g.appendChild(port);
 
-    // Node interactions
     g.addEventListener('mousedown', e => onNodeMouseDown(e, node));
     g.addEventListener('dblclick', e => { e.stopPropagation(); openProps(node); });
     layer.appendChild(g);
@@ -545,9 +489,7 @@ function onNodeMouseDown(e, node) {
     }
     return;
   }
-  // Move mode
   selectedId = node.id;
-  const rect = svg.getBoundingClientRect();
   dragState = {
     type: 'node',
     node,
@@ -572,7 +514,6 @@ svg.addEventListener('mousedown', e => {
 
 window.addEventListener('mousemove', e => {
   if (!dragState) {
-    // Update connect preview line
     if (mode==='connect' && connectSource) {
       const rect = svg.getBoundingClientRect();
       const src = nodes.find(n=>n.id===connectSource);
@@ -688,7 +629,6 @@ function openProps(node) {
   selectedId = node.id;
   const panel = document.getElementById('props-panel');
   const content = document.getElementById('props-content');
-  const color = PS.COLORS[node.type];
   content.innerHTML = `
     <div style="text-align:center;margin-bottom:12px">${PS.makeSVGLarge(node.type)}</div>
     <div class="props-row">
@@ -717,7 +657,6 @@ function openProps(node) {
   document.getElementById('prop-delete').addEventListener('click', () => {
     if (confirm('¿Eliminar nodo?')) { deleteNode(node.id); panel.classList.remove('open'); }
   });
-
   render();
 }
 function esc(v){if(v===undefined||v===null)return '';return String(v).replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
@@ -734,9 +673,6 @@ document.getElementById('btn-clear-canvas').addEventListener('click', () => {
   }
 });
 
-// ═══════════════════════════════════════
-// INSTRUCTIONS
-// ═══════════════════════════════════════
 document.getElementById('instr-close').addEventListener('click', () => {
   document.getElementById('instructions').style.display='none';
 });
@@ -784,7 +720,145 @@ document.getElementById('btn-export-svg').addEventListener('click',()=>{
   const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='trabajo-estandarizado.svg';a.click();
 });
 
-document.getElementById('btn-print').addEventListener('click',()=>window.print());
+// ═══════════════════════════════════════
+// PRINT — ventana limpia con diagrama completo
+// ═══════════════════════════════════════
+document.getElementById('btn-print').addEventListener('click', printDiagram);
+
+function printDiagram() {
+  // Recopilar encabezado
+  const hdr = {};
+  ['proceso','operador','takt','ciclo','fecha','area'].forEach(k => {
+    const el = document.getElementById('hdr-'+k);
+    hdr[k] = el ? el.value : '';
+  });
+
+  // Calcular bounding box real de todos los nodos
+  if (!nodes.length) { alert('El lienzo está vacío. Agrega nodos antes de imprimir.'); return; }
+  const PAD = 40;
+  const minX = Math.min(...nodes.map(n=>n.x)) - PAD;
+  const minY = Math.min(...nodes.map(n=>n.y)) - PAD;
+  const maxX = Math.max(...nodes.map(n=>n.x+NODE_W)) + PAD;
+  const maxY = Math.max(...nodes.map(n=>n.y+NODE_H)) + PAD;
+  const diagW = maxX - minX;
+  const diagH = maxY - minY;
+
+  // Construir SVG limpio con todos los nodos y aristas — sin pan/scale, coordenadas reales
+  function buildPrintSVG(W, H) {
+    const scaleX = W / diagW;
+    const scaleY = H / diagH;
+    const sc = Math.min(scaleX, scaleY, 1); // no ampliar, solo reducir si es grande
+    const offX = -minX * sc + (W - diagW*sc)/2;
+    const offY = -minY * sc + (H - diagH*sc)/2;
+    const nw = NODE_W * sc, nh = NODE_H * sc;
+
+    // Edges
+    let edgesSVG = edges.map(edge => {
+      const src = nodes.find(n=>n.id===edge.from);
+      const dst = nodes.find(n=>n.id===edge.to);
+      if (!src||!dst) return '';
+      const x1=(src.x+NODE_W)*sc+offX, y1=(src.y+NODE_H/2)*sc+offY;
+      const x2=dst.x*sc+offX,          y2=(dst.y+NODE_H/2)*sc+offY;
+      const dx=(x2-x1)*0.45;
+      return `<path d="M${x1},${y1} C${x1+dx},${y1} ${x2-dx},${y2} ${x2},${y2}" stroke="#555" stroke-width="1.5" fill="none" marker-end="url(#parrow)"/>`;
+    }).join('');
+
+    // Nodes
+    let nodesSVG = nodes.map(node => {
+      const color = PS.COLORS[node.type] || '#4f98a3';
+      const alpha = `rgba(${hexToRgb(color)},0.18)`;
+      const nx = node.x*sc+offX, ny = node.y*sc+offY;
+      const shape = getNodeSVGShape(node.type, nw, nh, color);
+      const lbl = truncate(node.label || PS.LABELS[node.type], 18);
+      const timeLabel = node.time ? `<text x="${nw/2}" y="${nh*0.7}" text-anchor="middle" dominant-baseline="middle" font-size="${Math.max(6,8*sc)}" font-weight="700" fill="${color}" font-family="Inter,Arial,sans-serif">${node.time}s</text>` : '';
+      return `<g transform="translate(${nx},${ny})">
+        ${shape}
+        <text x="${nw/2}" y="${nh*0.44}" text-anchor="middle" dominant-baseline="middle" font-size="${Math.max(7,9*sc)}" fill="#111" font-family="Inter,Arial,sans-serif" font-weight="600">${lbl}</text>
+        ${timeLabel}
+      </g>`;
+    }).join('');
+
+    // Legend
+    const legendItems = PS.PALETTE_ITEMS.map((item,i) => {
+      const color = PS.COLORS[item.type] || '#4f98a3';
+      const lx = i * 110;
+      return `<g transform="translate(${lx},0)">
+        ${getNodeSVGShape(item.type, 20, 14, color).replace(/cx="[^"]*"/,'cx="10"').replace(/cy="[^"]*"/,'cy="7"')}
+        <text x="24" y="10" font-size="9" fill="#333" font-family="Inter,Arial,sans-serif">${item.label}</text>
+      </g>`;
+    }).join('');
+
+    return `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}">
+      <defs>
+        <marker id="parrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+          <polygon points="0 0, 8 3, 0 6" fill="#555"/>
+        </marker>
+      </defs>
+      <rect width="${W}" height="${H}" fill="#fff"/>
+      ${edgesSVG}
+      ${nodesSVG}
+      <g transform="translate(0,${H-20})">${legendItems}</g>
+    </svg>`;
+  }
+
+  // Construir HTML de impresión
+  const fecha = hdr.fecha ? new Date(hdr.fecha+'T12:00:00').toLocaleDateString('es', {day:'2-digit',month:'2-digit',year:'numeric'}) : '';
+
+  const html = `<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Trabajo Estandarizado — ${hdr.proceso||'Proceso'}</title>
+<style>
+  @page { size: A4 landscape; margin: 12mm 14mm; }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:Inter,Arial,sans-serif;background:#fff;color:#111;font-size:11px}
+  .print-header{display:grid;grid-template-columns:1fr auto;align-items:start;border-bottom:2px solid #111;padding-bottom:8px;margin-bottom:12px;gap:12px}
+  .print-title{font-size:18px;font-weight:800;letter-spacing:-.02em}
+  .print-title span{color:#4f98a3}
+  .print-subtitle{font-size:11px;color:#555;margin-top:3px}
+  .info-table{border-collapse:collapse;font-size:10px}
+  .info-table td{padding:2px 10px 2px 0;white-space:nowrap}
+  .info-table td:first-child{font-weight:700;color:#555;padding-right:6px}
+  .diagram-area{width:100%;border:1px solid #ddd;border-radius:6px;overflow:hidden;background:#fafafa}
+  .diagram-area svg{display:block;width:100%;height:auto}
+  .print-footer{margin-top:10px;font-size:9px;color:#999;text-align:right}
+  @media print{
+    body{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+    button{display:none!important}
+  }
+</style>
+</head>
+<body>
+<div class="print-header">
+  <div>
+    <div class="print-title">⚙️ <span>Trabajo Estandarizado</span></div>
+    <div class="print-subtitle">Diagrama de Flujo de Proceso — Largotek Lean Suite</div>
+  </div>
+  <table class="info-table">
+    <tr><td>Proceso</td><td><strong>${hdr.proceso||'—'}</strong></td></tr>
+    <tr><td>Operador</td><td>${hdr.operador||'—'}</td></tr>
+    <tr><td>Área / Línea</td><td>${hdr.area||'—'}</td></tr>
+    <tr><td>Takt Time</td><td>${hdr.takt ? hdr.takt+'s' : '—'}</td></tr>
+    <tr><td>Ciclo Std</td><td>${hdr.ciclo ? hdr.ciclo+'s' : '—'}</td></tr>
+    <tr><td>Fecha</td><td>${fecha||'—'}</td></tr>
+  </table>
+</div>
+
+<div class="diagram-area">
+  ${buildPrintSVG(1050, 520)}
+</div>
+
+<div class="print-footer">Largotek Lean Suite · Trabajo Estandarizado · Impreso ${new Date().toLocaleString('es')}</div>
+
+<script>window.onload=()=>{window.print();setTimeout(()=>window.close(),800)}<\/script>
+</body>
+</html>`;
+
+  const win = window.open('','_blank','width=1100,height=750');
+  win.document.write(html);
+  win.document.close();
+}
 
 // ═══════════════════════════════════════
 // INIT
