@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Plan de Control — Largotek</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300..700&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#0d1117;--surface:#161b22;--surface2:#21262d;--border:#30363d;--text:#e6edf3;--muted:#8b949e;--faint:#3d444d;--red:#f85149;--green:#5fc97a;--yellow:#e8c44a;--cyan:#4f98a3;--violet:#bc8cff;--orange:#f78c3f;--radius:14px}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:13px 28px;border-bottom:1px solid var(--border);background:var(--surface)}
+.topbar-brand{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:var(--muted);text-decoration:none}.topbar-brand span{color:var(--red)}
+.topbar-right{display:flex;align-items:center;gap:8px}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:7px 15px;border-radius:8px;border:1.5px solid var(--border);background:transparent;color:var(--muted);font-size:12px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;transition:all .18s}.btn:hover{border-color:var(--red);color:var(--red)}.btn-primary{background:var(--red);color:#fff;border-color:var(--red)}.btn-primary:hover{opacity:.88}.btn-green{background:var(--green);color:#111;border-color:var(--green)}.btn-green:hover{opacity:.88}
+.hero{padding:32px 32px 20px;max-width:1100px;margin:0 auto}.hero-eye{font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--red);margin-bottom:8px}.hero h1{font-family:'Instrument Serif',serif;font-size:clamp(1.5rem,3vw,2.2rem);margin-bottom:6px}.hero-sub{font-size:13px;color:var(--muted);line-height:1.7}
+.wrap{max-width:1100px;margin:0 auto;padding:0 32px 80px}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:16px;overflow:hidden}
+.card-head{display:flex;align-items:center;gap:10px;padding:13px 18px;border-bottom:1px solid var(--faint);background:var(--surface2)}
+.card-title{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.card-body{padding:16px 18px}
+.meta-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+@media(max-width:700px){.meta-grid{grid-template-columns:1fr 1fr}}
+@media(max-width:420px){.meta-grid{grid-template-columns:1fr}}
+.field{display:flex;flex-direction:column;gap:5px}.field label{font-size:10px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--muted)}.field input,.field select,.field textarea{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:9px 12px;font-size:13px;color:var(--text);font-family:'Inter',sans-serif;transition:border-color .18s;width:100%}.field input:focus,.field select:focus,.field textarea:focus{outline:none;border-color:var(--red)}.field-full{grid-column:1/-1}.field textarea{resize:vertical;min-height:56px;line-height:1.65}
+
+/* LEGEND */
+.legend{display:flex;gap:14px;flex-wrap:wrap;margin-bottom:14px}
+.legend-item{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--muted)}
+.dot{width:10px;height:10px;border-radius:50%}
+
+/* TABLE */
+.ctrl-table{width:100%;border-collapse:collapse;font-size:12px;min-width:900px}
+.ctrl-table th{text-align:left;padding:9px 10px;background:var(--surface2);color:var(--muted);font-size:10px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;border-bottom:1px solid var(--border);white-space:nowrap}
+.ctrl-table td{padding:6px 6px;border-top:1px solid var(--faint);vertical-align:middle}
+.ctrl-table td input,.ctrl-table td select,.ctrl-table td textarea{width:100%;background:transparent;border:1px solid transparent;color:var(--text);font-size:12px;font-family:'Inter',sans-serif;padding:4px 6px;border-radius:5px;transition:border-color .15s;min-width:60px}
+.ctrl-table td input:focus,.ctrl-table td select:focus,.ctrl-table td textarea:focus{outline:none;border-color:var(--red);background:var(--surface2)}
+.ctrl-table td select{background:var(--surface2);border-color:var(--border);cursor:pointer}
+.ctrl-table td select option{background:var(--surface2)}
+.table-wrap{overflow-x:auto}
+.priority-dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:4px}
+.add-btn{display:inline-flex;align-items:center;gap:5px;margin-top:10px;padding:6px 14px;border-radius:6px;border:1px dashed var(--border);background:transparent;color:var(--muted);font-size:11px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;transition:all .18s}.add-btn:hover{border-color:var(--red);color:var(--red)}
+.del-btn{background:transparent;border:none;color:var(--faint);cursor:pointer;font-size:14px;padding:0 4px;transition:color .15s}.del-btn:hover{color:var(--red)}
+
+/* SUMMARY CHIPS */
+.summary-row{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:16px}
+.summary-chip{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 16px;min-width:120px;text-align:center}
+.chip-val{font-size:1.4rem;font-weight:800}
+.chip-lbl{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-top:3px}
+
+/* APPROVALS */
+.approval-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+@media(max-width:600px){.approval-grid{grid-template-columns:1fr}}
+.approval-box{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:14px}
+.approval-role{font-size:10px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);margin-bottom:8px}
+
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:#1e3a2e;border:1px solid var(--green);color:var(--green);padding:10px 22px;border-radius:99px;font-size:13px;font-weight:600;opacity:0;transition:all .3s;z-index:999;white-space:nowrap}.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.saved-lbl{font-size:11px;color:var(--muted)}
+
+@media print{.topbar,.btn,.add-btn,.del-btn{display:none!important}body{background:#fff;color:#111}.card,.summary-chip,.approval-box{border-color:#ccc;background:#fff}.ctrl-table th{background:#f0f0f0;color:#333}.ctrl-table td input,.ctrl-table td select{color:#111}}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <a href="index.html" class="topbar-brand">← <span>Largotek</span> Lean Suite</a>
+  <div class="topbar-right">
+    <span class="saved-lbl" id="saved-lbl"></span>
+    <button class="btn" onclick="clearAll()">🗑 Limpiar</button>
+    <button class="btn btn-green" onclick="exportCSV()">📥 CSV</button>
+    <button class="btn" onclick="saveLocal()">💾 Guardar</button>
+    <button class="btn btn-primary" onclick="window.print()">🖨 PDF</button>
+  </div>
+</div>
+
+<div class="hero">
+  <div class="hero-eye">📌 Plan de Control — Largotek Lean Suite · Fase C</div>
+  <h1>Plan de Control</h1>
+  <p class="hero-sub">Define qué características controlar, cómo medirlas, con qué frecuencia, quién es responsable y cómo reaccionar ante desviaciones. Herramienta de cierre obligatoria en la fase <strong style="color:var(--red)">Controlar</strong> del DMAIC.</p>
+</div>
+
+<div class="wrap">
+
+  <!-- META -->
+  <div class="card">
+    <div class="card-head"><span>🏷️</span><span class="card-title">Datos del proyecto</span></div>
+    <div class="card-body meta-grid">
+      <div class="field"><label>Nombre del proyecto</label><input id="m-proyecto" placeholder="Ej: Reducción de defectos en línea L2"></div>
+      <div class="field"><label>Proceso / Área</label><input id="m-proceso" placeholder="Ej: Ensamble Final"></div>
+      <div class="field"><label>Fecha de emisión</label><input id="m-fecha" type="date"></div>
+      <div class="field"><label>Belt / Nivel</label><select id="m-belt"><option value="">Seleccionar...</option><option>Yellow Belt</option><option>Green Belt</option><option>Black Belt</option></select></div>
+      <div class="field"><label>Empresa / Planta</label><input id="m-empresa" placeholder="Ej: Largotek SRL"></div>
+      <div class="field"><label>Versión</label><input id="m-version" placeholder="Ej: v1.0"></div>
+      <div class="field field-full"><label>Alcance del plan</label><textarea id="m-alcance" placeholder="Describe el alcance: qué procesos, etapas o productos cubre este Plan de Control..."></textarea></div>
+    </div>
+  </div>
+
+  <!-- SUMMARY -->
+  <div class="summary-row" id="summary-row">
+    <div class="summary-chip"><div class="chip-val" id="s-total">0</div><div class="chip-lbl">Características</div></div>
+    <div class="summary-chip"><div class="chip-val" style="color:var(--red)" id="s-critico">0</div><div class="chip-lbl">Críticas 🔴</div></div>
+    <div class="summary-chip"><div class="chip-val" style="color:var(--yellow)" id="s-mayor">0</div><div class="chip-lbl">Mayores 🟡</div></div>
+    <div class="summary-chip"><div class="chip-val" style="color:var(--green)" id="s-menor">0</div><div class="chip-lbl">Menores 🟢</div></div>
+  </div>
+
+  <!-- LEGEND -->
+  <div class="legend">
+    <div class="legend-item"><div class="dot" style="background:var(--red)"></div>Crítica — Afecta seguridad, regulación o cliente</div>
+    <div class="legend-item"><div class="dot" style="background:var(--yellow)"></div>Mayor — Impacta directamente en el KPI del proyecto</div>
+    <div class="legend-item"><div class="dot" style="background:var(--green)"></div>Menor — De seguimiento preventivo</div>
+  </div>
+
+  <!-- TABLE -->
+  <div class="card">
+    <div class="card-head"><span>📋</span><span class="card-title">Características a controlar</span></div>
+    <div class="card-body">
+      <div class="table-wrap">
+        <table class="ctrl-table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Tipo</th>
+              <th>Característica / CTQ</th>
+              <th>Especificación / Meta</th>
+              <th>Método de medición</th>
+              <th>Instrumento</th>
+              <th>Frecuencia</th>
+              <th>Tamaño muestra</th>
+              <th>Responsable</th>
+              <th>Reacción ante desviación</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="ctrl-body"></tbody>
+        </table>
+      </div>
+      <button class="add-btn" onclick="addRow()">+ Agregar característica</button>
+    </div>
+  </div>
+
+  <!-- APPROVALS -->
+  <div class="card">
+    <div class="card-head"><span>✅</span><span class="card-title">Aprobaciones</span></div>
+    <div class="card-body approval-grid">
+      <div class="approval-box">
+        <div class="approval-role">Black / Green Belt</div>
+        <div class="field"><label>Nombre</label><input id="ap-belt-nombre" placeholder="Nombre completo"></div>
+        <div class="field" style="margin-top:8px"><label>Firma / Fecha</label><input id="ap-belt-fecha" type="date"></div>
+      </div>
+      <div class="approval-box">
+        <div class="approval-role">Champion / Sponsor</div>
+        <div class="field"><label>Nombre</label><input id="ap-champ-nombre" placeholder="Nombre completo"></div>
+        <div class="field" style="margin-top:8px"><label>Firma / Fecha</label><input id="ap-champ-fecha" type="date"></div>
+      </div>
+      <div class="approval-box">
+        <div class="approval-role">Responsable de Área</div>
+        <div class="field"><label>Nombre</label><input id="ap-area-nombre" placeholder="Nombre completo"></div>
+        <div class="field" style="margin-top:8px"><label>Firma / Fecha</label><input id="ap-area-fecha" type="date"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- NOTAS -->
+  <div class="card">
+    <div class="card-head"><span>📝</span><span class="card-title">Notas y observaciones</span></div>
+    <div class="card-body">
+      <div class="field"><textarea id="m-notas" style="min-height:80px" placeholder="Observaciones generales, condiciones especiales, fechas de revisión del plan, referencias a documentos relacionados..."></textarea></div>
+    </div>
+  </div>
+
+</div>
+
+<div class="toast" id="toast">✅ Guardado en caché</div>
+
+<script>
+const KEY = 'largotek_plan_control';
+const META_IDS = ['m-proyecto','m-proceso','m-fecha','m-belt','m-empresa','m-version','m-alcance','m-notas',
+  'ap-belt-nombre','ap-belt-fecha','ap-champ-nombre','ap-champ-fecha','ap-area-nombre','ap-area-fecha'];
+let rows = [];
+
+const TIPO_COLOR = {critico:'var(--red)', mayor:'var(--yellow)', menor:'var(--green)'};
+const TIPO_LABEL = {critico:'🔴 Crítica', mayor:'🟡 Mayor', menor:'🟢 Menor'};
+
+function addRow(d={}) {
+  rows.push({tipo:'mayor', caract:'', espec:'', metodo:'', instrumento:'', frecuencia:'', muestra:'', responsable:'', reaccion:'', ...d});
+  renderTable();
+}
+
+function renderTable() {
+  const tbody = document.getElementById('ctrl-body');
+  tbody.innerHTML = '';
+  rows.forEach((r, i) => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td style="color:var(--muted);text-align:center;font-size:11px;min-width:28px">${i+1}</td>
+      <td style="min-width:110px">
+        <select onchange="rows[${i}].tipo=this.value;renderTable()" style="background:var(--surface2);border:1px solid var(--border);border-radius:5px;color:var(--text);font-size:11px;padding:4px 6px;font-family:'Inter',sans-serif;width:100%">
+          <option value="critico" ${r.tipo==='critico'?'selected':''}>🔴 Crítica</option>
+          <option value="mayor" ${r.tipo==='mayor'?'selected':''}>🟡 Mayor</option>
+          <option value="menor" ${r.tipo==='menor'?'selected':''}>🟢 Menor</option>
+        </select>
+      </td>
+      <td style="min-width:160px"><input value="${esc(r.caract)}" placeholder="Ej: Peso neto producto" oninput="rows[${i}].caract=this.value;autoSave()"></td>
+      <td style="min-width:130px"><input value="${esc(r.espec)}" placeholder="Ej: 500 ± 2 g" oninput="rows[${i}].espec=this.value;autoSave()"></td>
+      <td style="min-width:130px"><input value="${esc(r.metodo)}" placeholder="Ej: Pesaje en balanza" oninput="rows[${i}].metodo=this.value;autoSave()"></td>
+      <td style="min-width:110px"><input value="${esc(r.instrumento)}" placeholder="Ej: Balanza digital" oninput="rows[${i}].instrumento=this.value;autoSave()"></td>
+      <td style="min-width:100px"><input value="${esc(r.frecuencia)}" placeholder="Ej: Cada turno" oninput="rows[${i}].frecuencia=this.value;autoSave()"></td>
+      <td style="min-width:80px"><input value="${esc(r.muestra)}" placeholder="Ej: n=5" oninput="rows[${i}].muestra=this.value;autoSave()"></td>
+      <td style="min-width:110px"><input value="${esc(r.responsable)}" placeholder="Nombre / Rol" oninput="rows[${i}].responsable=this.value;autoSave()"></td>
+      <td style="min-width:160px"><input value="${esc(r.reaccion)}" placeholder="Ej: Detener proceso, notificar supervisor" oninput="rows[${i}].reaccion=this.value;autoSave()"></td>
+      <td><button class="del-btn" onclick="rows.splice(${i},1);renderTable()">✕</button></td>`;
+    tbody.appendChild(tr);
+  });
+  updateSummary();
+  autoSave();
+}
+
+function updateSummary() {
+  document.getElementById('s-total').textContent = rows.length;
+  document.getElementById('s-critico').textContent = rows.filter(r=>r.tipo==='critico').length;
+  document.getElementById('s-mayor').textContent = rows.filter(r=>r.tipo==='mayor').length;
+  document.getElementById('s-menor').textContent = rows.filter(r=>r.tipo==='menor').length;
+}
+
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;');}
+
+let saveTimer;
+function autoSave(){clearTimeout(saveTimer);saveTimer=setTimeout(saveLocal,1200);}
+
+function saveLocal() {
+  const d = {fields:{}, rows, ts: new Date().toISOString()};
+  META_IDS.forEach(id=>{const el=document.getElementById(id);if(el)d.fields[id]=el.value;});
+  localStorage.setItem(KEY, JSON.stringify(d));
+  const t = new Date().toLocaleTimeString('es-BO',{hour:'2-digit',minute:'2-digit'});
+  const el = document.getElementById('saved-lbl');
+  if(el) el.textContent = '✓ Guardado '+t;
+  const toast = document.getElementById('toast');
+  toast.classList.add('show');
+  setTimeout(()=>toast.classList.remove('show'), 2000);
+}
+
+function loadLocal() {
+  const raw = localStorage.getItem(KEY);
+  if(!raw) {
+    addRow({tipo:'critico', caract:'Tiempo de ciclo', espec:'≤ 45 seg', metodo:'Cronometraje directo', instrumento:'Cronómetro', frecuencia:'Cada lote', muestra:'n=3', responsable:'Operario / Supervisor', reaccion:'Revisar método de trabajo estándar'});
+    addRow({tipo:'mayor', caract:'Tasa de defectos', espec:'< 2%', metodo:'Inspección visual', instrumento:'Check list', frecuencia:'Diario', muestra:'100%', responsable:'Inspector calidad', reaccion:'Iniciar registro AMEF, escalar a Green Belt'});
+    return;
+  }
+  try {
+    const d = JSON.parse(raw);
+    META_IDS.forEach(id=>{const el=document.getElementById(id);if(el&&d.fields[id]!=null)el.value=d.fields[id];});
+    rows = d.rows || [];
+    renderTable();
+    if(d.ts){const t=new Date(d.ts).toLocaleString('es-BO',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});const el=document.getElementById('saved-lbl');if(el)el.textContent='Último guardado: '+t;}
+  } catch(e){renderTable();}
+}
+
+function clearAll(){if(!confirm('¿Limpiar el Plan de Control?'))return;localStorage.removeItem(KEY);location.reload();}
+
+function exportCSV() {
+  const headers = ['#','Tipo','Característica','Especificación','Método medición','Instrumento','Frecuencia','Tamaño muestra','Responsable','Reacción ante desviación'];
+  const csvRows = [headers.join(',')];
+  rows.forEach((r,i)=>{
+    const tipo = r.tipo==='critico'?'Crítica':r.tipo==='mayor'?'Mayor':'Menor';
+    csvRows.push([i+1,tipo,r.caract,r.espec,r.metodo,r.instrumento,r.frecuencia,r.muestra,r.responsable,r.reaccion].map(v=>`"${String(v||'').replace(/"/g,'""')}"`).join(','));
+  });
+  const blob = new Blob(['\uFEFF'+csvRows.join('\n')], {type:'text/csv;charset=utf-8;'});
+  const a = document.createElement('a'); a.href=URL.createObjectURL(blob);
+  a.download='plan-control.csv'; a.click();
+}
+
+document.querySelectorAll('input,select,textarea').forEach(el=>el.addEventListener('input',()=>autoSave()));
+window.addEventListener('load', ()=>{loadLocal(); renderTable();});
+</script>
+<script src="branding.js"></script>
+</body>
+</html>
