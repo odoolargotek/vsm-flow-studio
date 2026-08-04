@@ -7,64 +7,120 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300..700&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+
+  <!-- branding.js inyecta :root con las variables del tema (dark/light) -->
+  <script src="branding.js"></script>
+
   <style>
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
     :root{
-      --bg:#0d1117;--surface:#161b22;--surface2:#21262d;--border:#30363d;
-      --text:#e6edf3;--muted:#8b949e;--faint:#484f58;
-      --d-color:#4f98a3;--m-color:#d29922;--a-color:#bc8cff;
-      --i-color:#3fb950;--c-color:#f85149;
       --radius:14px;--radius-sm:8px;
     }
     html{scroll-behavior:smooth}
-    body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;flex-direction:column}
+    body{
+      font-family:'Inter',sans-serif;
+      background:var(--bg);
+      color:var(--text);
+      min-height:100vh;
+      display:flex;
+      flex-direction:column;
+      transition:background .25s,color .2s;
+    }
+
+    /* ── HERO ── */
     .hero{padding:56px 32px 40px;max-width:900px;margin:0 auto;text-align:center}
     .hero-eyebrow{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--d-color);margin-bottom:14px;font-weight:600}
     .hero-title{font-family:'Instrument Serif',serif;font-size:clamp(2rem,5vw,3.2rem);line-height:1.1;margin-bottom:14px}
     .hero-title em{color:var(--d-color);font-style:italic}
     .hero-sub{font-size:14.5px;color:var(--muted);max-width:540px;margin:0 auto 28px;line-height:1.75}
+
+    /* ── DMAIC PILLS ── */
     .dmaic-ribbon{display:flex;justify-content:center;gap:8px;flex-wrap:wrap;margin-bottom:12px}
     .dmaic-pill{display:flex;align-items:center;gap:6px;padding:6px 16px;border-radius:99px;font-size:12px;font-weight:700;letter-spacing:.06em;text-decoration:none;border:1.5px solid transparent;transition:all .2s}
-    .dmaic-pill:hover{filter:brightness(1.15)}
+    .dmaic-pill:hover{filter:brightness(1.1);transform:translateY(-1px)}
     .dmaic-pill.d{background:rgba(79,152,163,.15);color:var(--d-color);border-color:rgba(79,152,163,.35)}
     .dmaic-pill.m{background:rgba(210,153,34,.15);color:var(--m-color);border-color:rgba(210,153,34,.35)}
     .dmaic-pill.a{background:rgba(188,140,255,.15);color:var(--a-color);border-color:rgba(188,140,255,.35)}
     .dmaic-pill.i{background:rgba(63,185,80,.15);color:var(--i-color);border-color:rgba(63,185,80,.35)}
     .dmaic-pill.c{background:rgba(248,81,73,.15);color:var(--c-color);border-color:rgba(248,81,73,.35)}
-    .stats-bar{display:flex;justify-content:center;gap:32px;padding:20px 32px;border-top:1px solid var(--border);border-bottom:1px solid var(--border);background:var(--surface);flex-wrap:wrap}
+
+    /* ── STATS BAR ── */
+    .stats-bar{
+      display:flex;justify-content:center;gap:32px;padding:20px 32px;
+      border-top:1px solid var(--border);border-bottom:1px solid var(--border);
+      background:var(--surface);flex-wrap:wrap;
+      transition:background .25s,border-color .25s;
+    }
     .stat{text-align:center}
-    .stat-val{font-size:20px;font-weight:700}
+    .stat-val{font-size:20px;font-weight:700;color:var(--text)}
     .stat-lbl{font-size:10px;color:var(--muted);margin-top:2px;letter-spacing:.05em;text-transform:uppercase}
+
+    /* ── PHASES ── */
     .phases{max-width:1000px;margin:0 auto;padding:36px 28px 64px;flex:1}
-    .phase-header{display:flex;align-items:center;gap:12px;margin:44px 0 16px;scroll-margin-top:20px}
-    .phase-badge{display:flex;align-items:center;gap:8px;padding:5px 16px 5px 12px;border-radius:99px;border:1.5px solid currentColor;font-size:12px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;white-space:nowrap}
+    .phase-header{display:flex;align-items:center;gap:12px;margin:44px 0 16px;scroll-margin-top:80px}
+    .phase-badge{
+      display:flex;align-items:center;gap:8px;padding:5px 16px 5px 12px;
+      border-radius:99px;border:1.5px solid currentColor;
+      font-size:12px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;white-space:nowrap
+    }
     .phase-badge .phase-letter{font-size:20px;font-weight:900;line-height:1}
     .phase-desc{font-size:12px;color:var(--muted);font-weight:400;letter-spacing:0;text-transform:none;margin-left:4px}
     .phase-line{flex:1;height:1px;background:var(--border)}
+
+    /* ── TOOL CARDS ── */
     .tools-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(252px,1fr));gap:13px}
-    .tool-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px;text-decoration:none;color:inherit;display:flex;flex-direction:column;gap:9px;transition:all .22s;position:relative;overflow:hidden;cursor:pointer}
-    .tool-card::after{content:'';position:absolute;inset:0;opacity:0;transition:opacity .22s;background:var(--card-accent,var(--d-color));border-radius:var(--radius)}
-    .tool-card:hover{border-color:var(--card-accent,var(--d-color));transform:translateY(-3px);box-shadow:0 10px 28px rgba(0,0,0,.38)}
-    .tool-card:hover::after{opacity:.05}
+    .tool-card{
+      background:var(--surface);border:1px solid var(--border);
+      border-radius:var(--radius);padding:20px;
+      text-decoration:none;color:inherit;
+      display:flex;flex-direction:column;gap:9px;
+      transition:all .22s;position:relative;overflow:hidden;cursor:pointer
+    }
+    .tool-card::after{
+      content:'';position:absolute;inset:0;opacity:0;
+      transition:opacity .22s;
+      background:var(--card-accent,var(--d-color));border-radius:var(--radius)
+    }
+    .tool-card:hover{
+      border-color:var(--card-accent,var(--d-color));
+      transform:translateY(-3px);
+      box-shadow:0 10px 28px rgba(0,0,0,.15)
+    }
+    .tool-card:hover::after{opacity:.04}
     .tool-card .card-content{position:relative;z-index:1;display:flex;flex-direction:column;gap:9px;height:100%}
     .tool-card.soon{opacity:.55;cursor:default;pointer-events:none}
     .tool-card.soon:hover{transform:none;box-shadow:none;border-color:var(--border)}
+
     .card-top{display:flex;align-items:flex-start;justify-content:space-between;gap:8px}
     .card-icon{font-size:26px;line-height:1}
-    .card-badge{font-size:10px;font-weight:700;letter-spacing:.06em;padding:3px 8px;border-radius:99px;text-transform:uppercase;white-space:nowrap}
+    .card-badge{
+      font-size:10px;font-weight:700;letter-spacing:.06em;
+      padding:3px 8px;border-radius:99px;text-transform:uppercase;white-space:nowrap
+    }
     .badge-active{background:rgba(79,152,163,.18);color:var(--d-color)}
     .badge-new{background:rgba(63,185,80,.18);color:var(--i-color)}
-    .badge-soon{background:rgba(72,79,88,.35);color:var(--faint)}
+    .badge-soon{background:var(--surface2);color:var(--faint)}
     .dual-badge{display:flex;gap:4px;flex-wrap:wrap}
-    .badge-dual-d{background:rgba(79,152,163,.18);color:#4f98a3;font-size:9px;font-weight:700;padding:2px 7px;border-radius:99px}
-    .badge-dual-c{background:rgba(248,81,73,.15);color:#f85149;font-size:9px;font-weight:700;padding:2px 7px;border-radius:99px}
-    .card-title{font-size:13.5px;font-weight:700;line-height:1.3}
+    .badge-dual-d{background:rgba(79,152,163,.18);color:var(--d-color);font-size:9px;font-weight:700;padding:2px 7px;border-radius:99px}
+    .badge-dual-c{background:rgba(248,81,73,.15);color:var(--c-color);font-size:9px;font-weight:700;padding:2px 7px;border-radius:99px}
+
+    .card-title{font-size:13.5px;font-weight:700;line-height:1.3;color:var(--text)}
     .card-desc{font-size:11.5px;color:var(--muted);line-height:1.6;flex:1}
     .card-footer{display:flex;align-items:center;justify-content:space-between;margin-top:auto}
-    .card-tag{font-size:10px;font-weight:600;padding:2px 8px;border-radius:99px;background:var(--surface2);color:var(--muted)}
+    .card-tag{
+      font-size:10px;font-weight:600;padding:2px 8px;
+      border-radius:99px;background:var(--surface2);color:var(--muted)
+    }
     .card-arrow{font-size:14px;color:var(--muted);transition:transform .2s,color .2s}
     .tool-card:hover .card-arrow{transform:translateX(5px);color:var(--card-accent,var(--d-color))}
-    @media(max-width:600px){.hero{padding:36px 18px 24px}.phases{padding:20px 16px 40px}.stats-bar{gap:18px}.dmaic-ribbon{gap:6px}.dmaic-pill{font-size:11px;padding:5px 12px}}
+
+    @media(max-width:600px){
+      .hero{padding:36px 18px 24px}
+      .phases{padding:20px 16px 40px}
+      .stats-bar{gap:18px}
+      .dmaic-ribbon{gap:6px}
+      .dmaic-pill{font-size:11px;padding:5px 12px}
+    }
   </style>
 </head>
 <body>
@@ -396,6 +452,5 @@
 
 </div>
 
-<script src="branding.js"></script>
 </body>
 </html>
