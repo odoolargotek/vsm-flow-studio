@@ -3,171 +3,1082 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Gestión de Sprints Kaizen | Largotek</title>
+  <title>Gestión de Sprints Kaizen — Largotek</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300..700&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+
   <style>
-    :root { --navy:#0a1d93; --blue:#1533eb; --green:#009a46; --red:#c00000; --amber:#d97706; --slate:#475569; --bg:#f5f7fb; --line:#d9e1ec; --card:#fff; }
-    * { box-sizing:border-box; }
-    body { margin:0; background:var(--bg); color:#172033; font:14px/1.45 Arial,Helvetica,sans-serif; }
-    header { color:#fff; background:linear-gradient(135deg,var(--navy),#1533eb); padding:22px max(18px,calc((100% - 1240px)/2)); }
-    header h1 { margin:0; font-size:26px; }
-    header p { margin:5px 0 0; opacity:.9; }
-    main { max-width:1240px; margin:20px auto 48px; padding:0 18px; }
-    .toolbar,.panel,.metric,.column { background:var(--card); border:1px solid var(--line); border-radius:10px; box-shadow:0 2px 8px #0f172a0b; }
-    .toolbar { display:flex; flex-wrap:wrap; gap:10px; padding:12px; margin-bottom:16px; align-items:center; }
-    button,.file-label { border:0; border-radius:7px; padding:9px 12px; color:#fff; background:var(--navy); font-weight:700; cursor:pointer; font-size:13px; }
-    button:hover,.file-label:hover { filter:brightness(1.08); }
-    button.green { background:var(--green); } button.red { background:var(--red); } button.gray { background:#64748b; }
-    .file-label input { display:none; }
-    .grid { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:12px; margin-bottom:16px; }
-    .metric { padding:14px; border-top:4px solid var(--blue); }
-    .metric.green { border-top-color:var(--green); }.metric.amber { border-top-color:var(--amber); }.metric.red { border-top-color:var(--red); }
-    .metric small { color:var(--slate); display:block; }.metric strong { font-size:27px; display:block; margin-top:3px; }
-    .tabs { display:flex; overflow:auto; gap:4px; border-bottom:1px solid var(--line); margin-bottom:16px; }
-    .tab { color:var(--slate); background:transparent; border-radius:8px 8px 0 0; white-space:nowrap; }
-    .tab.active { background:var(--navy); color:white; }
-    .view { display:none; }.view.active { display:block; }
-    .panel { padding:18px; margin-bottom:16px; }
-    .panel h2 { color:var(--navy); font-size:18px; margin:0 0 14px; }.panel h3 { color:var(--navy); margin:18px 0 10px; font-size:15px; }
-    .form-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:12px; }.form-grid.two { grid-template-columns:repeat(2,minmax(0,1fr)); }
-    label { color:#34405a; display:block; font-weight:700; font-size:12px; } input,select,textarea { width:100%; margin-top:4px; padding:8px; border:1px solid #cbd5e1; border-radius:6px; color:#172033; background:#fff; font:inherit; } textarea { min-height:72px; resize:vertical; }
-    .span-all { grid-column:1/-1; }.hint { color:#64748b; font-size:12px; margin:4px 0 0; }
-    .board { display:grid; grid-template-columns:repeat(6,minmax(215px,1fr)); gap:12px; overflow-x:auto; padding-bottom:6px; }.column { min-height:290px; background:#f8fafc; }.column h3 { margin:0; padding:10px; font-size:13px; color:var(--navy); border-bottom:1px solid var(--line); }.cards { padding:8px; min-height:230px; }
-    .opportunity { background:#fff; border:1px solid #dbe3ef; border-left:4px solid var(--blue); border-radius:7px; padding:9px; margin-bottom:8px; box-shadow:0 1px 3px #0f172a12; }.opportunity.a { border-left-color:var(--green); }.opportunity.b { border-left-color:var(--amber); }.opportunity.c { border-left-color:var(--red); }.opportunity h4 { margin:5px 0; font-size:13px; }.opportunity p { color:#64748b; margin:4px 0; font-size:12px; }.badge { display:inline-block; color:#fff; border-radius:99px; padding:2px 7px; font-size:11px; font-weight:700; }.badge.a { background:var(--green); }.badge.b { background:var(--amber); }.badge.c { background:var(--red); }.badge.status { background:#64748b; }
-    table { width:100%; border-collapse:collapse; } th,td { text-align:left; vertical-align:top; padding:9px; border-bottom:1px solid var(--line); } th { color:var(--navy); background:#f1f5f9; font-size:12px; }.table-wrap { overflow:auto; }.empty { color:#64748b; text-align:center; padding:20px; }
-    .row-actions { display:flex; gap:5px; }.row-actions button { padding:5px 8px; font-size:11px; }.danger { background:var(--red); }.inline { display:flex; gap:10px; align-items:end; }.inline > * { flex:1; }.right { margin-left:auto; }
-    .success { color:var(--green); font-weight:700; }.warning { color:var(--amber); font-weight:700; }.muted { color:#64748b; }
-    @media(max-width:850px){.grid,.form-grid,.form-grid.two{grid-template-columns:1fr 1fr;}.board{grid-template-columns:repeat(6,260px);}} @media(max-width:520px){.grid,.form-grid,.form-grid.two{grid-template-columns:1fr;}.span-all{grid-column:auto;}.toolbar button,.file-label{width:100%;text-align:center;}.right{margin-left:0;}}
-    @media print { body{background:#fff;font-size:11px} header{padding:10px;background:#fff;color:#000;border-bottom:2px solid #000} main{max-width:none;margin:0;padding:0}.toolbar,.tabs,.no-print{display:none!important}.view{display:block!important}.panel,.metric,.column{box-shadow:none;border:1px solid #aaa;break-inside:avoid}.grid{grid-template-columns:repeat(4,1fr)}.board{grid-template-columns:repeat(3,1fr);overflow:visible}.column{min-height:0}.cards{min-height:0}#view-backlog,#view-daily{display:none!important} }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{
+      --bg:#0d1117;--surface:#161b22;--surface2:#21262d;--border:#30363d;
+      --text:#e6edf3;--muted:#8b949e;--faint:#484f58;
+      --accent:#4f98a3;--accent2:#3fb950;--warn:#d29922;--danger:#f85149;
+      --purple:#bc8cff;--orange:#ffa657;
+      --radius:14px;--radius-sm:8px;
+    }
+    body{
+      font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);
+      min-height:100vh;display:flex;flex-direction:column;
+    }
+    button,input,select,textarea{font:inherit}
+    button{cursor:pointer}
+
+    header{
+      padding:14px 24px;border-bottom:1px solid var(--border);
+      background:var(--surface);display:flex;align-items:center;gap:14px;
+      flex-wrap:wrap;position:sticky;top:0;z-index:50;
+    }
+    .back-btn{
+      display:inline-flex;align-items:center;gap:6px;padding:6px 13px;
+      border:1px solid var(--border);border-radius:99px;font-size:12px;
+      color:var(--muted);text-decoration:none;transition:all .2s;
+    }
+    .back-btn:hover{border-color:var(--accent);color:var(--accent)}
+    .header-title{font-size:14px;font-weight:700;flex:1;min-width:220px}
+    .header-title span{color:var(--accent)}
+    .header-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+    .btn{
+      display:inline-flex;align-items:center;gap:5px;padding:7px 14px;
+      border-radius:99px;font-size:12px;font-weight:600;border:none;
+      transition:all .2s;white-space:nowrap;font-family:inherit;
+    }
+    .btn-ghost{background:transparent;color:var(--muted);border:1px solid var(--border)}
+    .btn-ghost:hover{border-color:var(--accent);color:var(--accent)}
+    .btn-primary{background:var(--accent);color:#fff}
+    .btn-primary:hover{background:#3a7f8a}
+    .btn-success{background:var(--accent2);color:#08120a}
+    .btn-success:hover{filter:brightness(1.08)}
+    .btn-danger{background:transparent;color:var(--danger);border:1px solid var(--danger)}
+    .btn-danger:hover{background:var(--danger);color:#fff}
+
+    .main{display:flex;flex:1;min-height:0}
+    .sidebar{
+      width:280px;flex-shrink:0;background:var(--surface);
+      border-right:1px solid var(--border);overflow-y:auto;
+      height:calc(100vh - 57px);position:sticky;top:57px;
+    }
+    .sb-section{
+      padding:12px 14px 6px;font-size:10px;font-weight:700;
+      letter-spacing:.08em;text-transform:uppercase;color:var(--muted);
+      border-bottom:1px solid var(--border);
+    }
+    .form-box{padding:12px 14px;border-bottom:1px solid var(--border)}
+    .field-row{display:flex;flex-direction:column;gap:3px;margin-bottom:9px}
+    .field-row:last-child{margin-bottom:0}
+    label{font-size:10px;font-weight:600;color:var(--muted)}
+    input,select,textarea{
+      width:100%;background:var(--surface2);border:1px solid var(--border);
+      border-radius:6px;color:var(--text);font-size:12px;padding:7px 8px;
+      outline:none;resize:vertical;
+    }
+    input:focus,select:focus,textarea:focus{border-color:var(--accent)}
+    textarea{min-height:60px}
+    .side-note{
+      margin:12px 14px;padding:10px;border:1px solid rgba(79,152,163,.25);
+      background:rgba(79,152,163,.08);border-radius:var(--radius-sm);
+      color:var(--muted);font-size:10px;line-height:1.55;
+    }
+    .side-note b{color:var(--accent)}
+    .summary{padding:12px 14px;border-bottom:1px solid var(--border)}
+    .summary-title{
+      margin-bottom:8px;font-size:10px;font-weight:700;
+      letter-spacing:.07em;text-transform:uppercase;color:var(--muted);
+    }
+    .summary-row{
+      display:flex;justify-content:space-between;align-items:center;
+      margin-bottom:7px;font-size:11px;
+    }
+    .summary-row:last-child{margin-bottom:0}
+    .summary-value{font-size:13px;font-weight:700}
+    .green{color:var(--accent2)}.yellow{color:var(--warn)}.red{color:var(--danger)}
+
+    .content{flex:1;min-width:0;padding:20px 22px 38px;overflow:auto}
+    .content-top{
+      display:flex;align-items:center;gap:12px;flex-wrap:wrap;
+      padding-bottom:16px;border-bottom:1px solid var(--border);
+      margin-bottom:16px;
+    }
+    .content-title{font-size:18px;font-weight:700;flex:1}
+    .content-title span{color:var(--accent)}
+    .status-badge{
+      padding:5px 11px;border-radius:99px;font-size:11px;font-weight:700;
+      background:rgba(79,152,163,.15);border:1px solid rgba(79,152,163,.3);color:var(--accent);
+    }
+    .tabs{
+      display:flex;gap:6px;flex-wrap:wrap;padding:8px;background:var(--surface);
+      border:1px solid var(--border);border-radius:var(--radius-sm);margin-bottom:16px;
+    }
+    .tab{
+      border:0;background:transparent;color:var(--muted);padding:7px 12px;
+      border-radius:6px;font-size:11px;font-weight:700;
+    }
+    .tab:hover{color:var(--text);background:var(--surface2)}
+    .tab.active{background:rgba(79,152,163,.18);color:var(--accent)}
+    .view{display:none}.view.active{display:block}
+
+    .metrics{
+      display:grid;grid-template-columns:repeat(auto-fit,minmax(155px,1fr));
+      gap:12px;margin-bottom:16px;
+    }
+    .metric{
+      background:var(--surface);border:1px solid var(--border);
+      border-radius:var(--radius-sm);padding:13px;border-top:3px solid var(--accent);
+    }
+    .metric.green-top{border-top-color:var(--accent2)}
+    .metric.yellow-top{border-top-color:var(--warn)}
+    .metric.red-top{border-top-color:var(--danger)}
+    .metric-label{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
+    .metric-value{font-size:24px;font-weight:700;margin-top:4px}
+    .metric-help{font-size:10px;color:var(--faint);margin-top:3px}
+
+    .panel{
+      background:var(--surface);border:1px solid var(--border);
+      border-radius:var(--radius);margin-bottom:16px;overflow:hidden;
+    }
+    .panel-header{
+      display:flex;justify-content:space-between;align-items:center;gap:10px;
+      padding:13px 16px;border-bottom:1px solid var(--border);flex-wrap:wrap;
+    }
+    .panel-title{font-size:13px;font-weight:700}
+    .panel-title span{color:var(--accent)}
+    .panel-body{padding:16px}
+    .grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+    .grid.two{grid-template-columns:repeat(2,minmax(0,1fr))}
+    .span-all{grid-column:1/-1}
+
+    .kanban{
+      display:grid;grid-template-columns:repeat(6,minmax(225px,1fr));
+      gap:12px;overflow-x:auto;padding-bottom:8px;
+    }
+    .column{
+      min-height:280px;background:var(--surface2);border:1px solid var(--border);
+      border-radius:var(--radius-sm);overflow:hidden;
+    }
+    .column-head{
+      padding:10px 11px;border-bottom:1px solid var(--border);
+      display:flex;justify-content:space-between;align-items:center;
+      font-size:11px;font-weight:700;color:var(--muted);
+    }
+    .column-count{
+      min-width:20px;text-align:center;padding:2px 6px;border-radius:99px;
+      background:var(--bg);font-size:10px;color:var(--text);
+    }
+    .column-cards{padding:8px;min-height:220px}
+    .card{
+      background:var(--surface);border:1px solid var(--border);
+      border-left:3px solid var(--accent);border-radius:7px;padding:10px;
+      margin-bottom:8px;transition:all .18s;
+    }
+    .card:hover{border-color:var(--accent);transform:translateY(-1px)}
+    .card.a{border-left-color:var(--accent2)}
+    .card.b{border-left-color:var(--warn)}
+    .card.c{border-left-color:var(--danger)}
+    .card-topline{display:flex;justify-content:space-between;gap:8px;align-items:flex-start}
+    .card-title{font-size:11px;font-weight:700;line-height:1.4;margin:7px 0}
+    .card-meta{font-size:10px;color:var(--muted);line-height:1.55}
+    .card-select{margin-top:8px;padding:5px;font-size:10px}
+    .badge{
+      display:inline-flex;align-items:center;padding:2px 7px;border-radius:99px;
+      font-size:9px;font-weight:800;letter-spacing:.04em;
+    }
+    .badge-a{background:rgba(63,185,80,.16);color:var(--accent2)}
+    .badge-b{background:rgba(210,153,34,.16);color:var(--warn)}
+    .badge-c{background:rgba(248,81,73,.16);color:var(--danger)}
+    .badge-state{background:rgba(79,152,163,.16);color:var(--accent)}
+
+    .table-wrap{overflow:auto}
+    table{width:100%;border-collapse:collapse;min-width:740px}
+    th,td{padding:10px;border-bottom:1px solid var(--border);text-align:left;vertical-align:top}
+    th{font-size:10px;color:var(--muted);letter-spacing:.05em;text-transform:uppercase;background:var(--surface2)}
+    td{font-size:11px;color:var(--text)}
+    tr:hover td{background:rgba(79,152,163,.035)}
+    .table-actions{display:flex;gap:5px}
+    .mini-btn{
+      background:transparent;color:var(--muted);border:1px solid var(--border);
+      border-radius:5px;padding:4px 7px;font-size:10px;
+    }
+    .mini-btn:hover{border-color:var(--accent);color:var(--accent)}
+    .mini-btn.delete:hover{border-color:var(--danger);color:var(--danger)}
+    .empty{text-align:center;color:var(--faint);padding:22px!important}
+
+    .form-actions{display:flex;gap:8px;margin-top:14px;flex-wrap:wrap}
+    .hint{font-size:10px;color:var(--muted);line-height:1.55;margin-top:8px}
+    .text-success{color:var(--accent2);font-weight:700}
+    .text-danger{color:var(--danger);font-weight:700}
+
+    @media(max-width:900px){
+      .sidebar{display:none}
+      .content{padding:16px}
+      .grid,.grid.two{grid-template-columns:1fr}
+      .span-all{grid-column:auto}
+    }
+    @media(max-width:560px){
+      header{padding:12px 14px}
+      .header-actions{width:100%}
+      .header-actions .btn{flex:1;justify-content:center}
+      .back-btn{font-size:11px}
+    }
+    @media print{
+      body{background:#fff;color:#111}
+      header,.sidebar,.tabs,.no-print{display:none!important}
+      .main,.content{display:block;overflow:visible;padding:0}
+      .view{display:block!important}
+      #view-backlog,#view-daily{display:none!important}
+      .panel,.metric,.column{background:#fff;border-color:#aaa;color:#111;box-shadow:none}
+      .panel-title,.content-title,.card-title{color:#111}
+      .metric-label,.card-meta,.hint{color:#555}
+      .kanban{grid-template-columns:repeat(3,1fr);overflow:visible}
+      .column{min-height:0}.column-cards{min-height:0}
+      .card{color:#111}
+    }
   </style>
 </head>
 <body>
+
 <header>
-  <h1>Gestión de Sprints Kaizen</h1>
-  <p>Planificar, ejecutar, verificar y estandarizar mejoras continuas.</p>
+  <a class="back-btn" href="index.html">🏠 Inicio</a>
+  <a class="back-btn" href="pdca.html">← PDCA / Kaizen</a>
+  <div class="header-title">改善 <span>Gestión de Sprints Kaizen</span> — Evento Kaizen como Sprint</div>
+  <div class="header-actions">
+    <button class="btn btn-ghost" onclick="saveLocal()">💾 Guardar</button>
+    <button class="btn btn-ghost" onclick="document.getElementById('import-file').click()">📂 Cargar</button>
+    <input id="import-file" type="file" accept=".json,application/json" hidden>
+    <button class="btn btn-ghost" onclick="exportJSON()">⬇ JSON</button>
+    <button class="btn btn-primary" onclick="printReport()">🖨 Imprimir / PDF</button>
+  </div>
 </header>
-<main>
-  <section class="toolbar no-print">
-    <button class="green" onclick="newSprint()">+ Nuevo Sprint</button>
-    <button onclick="saveSprint()">Guardar localmente</button>
-    <button onclick="exportJSON()">Exportar JSON</button>
-    <label class="file-label">Importar JSON<input type="file" accept="application/json" onchange="importJSON(event)"></label>
-    <button class="gray" onclick="window.print()">Imprimir / PDF</button>
-    <button class="red right" onclick="resetData()">Restablecer datos</button>
-  </section>
 
-  <section class="grid" id="metrics"></section>
-
-  <nav class="tabs no-print">
-    <button class="tab active" data-view="overview">Resumen</button>
-    <button class="tab" data-view="charter">Charter Kaizen</button>
-    <button class="tab" data-view="backlog">Oportunidades</button>
-    <button class="tab" data-view="board">Tablero Sprint</button>
-    <button class="tab" data-view="daily">Seguimiento diario</button>
-    <button class="tab" data-view="results">Resultados y sostenimiento</button>
-  </nav>
-
-  <section class="view active" id="view-overview">
-    <div class="panel"><h2>Estado del Sprint</h2><div id="overview-content"></div></div>
-    <div class="panel"><h2>Oportunidades prioritarias</h2><div class="table-wrap"><table><thead><tr><th>Clase</th><th>Oportunidad</th><th>Responsable</th><th>Fecha</th><th>Estado</th></tr></thead><tbody id="priority-list"></tbody></table></div></div>
-  </section>
-
-  <section class="view" id="view-charter">
-    <form class="panel" id="charter-form">
-      <h2>Charter del Sprint Kaizen</h2>
-      <div class="form-grid">
-        <label>Código<input name="code" placeholder="KZ-2026-001"></label>
-        <label>Título del Sprint<input name="title" required placeholder="Ej. Reducción de tiempo de preparación"></label>
-        <label>Estado<select name="status"><option>Borrador</option><option>Preparación</option><option>Planificado</option><option>En ejecución</option><option>En revisión</option><option>Estandarización</option><option>Cerrado</option></select></label>
-        <label>Cliente / organización<input name="organization"></label>
-        <label>Área / proceso<input name="area"></label>
-        <label>Tipo de evento<select name="eventType"><option value="Kaizen Blitz">Kaizen Blitz (3–5 horas)</option><option value="Evento Kaizen">Evento Kaizen (3–5 días)</option><option value="Six Sigma Kaizen">Six Sigma Kaizen (3–5 semanas)</option></select></label>
-        <label>Inicio<input type="date" name="startDate"></label>
-        <label>Fin<input type="date" name="endDate"></label>
-        <label>Facilitador Kaizen<input name="facilitator"></label>
-        <label class="span-all">Objetivo SMART<textarea name="objective" placeholder="Qué se busca mejorar, cuánto y hasta cuándo."></textarea></label>
-        <label class="span-all">Problema / oportunidad<textarea name="problem" placeholder="Situación actual, desperdicio o necesidad del cliente."></textarea></label>
-        <label>Alcance incluido<textarea name="scope"></textarea></label>
-        <label>Fuera de alcance<textarea name="outScope"></textarea></label>
-        <label>Patrocinador<input name="sponsor"></label>
-        <label class="span-all">Equipo multidisciplinario<textarea name="team" placeholder="Nombre – rol / área; un integrante por línea."></textarea></label>
-        <label class="span-all">Agenda / entregables<textarea name="agenda" placeholder="Preparación, VSM actual, análisis, implementación, revisión y entrega."></textarea></label>
+<div class="main">
+  <aside class="sidebar">
+    <div class="sb-section">Charter Kaizen</div>
+    <div class="form-box">
+      <div class="field-row"><label>Código del Sprint</label><input id="s-code" placeholder="KZ-2026-001"></div>
+      <div class="field-row"><label>Nombre del Sprint Kaizen</label><input id="s-title" placeholder="Ej. Reducción de tiempo de preparación"></div>
+      <div class="field-row">
+        <label>Estado</label>
+        <select id="s-status">
+          <option>Borrador</option><option>Preparación</option><option>Planificado</option>
+          <option>En ejecución</option><option>En revisión</option><option>Estandarización</option><option>Cerrado</option>
+        </select>
       </div>
-      <p class="hint">Un Evento Kaizen se gestiona como un Sprint: preparación, planeación, ejecución, incremento, revisión y estandarización.</p>
-      <button class="green no-print" type="submit">Guardar Charter</button>
-    </form>
-  </section>
-
-  <section class="view" id="view-backlog">
-    <div class="panel no-print">
-      <h2>Registrar oportunidad de mejora</h2>
-      <form id="opportunity-form" class="form-grid">
-        <input type="hidden" name="id">
-        <label>Título<input name="title" required placeholder="Ej. Organizar herramientas mediante 5S"></label>
-        <label>Clase<select name="class"><option value="A">A · inmediata (1–5 días)</option><option value="B">B · 1–2 semanas</option><option value="C">C · hasta 2 meses</option></select></label>
-        <label>Estado<select name="status"><option>Backlog</option><option>Seleccionada</option><option>En progreso</option><option>Bloqueada</option><option>Validación</option><option>Implementada</option><option>Estandarizada</option></select></label>
-        <label>Responsable<input name="owner"></label>
-        <label>Fecha compromiso<input type="date" name="dueDate"></label>
-        <label>Impacto<select name="impact"><option>Alto</option><option selected>Medio</option><option>Bajo</option></select></label>
-        <label>Esfuerzo<select name="effort"><option>Bajo</option><option selected>Medio</option><option>Alto</option></select></label>
-        <label>Categoría<input name="category" placeholder="5S, SMED, calidad, seguridad…"></label>
-        <label class="span-all">Descripción<textarea name="description"></textarea></label>
-        <label class="span-all">Resultado / evidencia<textarea name="result"></textarea></label>
-        <button class="green" type="submit">Guardar oportunidad</button><button class="gray" type="button" onclick="clearOpportunityForm()">Limpiar</button>
-      </form>
+      <div class="field-row">
+        <label>Tipo de evento</label>
+        <select id="s-event-type">
+          <option>Kaizen Blitz · 3–5 horas</option>
+          <option>Evento Kaizen · 3–5 días</option>
+          <option>Six Sigma Kaizen · 3–5 semanas</option>
+        </select>
+      </div>
+      <div class="field-row"><label>Cliente / organización</label><input id="s-organization"></div>
+      <div class="field-row"><label>Área / proceso</label><input id="s-area"></div>
+      <div class="field-row"><label>Facilitador</label><input id="s-facilitator"></div>
+      <div class="field-row"><label>Patrocinador</label><input id="s-sponsor"></div>
+      <div class="field-row"><label>Fecha inicio</label><input type="date" id="s-start"></div>
+      <div class="field-row"><label>Fecha fin</label><input type="date" id="s-end"></div>
     </div>
-    <div class="panel"><h2>Backlog de oportunidades</h2><div class="table-wrap"><table><thead><tr><th>Clase</th><th>Oportunidad</th><th>Impacto</th><th>Responsable</th><th>Compromiso</th><th>Estado</th><th class="no-print">Acciones</th></tr></thead><tbody id="opportunity-list"></tbody></table></div></div>
-  </section>
 
-  <section class="view" id="view-board"><div class="panel"><h2>Tablero Kanban del Sprint</h2><p class="hint">Clasificación A/B/C: A es inmediata, B se completa durante o poco después del evento y C requiere mayor gestión o inversión.</p><div class="board" id="board"></div></div></section>
+    <div class="sb-section">Objetivo y alcance</div>
+    <div class="form-box">
+      <div class="field-row"><label>Objetivo SMART</label><textarea id="s-objective" placeholder="Qué se mejorará, cuánto y hasta cuándo."></textarea></div>
+      <div class="field-row"><label>Problema / oportunidad</label><textarea id="s-problem" placeholder="Situación actual, desperdicio o necesidad."></textarea></div>
+      <div class="field-row"><label>Alcance incluido</label><textarea id="s-scope"></textarea></div>
+      <div class="field-row"><label>Equipo multidisciplinario</label><textarea id="s-team" placeholder="Nombre – rol / área"></textarea></div>
+    </div>
 
-  <section class="view" id="view-daily">
-    <div class="panel no-print"><h2>Registro diario Kaizen</h2><form id="daily-form" class="form-grid"><input type="hidden" name="id"><label>Fecha<input type="date" name="date" required></label><label>Participantes<input name="participants"></label><label>Estado del día<select name="health"><option>Verde · según plan</option><option>Amarillo · con riesgo</option><option>Rojo · bloqueo crítico</option></select></label><label>Completado<textarea name="done"></textarea></label><label>Plan de hoy<textarea name="plan"></textarea></label><label>Bloqueos / apoyo requerido<textarea name="blockers"></textarea></label><label class="span-all">Decisiones y observaciones Gemba<textarea name="notes"></textarea></label><button class="green" type="submit">Guardar registro</button></form></div>
-    <div class="panel"><h2>Bitácora diaria</h2><div class="table-wrap"><table><thead><tr><th>Fecha</th><th>Estado</th><th>Completado</th><th>Plan</th><th>Bloqueos</th><th>Notas</th><th class="no-print">Acciones</th></tr></thead><tbody id="daily-list"></tbody></table></div></div>
-  </section>
+    <div class="sb-section">Indicadores del Sprint</div>
+    <div class="summary" id="sidebar-summary"></div>
 
-  <section class="view" id="view-results">
-    <form class="panel" id="results-form"><h2>Resultados, revisión y sostenimiento</h2><div class="form-grid two"><label>Resultado antes<textarea name="before"></textarea></label><label>Resultado después<textarea name="after"></textarea></label><label>Incremento / mejora implementada<textarea name="increment"></textarea></label><label>Beneficio estimado / validado<textarea name="benefit"></textarea></label><label>Qué funcionó<textarea name="worked"></textarea></label><label>Qué debe mejorarse<textarea name="improve"></textarea></label><label>Nuevo estándar de trabajo<textarea name="standard"></textarea></label><label>Responsable del estándar<input name="standardOwner"></label><label>Verificación 7 días<input type="date" name="follow7"></label><label>Verificación 30 días<input type="date" name="follow30"></label><label class="span-all">Acciones de sostenimiento / capacitación<textarea name="sustainment"></textarea></label></div><button class="green no-print" type="submit">Guardar resultados</button></form>
-    <div class="panel"><h2>Métricas antes y después</h2><div class="table-wrap"><table><thead><tr><th>Indicador</th><th>Unidad</th><th>Línea base</th><th>Meta</th><th>Resultado</th><th class="no-print">Acciones</th></tr></thead><tbody id="metric-list"></tbody><tfoot class="no-print"><tr><td><input id="m-name" placeholder="Ej. Tiempo de preparación"></td><td><input id="m-unit" placeholder="minutos"></td><td><input type="number" id="m-baseline"></td><td><input type="number" id="m-target"></td><td><input type="number" id="m-actual"></td><td><button class="green" onclick="addMetric()">+ Agregar</button></td></tr></tfoot></table></div></div>
-  </section>
-</main>
+    <div class="side-note">
+      <b>Sprint = Kaizen</b><br>
+      Un evento Kaizen se organiza como un Sprint enfocado: preparación, ejecución, revisión, incremento y estandarización.
+      <br><br>
+      <b>A:</b> inmediata, 1–5 días.<br>
+      <b>B:</b> 1–2 semanas.<br>
+      <b>C:</b> requiere autorización, inversión o coordinación.
+    </div>
+  </aside>
+
+  <main class="content">
+    <div class="content-top">
+      <div class="content-title">Sprint <span id="screen-title">Kaizen</span></div>
+      <span class="status-badge" id="screen-status">Preparación</span>
+    </div>
+
+    <div class="tabs no-print">
+      <button class="tab active" data-view="dashboard">◉ Resumen</button>
+      <button class="tab" data-view="board">▦ Tablero Sprint</button>
+      <button class="tab" data-view="backlog">☷ Oportunidades A/B/C</button>
+      <button class="tab" data-view="daily">☀ Seguimiento diario</button>
+      <button class="tab" data-view="results">✓ Resultados y estándar</button>
+    </div>
+
+    <section class="view active" id="view-dashboard">
+      <div class="metrics" id="metrics"></div>
+
+      <div class="panel">
+        <div class="panel-header"><div class="panel-title">Charter del <span>Sprint Kaizen</span></div></div>
+        <div class="panel-body" id="charter-preview"></div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-header">
+          <div class="panel-title">Oportunidades <span>prioritarias</span></div>
+          <button class="btn btn-ghost no-print" onclick="showView('backlog')">Gestionar oportunidades</button>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Clase</th><th>Oportunidad</th><th>Responsable</th><th>Fecha</th><th>Estado</th></tr></thead>
+            <tbody id="priority-table"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-header"><div class="panel-title">Revisión del Sprint e <span>incremento</span></div></div>
+        <div class="panel-body" id="results-preview"></div>
+      </div>
+    </section>
+
+    <section class="view" id="view-board">
+      <div class="panel">
+        <div class="panel-header">
+          <div class="panel-title">Tablero Kanban del <span>Sprint Kaizen</span></div>
+          <button class="btn btn-success no-print" onclick="showView('backlog');document.getElementById('o-title').focus()">＋ Nueva oportunidad</button>
+        </div>
+        <div class="panel-body">
+          <p class="hint" style="margin-top:0;margin-bottom:14px">Mueve las tarjetas entre estados para reflejar el avance del evento. Las oportunidades A deben priorizarse para implementación inmediata.</p>
+          <div class="kanban" id="kanban-board"></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="view" id="view-backlog">
+      <div class="panel no-print">
+        <div class="panel-header"><div class="panel-title">Registrar oportunidad de <span>mejora</span></div></div>
+        <div class="panel-body">
+          <form id="opportunity-form">
+            <input type="hidden" id="o-id">
+            <div class="grid">
+              <div class="field-row"><label>Título de la oportunidad</label><input id="o-title" required placeholder="Ej. Organizar herramientas mediante 5S"></div>
+              <div class="field-row">
+                <label>Clase de oportunidad</label>
+                <select id="o-class">
+                  <option value="A">A · Inmediata (1–5 días)</option>
+                  <option value="B">B · Corto plazo (1–2 semanas)</option>
+                  <option value="C">C · Requiere gestión (hasta 2 meses)</option>
+                </select>
+              </div>
+              <div class="field-row">
+                <label>Estado</label>
+                <select id="o-status">
+                  <option>Backlog</option><option>Seleccionada</option><option>En progreso</option>
+                  <option>Bloqueada</option><option>Validación</option><option>Implementada</option><option>Estandarizada</option>
+                </select>
+              </div>
+              <div class="field-row"><label>Responsable</label><input id="o-owner"></div>
+              <div class="field-row"><label>Fecha compromiso</label><input id="o-due" type="date"></div>
+              <div class="field-row">
+                <label>Impacto</label>
+                <select id="o-impact"><option>Alto</option><option selected>Medio</option><option>Bajo</option></select>
+              </div>
+              <div class="field-row"><label>Categoría Lean</label><input id="o-category" placeholder="5S, SMED, TPM, seguridad…"></div>
+              <div class="field-row">
+                <label>Esfuerzo</label>
+                <select id="o-effort"><option>Bajo</option><option selected>Medio</option><option>Alto</option></select>
+              </div>
+              <div class="field-row"><label>Área afectada</label><input id="o-area"></div>
+              <div class="field-row span-all"><label>Descripción, causa u observación Gemba</label><textarea id="o-description"></textarea></div>
+              <div class="field-row span-all"><label>Resultado / evidencia de implementación</label><textarea id="o-result"></textarea></div>
+            </div>
+            <div class="form-actions">
+              <button class="btn btn-success" type="submit">✓ Guardar oportunidad</button>
+              <button class="btn btn-ghost" type="button" onclick="clearOpportunityForm()">Limpiar</button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-header"><div class="panel-title">Backlog de <span>oportunidades</span></div></div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Clase</th><th>Oportunidad</th><th>Impacto</th><th>Responsable</th><th>Compromiso</th><th>Estado</th><th class="no-print">Acciones</th></tr></thead>
+            <tbody id="opportunity-table"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <section class="view" id="view-daily">
+      <div class="panel no-print">
+        <div class="panel-header"><div class="panel-title">Registro diario <span>Kaizen</span></div></div>
+        <div class="panel-body">
+          <form id="daily-form">
+            <input type="hidden" id="d-id">
+            <div class="grid">
+              <div class="field-row"><label>Fecha</label><input type="date" id="d-date" required></div>
+              <div class="field-row"><label>Participantes</label><input id="d-participants"></div>
+              <div class="field-row">
+                <label>Salud del Sprint</label>
+                <select id="d-health"><option>Verde · según plan</option><option>Amarillo · con riesgo</option><option>Rojo · bloqueo crítico</option></select>
+              </div>
+              <div class="field-row"><label>¿Qué se completó?</label><textarea id="d-done"></textarea></div>
+              <div class="field-row"><label>¿Qué se hará hoy?</label><textarea id="d-plan"></textarea></div>
+              <div class="field-row"><label>Bloqueos / apoyo requerido</label><textarea id="d-blockers"></textarea></div>
+              <div class="field-row span-all"><label>Decisiones y observaciones Gemba</label><textarea id="d-notes"></textarea></div>
+            </div>
+            <div class="form-actions">
+              <button class="btn btn-success" type="submit">✓ Guardar seguimiento</button>
+              <button class="btn btn-ghost" type="button" onclick="clearDailyForm()">Limpiar</button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-header"><div class="panel-title">Bitácora del <span>Sprint</span></div></div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Fecha</th><th>Estado</th><th>Completado</th><th>Plan</th><th>Bloqueos</th><th>Notas</th><th class="no-print">Acciones</th></tr></thead>
+            <tbody id="daily-table"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <section class="view" id="view-results">
+      <div class="panel">
+        <div class="panel-header"><div class="panel-title">Resultados, revisión y <span>estandarización</span></div></div>
+        <div class="panel-body">
+          <div class="grid two">
+            <div class="field-row"><label>Resultado antes</label><textarea id="r-before"></textarea></div>
+            <div class="field-row"><label>Resultado después</label><textarea id="r-after"></textarea></div>
+            <div class="field-row"><label>Incremento / mejora implementada</label><textarea id="r-increment"></textarea></div>
+            <div class="field-row"><label>Beneficio estimado o validado</label><textarea id="r-benefit"></textarea></div>
+            <div class="field-row"><label>Qué funcionó</label><textarea id="r-worked"></textarea></div>
+            <div class="field-row"><label>Qué debe mejorarse</label><textarea id="r-improve"></textarea></div>
+            <div class="field-row"><label>Nuevo estándar de trabajo</label><textarea id="r-standard"></textarea></div>
+            <div class="field-row"><label>Responsable del estándar</label><input id="r-standard-owner"></div>
+            <div class="field-row"><label>Verificación a 7 días</label><input type="date" id="r-follow-7"></div>
+            <div class="field-row"><label>Verificación a 30 días</label><input type="date" id="r-follow-30"></div>
+            <div class="field-row span-all"><label>Acciones de sostenimiento / capacitación</label><textarea id="r-sustainment"></textarea></div>
+          </div>
+          <div class="form-actions no-print">
+            <button class="btn btn-success" onclick="saveResults()">✓ Guardar resultados</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-header"><div class="panel-title">Indicadores <span>antes y después</span></div></div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Indicador</th><th>Unidad</th><th>Línea base</th><th>Meta</th><th>Resultado</th><th class="no-print">Acciones</th></tr></thead>
+            <tbody id="metrics-table"></tbody>
+            <tfoot class="no-print">
+              <tr>
+                <td><input id="m-name" placeholder="Tiempo de preparación"></td>
+                <td><input id="m-unit" placeholder="minutos"></td>
+                <td><input id="m-baseline" type="number"></td>
+                <td><input id="m-target" type="number"></td>
+                <td><input id="m-actual" type="number"></td>
+                <td><button class="btn btn-success" onclick="addMetric()">＋ Agregar</button></td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>
+
 <script>
-const STORAGE='largotek-kaizen-sprint-v1';
-const columns=['Backlog','Seleccionada','En progreso','Bloqueada','Validación','Implementada','Estandarizada'];
-let state={schema_version:'1.0',tool:'kaizen_sprint',sprint:{code:'KZ-2026-001',title:'',status:'Preparación',organization:'',area:'',eventType:'Evento Kaizen',startDate:'',endDate:'',facilitator:'',objective:'',problem:'',scope:'',outScope:'',sponsor:'',team:'',agenda:'',opportunities:[],dailyLogs:[],metrics:[],results:{}}};
-function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,7)}
-function esc(v=''){return String(v).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]))}
-function current(){return state.sprint}
-function saveSprint(){localStorage.setItem(STORAGE,JSON.stringify(state));render();alert('Sprint guardado localmente en este navegador.');}
-function loadSprint(){try{const raw=localStorage.getItem(STORAGE);if(raw)state=JSON.parse(raw)}catch(e){console.warn(e)} }
-function newSprint(){if(confirm('¿Crear un nuevo Sprint Kaizen? Se reemplazarán los datos actuales no exportados.')){localStorage.removeItem(STORAGE);location.reload()}}
-function resetData(){if(confirm('¿Eliminar los datos locales de este Sprint?')){localStorage.removeItem(STORAGE);location.reload()}}
-function exportJSON(){const copy=JSON.parse(JSON.stringify(state));copy.exported_at=new Date().toISOString();const blob=new Blob([JSON.stringify(copy,null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=(current().code||'kaizen-sprint')+'.json';a.click();URL.revokeObjectURL(a.href)}
-function importJSON(e){const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{const data=JSON.parse(r.result);if(!data.sprint)throw new Error('No contiene un objeto sprint');state=data;saveSprint();alert('Sprint importado correctamente.')}catch(err){alert('No se pudo importar el JSON: '+err.message)}};r.readAsText(f)}
-function fillForm(form,obj){[...form.elements].forEach(el=>{if(el.name&&obj&&Object.prototype.hasOwnProperty.call(obj,el.name))el.value=obj[el.name]??''})}
-function syncCharter(){const f=document.getElementById('charter-form');fillForm(f,current())}
-function syncResults(){fillForm(document.getElementById('results-form'),current().results||{})}
-function renderMetrics(){const s=current(),o=s.opportunities||[],done=o.filter(x=>['Implementada','Estandarizada'].includes(x.status)).length,over=o.filter(x=>x.dueDate&&new Date(x.dueDate+'T23:59:59')<new Date()&&!['Implementada','Estandarizada'].includes(x.status)).length;const end=s.endDate?Math.max(0,Math.ceil((new Date(s.endDate+'T23:59:59')-new Date())/86400000)):'—';document.getElementById('metrics').innerHTML=`<div class="metric"><small>Oportunidades activas</small><strong>${o.length}</strong></div><div class="metric green"><small>Implementadas / estandarizadas</small><strong>${done}</strong></div><div class="metric ${over?'red':'amber'}"><small>Acciones vencidas</small><strong>${over}</strong></div><div class="metric amber"><small>Días restantes</small><strong>${end}</strong></div>`}
-function renderOverview(){const s=current();document.getElementById('overview-content').innerHTML=`<div class="form-grid two"><div><strong>${esc(s.code||'Sin código')} · ${esc(s.title||'Sprint Kaizen sin título')}</strong><p class="muted">${esc(s.organization||'Sin organización')} · ${esc(s.area||'Sin área')} · ${esc(s.eventType||'')}</p><p><span class="badge status">${esc(s.status||'Borrador')}</span></p></div><div><strong>Objetivo</strong><p>${esc(s.objective||'Aún no se definió un objetivo SMART.')}</p><strong>Facilitador</strong><p>${esc(s.facilitator||'Sin asignar')}</p></div><div><strong>Alcance</strong><p>${esc(s.scope||'No definido')}</p><strong>Fechas</strong><p>${esc(s.startDate||'—')} a ${esc(s.endDate||'—')}</p></div><div><strong>Equipo</strong><p>${esc(s.team||'Sin equipo registrado')}</p><strong>Patrocinador</strong><p>${esc(s.sponsor||'Sin asignar')}</p></div></div>`; const tbody=document.getElementById('priority-list');const items=[...s.opportunities].sort((a,b)=>({A:0,B:1,C:2}[a.class]-({A:0,B:1,C:2}[b.class])||String(a.dueDate).localeCompare(String(b.dueDate)));tbody.innerHTML=items.length?items.slice(0,8).map(x=>`<tr><td><span class="badge ${x.class.toLowerCase()}">${esc(x.class)}</span></td><td>${esc(x.title)}</td><td>${esc(x.owner||'—')}</td><td>${esc(x.dueDate||'—')}</td><td>${esc(x.status)}</td></tr>`).join(''):'<tr><td colspan="5" class="empty">No hay oportunidades registradas.</td></tr>'}
-function renderOpportunityList(){const list=current().opportunities||[],tb=document.getElementById('opportunity-list');tb.innerHTML=list.length?list.map(x=>`<tr><td><span class="badge ${x.class.toLowerCase()}">${esc(x.class)}</span></td><td><strong>${esc(x.title)}</strong><br><span class="muted">${esc(x.category||'')}</span></td><td>${esc(x.impact)}</td><td>${esc(x.owner||'—')}</td><td>${esc(x.dueDate||'—')}</td><td>${esc(x.status)}</td><td class="no-print"><div class="row-actions"><button onclick="editOpportunity('${x.id}')">Editar</button><button class="danger" onclick="deleteOpportunity('${x.id}')">×</button></div></td></tr>`).join(''):'<tr><td colspan="7" class="empty">Registra la primera oportunidad de mejora.</td></tr>`}
-function renderBoard(){const s=current();document.getElementById('board').innerHTML=columns.map(c=>{const items=s.opportunities.filter(x=>x.status===c);return `<div class="column"><h3>${c} <span class="muted">(${items.length})</span></h3><div class="cards">${items.map(x=>`<article class="opportunity ${x.class.toLowerCase()}"><span class="badge ${x.class.toLowerCase()}">${esc(x.class)}</span><h4>${esc(x.title)}</h4><p>${esc(x.owner||'Sin responsable')} · ${esc(x.dueDate||'Sin fecha')}</p><select class="no-print" onchange="moveOpportunity('${x.id}',this.value)">${columns.map(z=>`<option ${z===x.status?'selected':''}>${z}</option>`).join('')}</select></article>`).join('')||'<p class="empty">Sin tarjetas</p>'}</div></div>`}).join('')}
-function renderDaily(){const logs=current().dailyLogs||[],tb=document.getElementById('daily-list');tb.innerHTML=logs.length?logs.sort((a,b)=>String(b.date).localeCompare(String(a.date))).map(x=>`<tr><td>${esc(x.date)}</td><td>${esc(x.health)}</td><td>${esc(x.done)}</td><td>${esc(x.plan)}</td><td>${esc(x.blockers)}</td><td>${esc(x.notes)}</td><td class="no-print"><div class="row-actions"><button onclick="editDaily('${x.id}')">Editar</button><button class="danger" onclick="deleteDaily('${x.id}')">×</button></div></td></tr>`).join(''):'<tr><td colspan="7" class="empty">No hay registros diarios.</td></tr>`}
-function renderMetricList(){const arr=current().metrics||[],tb=document.getElementById('metric-list');tb.innerHTML=arr.length?arr.map((m,i)=>`<tr><td>${esc(m.name)}</td><td>${esc(m.unit)}</td><td>${esc(m.baseline)}</td><td>${esc(m.target)}</td><td>${esc(m.actual)}</td><td class="no-print"><button class="danger" onclick="deleteMetric(${i})">×</button></td></tr>`).join(''):'<tr><td colspan="6" class="empty">Agrega indicadores para medir el antes y después.</td></tr>`}
-function render(){renderMetrics();renderOverview();renderOpportunityList();renderBoard();renderDaily();renderMetricList();syncCharter();syncResults()}
-function clearOpportunityForm(){document.getElementById('opportunity-form').reset();document.querySelector('#opportunity-form [name=id]').value=''}
-function editOpportunity(id){const x=current().opportunities.find(x=>x.id===id);fillForm(document.getElementById('opportunity-form'),x);showView('backlog');window.scrollTo({top:0,behavior:'smooth'})}
-function deleteOpportunity(id){if(confirm('¿Eliminar esta oportunidad?')){current().opportunities=current().opportunities.filter(x=>x.id!==id);saveSprint()}}
-function moveOpportunity(id,status){const x=current().opportunities.find(x=>x.id===id);x.status=status;saveSprint()}
-function editDaily(id){const x=current().dailyLogs.find(x=>x.id===id);fillForm(document.getElementById('daily-form'),x);showView('daily');window.scrollTo({top:0,behavior:'smooth'})}
-function deleteDaily(id){if(confirm('¿Eliminar este registro?')){current().dailyLogs=current().dailyLogs.filter(x=>x.id!==id);saveSprint()}}
-function addMetric(){const get=id=>document.getElementById(id).value.trim();const name=get('m-name');if(!name)return alert('Indica el nombre del indicador.');current().metrics.push({name,unit:get('m-unit'),baseline:get('m-baseline'),target:get('m-target'),actual:get('m-actual')});['m-name','m-unit','m-baseline','m-target','m-actual'].forEach(id=>document.getElementById(id).value='');saveSprint()}
-function deleteMetric(i){current().metrics.splice(i,1);saveSprint()}
-function showView(view){document.querySelectorAll('.view').forEach(x=>x.classList.toggle('active',x.id==='view-'+view));document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('active',x.dataset.view===view))}
-document.querySelectorAll('.tab').forEach(b=>b.addEventListener('click',()=>showView(b.dataset.view)));
-document.getElementById('charter-form').addEventListener('submit',e=>{e.preventDefault();const d=Object.fromEntries(new FormData(e.target));Object.assign(current(),d);saveSprint()});
-document.getElementById('results-form').addEventListener('submit',e=>{e.preventDefault();current().results=Object.fromEntries(new FormData(e.target));saveSprint()});
-document.getElementById('opportunity-form').addEventListener('submit',e=>{e.preventDefault();const d=Object.fromEntries(new FormData(e.target));if(d.id){const i=current().opportunities.findIndex(x=>x.id===d.id);current().opportunities[i]={...current().opportunities[i],...d}}else{d.id=uid();current().opportunities.push(d)}clearOpportunityForm();saveSprint()});
-document.getElementById('daily-form').addEventListener('submit',e=>{e.preventDefault();const d=Object.fromEntries(new FormData(e.target));if(d.id){const i=current().dailyLogs.findIndex(x=>x.id===d.id);current().dailyLogs[i]={...current().dailyLogs[i],...d}}else{d.id=uid();current().dailyLogs.push(d)}e.target.reset();saveSprint()});
-loadSprint();render();
+  const STORAGE_KEY = 'largotek-kaizen-sprint-v2';
+  const STATUSES = ['Backlog','Seleccionada','En progreso','Bloqueada','Validación','Implementada','Estandarizada'];
+
+  let data = {
+    schemaVersion: '1.0',
+    tool: 'kaizen_sprint',
+    sprint: {
+      code: 'KZ-2026-001',
+      title: '',
+      status: 'Preparación',
+      eventType: 'Evento Kaizen · 3–5 días',
+      organization: '',
+      area: '',
+      facilitator: '',
+      sponsor: '',
+      start: '',
+      end: '',
+      objective: '',
+      problem: '',
+      scope: '',
+      team: '',
+      opportunities: [],
+      dailyLogs: [],
+      metrics: [],
+      results: {
+        before: '', after: '', increment: '', benefit: '',
+        worked: '', improve: '', standard: '', standardOwner: '',
+        follow7: '', follow30: '', sustainment: ''
+      }
+    }
+  };
+
+  function escapeHTML(value) {
+    return String(value ?? '').replace(/[&<>"']/g, char => ({
+      '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'
+    }[char]));
+  }
+
+  function id() {
+    return Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+  }
+
+  function sprint() { return data.sprint; }
+
+  function byId(id) { return document.getElementById(id); }
+
+  function daysRemaining() {
+    if (!sprint().end) return '—';
+    return Math.max(0, Math.ceil((new Date(sprint().end + 'T23:59:59') - new Date()) / 86400000));
+  }
+
+  function isClosed(status) {
+    return status === 'Implementada' || status === 'Estandarizada';
+  }
+
+  function saveLocal(silent = false) {
+    syncSprintFromSidebar();
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+    renderAll();
+    if (!silent) alert('Sprint Kaizen guardado localmente en este navegador.');
+  }
+
+  function loadLocal() {
+    try {
+      const stored = localStorage.getItem(STORAGE_KEY);
+      if (stored) data = JSON.parse(stored);
+    } catch (error) {
+      console.warn('No fue posible recuperar el sprint local', error);
+    }
+  }
+
+  function syncSprintFromSidebar() {
+    const s = sprint();
+    s.code = byId('s-code').value;
+    s.title = byId('s-title').value;
+    s.status = byId('s-status').value;
+    s.eventType = byId('s-event-type').value;
+    s.organization = byId('s-organization').value;
+    s.area = byId('s-area').value;
+    s.facilitator = byId('s-facilitator').value;
+    s.sponsor = byId('s-sponsor').value;
+    s.start = byId('s-start').value;
+    s.end = byId('s-end').value;
+    s.objective = byId('s-objective').value;
+    s.problem = byId('s-problem').value;
+    s.scope = byId('s-scope').value;
+    s.team = byId('s-team').value;
+  }
+
+  function populateSidebar() {
+    const s = sprint();
+    byId('s-code').value = s.code || '';
+    byId('s-title').value = s.title || '';
+    byId('s-status').value = s.status || 'Preparación';
+    byId('s-event-type').value = s.eventType || 'Evento Kaizen · 3–5 días';
+    byId('s-organization').value = s.organization || '';
+    byId('s-area').value = s.area || '';
+    byId('s-facilitator').value = s.facilitator || '';
+    byId('s-sponsor').value = s.sponsor || '';
+    byId('s-start').value = s.start || '';
+    byId('s-end').value = s.end || '';
+    byId('s-objective').value = s.objective || '';
+    byId('s-problem').value = s.problem || '';
+    byId('s-scope').value = s.scope || '';
+    byId('s-team').value = s.team || '';
+  }
+
+  function renderSummary() {
+    const ops = sprint().opportunities || [];
+    const complete = ops.filter(op => isClosed(op.status)).length;
+    const overdue = ops.filter(op => {
+      if (!op.due || isClosed(op.status)) return false;
+      return new Date(op.due + 'T23:59:59') < new Date();
+    }).length;
+
+    byId('sidebar-summary').innerHTML = `
+      <div class="summary-title">Estado del evento</div>
+      <div class="summary-row"><span>Oportunidades</span><span class="summary-value">${ops.length}</span></div>
+      <div class="summary-row"><span>Implementadas</span><span class="summary-value green">${complete}</span></div>
+      <div class="summary-row"><span>Vencidas</span><span class="summary-value ${overdue ? 'red' : 'green'}">${overdue}</span></div>
+      <div class="summary-row"><span>Días restantes</span><span class="summary-value yellow">${daysRemaining()}</span></div>
+    `;
+  }
+
+  function renderMetrics() {
+    const ops = sprint().opportunities || [];
+    const done = ops.filter(op => isClosed(op.status)).length;
+    const overdue = ops.filter(op => op.due && !isClosed(op.status) && new Date(op.due + 'T23:59:59') < new Date()).length;
+    const rate = ops.length ? Math.round((done / ops.length) * 100) : 0;
+
+    byId('metrics').innerHTML = `
+      <div class="metric"><div class="metric-label">Oportunidades activas</div><div class="metric-value">${ops.length}</div><div class="metric-help">Backlog completo del Sprint</div></div>
+      <div class="metric green-top"><div class="metric-label">Implementación</div><div class="metric-value green">${done}</div><div class="metric-help">${rate}% de oportunidades cerradas</div></div>
+      <div class="metric ${overdue ? 'red-top' : 'yellow-top'}"><div class="metric-label">Acciones vencidas</div><div class="metric-value ${overdue ? 'red' : 'green'}">${overdue}</div><div class="metric-help">Requieren revisión o escalamiento</div></div>
+      <div class="metric yellow-top"><div class="metric-label">Días restantes</div><div class="metric-value yellow">${daysRemaining()}</div><div class="metric-help">${escapeHTML(sprint().eventType)}</div></div>
+    `;
+  }
+
+  function renderDashboard() {
+    const s = sprint();
+    byId('screen-title').textContent = s.title || 'Kaizen';
+    byId('screen-status').textContent = s.status || 'Preparación';
+
+    byId('charter-preview').innerHTML = `
+      <div class="grid two">
+        <div>
+          <div class="metric-label">Código / organización</div>
+          <div style="font-size:14px;font-weight:700;margin-top:5px">${escapeHTML(s.code || 'Sin código')}</div>
+          <div class="hint">${escapeHTML(s.organization || 'Sin organización')} · ${escapeHTML(s.area || 'Sin área')}</div>
+        </div>
+        <div>
+          <div class="metric-label">Fechas y facilitación</div>
+          <div style="font-size:12px;font-weight:700;margin-top:5px">${escapeHTML(s.start || '—')} → ${escapeHTML(s.end || '—')}</div>
+          <div class="hint">Facilitador: ${escapeHTML(s.facilitator || 'Sin asignar')} · Patrocinador: ${escapeHTML(s.sponsor || 'Sin asignar')}</div>
+        </div>
+        <div>
+          <div class="metric-label">Objetivo SMART</div>
+          <div class="hint" style="font-size:11px;color:var(--text);white-space:pre-line">${escapeHTML(s.objective || 'Aún no se definió un objetivo SMART.')}</div>
+        </div>
+        <div>
+          <div class="metric-label">Problema / oportunidad</div>
+          <div class="hint" style="font-size:11px;color:var(--text);white-space:pre-line">${escapeHTML(s.problem || 'No se registró el problema.')}</div>
+        </div>
+        <div>
+          <div class="metric-label">Alcance</div>
+          <div class="hint" style="font-size:11px;color:var(--text);white-space:pre-line">${escapeHTML(s.scope || 'No definido.')}</div>
+        </div>
+        <div>
+          <div class="metric-label">Equipo multidisciplinario</div>
+          <div class="hint" style="font-size:11px;color:var(--text);white-space:pre-line">${escapeHTML(s.team || 'Sin equipo registrado.')}</div>
+        </div>
+      </div>
+    `;
+
+    const ordered = [...s.opportunities].sort((a,b) => {
+      const priority = {A:0,B:1,C:2};
+      return priority[a.class] - priority[b.class] || String(a.due).localeCompare(String(b.due));
+    });
+
+    byId('priority-table').innerHTML = ordered.length
+      ? ordered.slice(0,8).map(op => `
+          <tr>
+            <td><span class="badge badge-${op.class.toLowerCase()}">${escapeHTML(op.class)}</span></td>
+            <td><strong>${escapeHTML(op.title)}</strong><br><span style="color:var(--muted);font-size:10px">${escapeHTML(op.category || '')}</span></td>
+            <td>${escapeHTML(op.owner || '—')}</td>
+            <td>${escapeHTML(op.due || '—')}</td>
+            <td><span class="badge badge-state">${escapeHTML(op.status)}</span></td>
+          </tr>
+        `).join('')
+      : '<tr><td colspan="5" class="empty">No hay oportunidades registradas todavía.</td></tr>';
+
+    const r = s.results || {};
+    byId('results-preview').innerHTML = `
+      <div class="grid two">
+        <div><div class="metric-label">Incremento implementado</div><div class="hint" style="font-size:11px;color:var(--text);white-space:pre-line">${escapeHTML(r.increment || 'Pendiente de revisión del Sprint.')}</div></div>
+        <div><div class="metric-label">Beneficio</div><div class="hint" style="font-size:11px;color:var(--text);white-space:pre-line">${escapeHTML(r.benefit || 'Pendiente de validación.')}</div></div>
+        <div><div class="metric-label">Nuevo estándar</div><div class="hint" style="font-size:11px;color:var(--text);white-space:pre-line">${escapeHTML(r.standard || 'Aún no definido.')}</div></div>
+        <div><div class="metric-label">Sostenimiento</div><div class="hint" style="font-size:11px;color:var(--text);white-space:pre-line">${escapeHTML(r.sustainment || 'Sin acciones de sostenimiento registradas.')}</div></div>
+      </div>
+    `;
+  }
+
+  function classBadge(op) {
+    return `<span class="badge badge-${op.class.toLowerCase()}">${escapeHTML(op.class)}</span>`;
+  }
+
+  function renderBoard() {
+    const s = sprint();
+    byId('kanban-board').innerHTML = STATUSES.map(status => {
+      const list = s.opportunities.filter(op => op.status === status);
+      return `
+        <div class="column">
+          <div class="column-head"><span>${escapeHTML(status)}</span><span class="column-count">${list.length}</span></div>
+          <div class="column-cards">
+            ${list.length ? list.map(op => `
+              <article class="card ${op.class.toLowerCase()}">
+                <div class="card-topline">${classBadge(op)}<span style="font-size:10px;color:var(--muted)">${escapeHTML(op.impact || '')}</span></div>
+                <div class="card-title">${escapeHTML(op.title)}</div>
+                <div class="card-meta">${escapeHTML(op.owner || 'Sin responsable')}<br>${op.due ? '📅 ' + escapeHTML(op.due) : 'Sin fecha compromiso'}</div>
+                <select class="card-select no-print" onchange="moveOpportunity('${op.id}', this.value)">
+                  ${STATUSES.map(item => `<option ${item === op.status ? 'selected' : ''}>${item}</option>`).join('')}
+                </select>
+              </article>
+            `).join('') : '<div class="empty">Sin tarjetas</div>'}
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  function renderOpportunities() {
+    const list = sprint().opportunities || [];
+    byId('opportunity-table').innerHTML = list.length
+      ? list.map(op => `
+        <tr>
+          <td>${classBadge(op)}</td>
+          <td><strong>${escapeHTML(op.title)}</strong><br><span style="font-size:10px;color:var(--muted)">${escapeHTML(op.description || '')}</span></td>
+          <td>${escapeHTML(op.impact || '—')}</td>
+          <td>${escapeHTML(op.owner || '—')}</td>
+          <td>${escapeHTML(op.due || '—')}</td>
+          <td><span class="badge badge-state">${escapeHTML(op.status)}</span></td>
+          <td class="no-print"><div class="table-actions"><button class="mini-btn" onclick="editOpportunity('${op.id}')">Editar</button><button class="mini-btn delete" onclick="deleteOpportunity('${op.id}')">×</button></div></td>
+        </tr>
+      `).join('')
+      : '<tr><td colspan="7" class="empty">El backlog está vacío. Registra una oportunidad de mejora.</td></tr>';
+  }
+
+  function renderDaily() {
+    const logs = [...(sprint().dailyLogs || [])].sort((a,b) => String(b.date).localeCompare(String(a.date)));
+    byId('daily-table').innerHTML = logs.length
+      ? logs.map(log => `
+        <tr>
+          <td>${escapeHTML(log.date)}</td>
+          <td>${escapeHTML(log.health)}</td>
+          <td>${escapeHTML(log.done)}</td>
+          <td>${escapeHTML(log.plan)}</td>
+          <td>${escapeHTML(log.blockers)}</td>
+          <td>${escapeHTML(log.notes)}</td>
+          <td class="no-print"><div class="table-actions"><button class="mini-btn" onclick="editDaily('${log.id}')">Editar</button><button class="mini-btn delete" onclick="deleteDaily('${log.id}')">×</button></div></td>
+        </tr>
+      `).join('')
+      : '<tr><td colspan="7" class="empty">No existen registros diarios todavía.</td></tr>';
+  }
+
+  function renderResultFields() {
+    const r = sprint().results || {};
+    byId('r-before').value = r.before || '';
+    byId('r-after').value = r.after || '';
+    byId('r-increment').value = r.increment || '';
+    byId('r-benefit').value = r.benefit || '';
+    byId('r-worked').value = r.worked || '';
+    byId('r-improve').value = r.improve || '';
+    byId('r-standard').value = r.standard || '';
+    byId('r-standard-owner').value = r.standardOwner || '';
+    byId('r-follow-7').value = r.follow7 || '';
+    byId('r-follow-30').value = r.follow30 || '';
+    byId('r-sustainment').value = r.sustainment || '';
+  }
+
+  function renderMetricTable() {
+    const metrics = sprint().metrics || [];
+    byId('metrics-table').innerHTML = metrics.length
+      ? metrics.map((metric,index) => `
+        <tr>
+          <td>${escapeHTML(metric.name)}</td>
+          <td>${escapeHTML(metric.unit)}</td>
+          <td>${escapeHTML(metric.baseline)}</td>
+          <td>${escapeHTML(metric.target)}</td>
+          <td>${escapeHTML(metric.actual)}</td>
+          <td class="no-print"><button class="mini-btn delete" onclick="deleteMetric(${index})">×</button></td>
+        </tr>
+      `).join('')
+      : '<tr><td colspan="6" class="empty">Agrega indicadores para medir el antes y después.</td></tr>';
+  }
+
+  function renderAll() {
+    renderSummary();
+    renderMetrics();
+    renderDashboard();
+    renderBoard();
+    renderOpportunities();
+    renderDaily();
+    renderResultFields();
+    renderMetricTable();
+  }
+
+  function showView(view) {
+    document.querySelectorAll('.view').forEach(element => element.classList.toggle('active', element.id === 'view-' + view));
+    document.querySelectorAll('.tab').forEach(element => element.classList.toggle('active', element.dataset.view === view));
+  }
+
+  document.querySelectorAll('.tab').forEach(tab => tab.addEventListener('click', () => showView(tab.dataset.view)));
+
+  document.getElementById('opportunity-form').addEventListener('submit', event => {
+    event.preventDefault();
+    const record = {
+      id: byId('o-id').value || id(),
+      title: byId('o-title').value.trim(),
+      class: byId('o-class').value,
+      status: byId('o-status').value,
+      owner: byId('o-owner').value.trim(),
+      due: byId('o-due').value,
+      impact: byId('o-impact').value,
+      category: byId('o-category').value.trim(),
+      effort: byId('o-effort').value,
+      area: byId('o-area').value.trim(),
+      description: byId('o-description').value.trim(),
+      result: byId('o-result').value.trim()
+    };
+
+    const index = sprint().opportunities.findIndex(op => op.id === record.id);
+    if (index >= 0) sprint().opportunities[index] = record;
+    else sprint().opportunities.push(record);
+
+    clearOpportunityForm();
+    saveLocal(true);
+  });
+
+  function clearOpportunityForm() {
+    byId('opportunity-form').reset();
+    byId('o-id').value = '';
+    byId('o-class').value = 'A';
+    byId('o-status').value = 'Backlog';
+    byId('o-impact').value = 'Medio';
+    byId('o-effort').value = 'Medio';
+  }
+
+  function editOpportunity(opportunityId) {
+    const op = sprint().opportunities.find(item => item.id === opportunityId);
+    if (!op) return;
+    byId('o-id').value = op.id;
+    byId('o-title').value = op.title || '';
+    byId('o-class').value = op.class || 'A';
+    byId('o-status').value = op.status || 'Backlog';
+    byId('o-owner').value = op.owner || '';
+    byId('o-due').value = op.due || '';
+    byId('o-impact').value = op.impact || 'Medio';
+    byId('o-category').value = op.category || '';
+    byId('o-effort').value = op.effort || 'Medio';
+    byId('o-area').value = op.area || '';
+    byId('o-description').value = op.description || '';
+    byId('o-result').value = op.result || '';
+    showView('backlog');
+    window.scrollTo({top:0,behavior:'smooth'});
+  }
+
+  function deleteOpportunity(opportunityId) {
+    if (!confirm('¿Eliminar esta oportunidad?')) return;
+    sprint().opportunities = sprint().opportunities.filter(item => item.id !== opportunityId);
+    saveLocal(true);
+  }
+
+  function moveOpportunity(opportunityId, status) {
+    const op = sprint().opportunities.find(item => item.id === opportunityId);
+    if (!op) return;
+    op.status = status;
+    saveLocal(true);
+  }
+
+  document.getElementById('daily-form').addEventListener('submit', event => {
+    event.preventDefault();
+    const record = {
+      id: byId('d-id').value || id(),
+      date: byId('d-date').value,
+      participants: byId('d-participants').value.trim(),
+      health: byId('d-health').value,
+      done: byId('d-done').value.trim(),
+      plan: byId('d-plan').value.trim(),
+      blockers: byId('d-blockers').value.trim(),
+      notes: byId('d-notes').value.trim()
+    };
+
+    const index = sprint().dailyLogs.findIndex(log => log.id === record.id);
+    if (index >= 0) sprint().dailyLogs[index] = record;
+    else sprint().dailyLogs.push(record);
+
+    clearDailyForm();
+    saveLocal(true);
+  });
+
+  function clearDailyForm() {
+    byId('daily-form').reset();
+    byId('d-id').value = '';
+    byId('d-date').value = new Date().toISOString().slice(0,10);
+  }
+
+  function editDaily(logId) {
+    const log = sprint().dailyLogs.find(item => item.id === logId);
+    if (!log) return;
+    byId('d-id').value = log.id;
+    byId('d-date').value = log.date || '';
+    byId('d-participants').value = log.participants || '';
+    byId('d-health').value = log.health || 'Verde · según plan';
+    byId('d-done').value = log.done || '';
+    byId('d-plan').value = log.plan || '';
+    byId('d-blockers').value = log.blockers || '';
+    byId('d-notes').value = log.notes || '';
+    showView('daily');
+    window.scrollTo({top:0,behavior:'smooth'});
+  }
+
+  function deleteDaily(logId) {
+    if (!confirm('¿Eliminar este registro diario?')) return;
+    sprint().dailyLogs = sprint().dailyLogs.filter(item => item.id !== logId);
+    saveLocal(true);
+  }
+
+  function saveResults() {
+    sprint().results = {
+      before: byId('r-before').value,
+      after: byId('r-after').value,
+      increment: byId('r-increment').value,
+      benefit: byId('r-benefit').value,
+      worked: byId('r-worked').value,
+      improve: byId('r-improve').value,
+      standard: byId('r-standard').value,
+      standardOwner: byId('r-standard-owner').value,
+      follow7: byId('r-follow-7').value,
+      follow30: byId('r-follow-30').value,
+      sustainment: byId('r-sustainment').value
+    };
+    saveLocal();
+  }
+
+  function addMetric() {
+    const name = byId('m-name').value.trim();
+    if (!name) {
+      alert('Indica el nombre del indicador.');
+      return;
+    }
+    sprint().metrics.push({
+      name,
+      unit: byId('m-unit').value.trim(),
+      baseline: byId('m-baseline').value,
+      target: byId('m-target').value,
+      actual: byId('m-actual').value
+    });
+    ['m-name','m-unit','m-baseline','m-target','m-actual'].forEach(field => byId(field).value = '');
+    saveLocal(true);
+  }
+
+  function deleteMetric(index) {
+    sprint().metrics.splice(index, 1);
+    saveLocal(true);
+  }
+
+  function exportJSON() {
+    syncSprintFromSidebar();
+    const exportData = JSON.parse(JSON.stringify(data));
+    exportData.exportedAt = new Date().toISOString();
+
+    const blob = new Blob([JSON.stringify(exportData,null,2)], {type:'application/json'});
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = (sprint().code || 'kaizen-sprint') + '.json';
+    link.click();
+    URL.revokeObjectURL(link.href);
+  }
+
+  document.getElementById('import-file').addEventListener('change', event => {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = loadEvent => {
+      try {
+        const imported = JSON.parse(loadEvent.target.result);
+        if (!imported.sprint) throw new Error('El archivo no contiene un Sprint Kaizen válido.');
+        data = imported;
+        if (!data.sprint.opportunities) data.sprint.opportunities = [];
+        if (!data.sprint.dailyLogs) data.sprint.dailyLogs = [];
+        if (!data.sprint.metrics) data.sprint.metrics = [];
+        if (!data.sprint.results) data.sprint.results = {};
+        populateSidebar();
+        clearOpportunityForm();
+        clearDailyForm();
+        saveLocal(true);
+        alert('Sprint Kaizen cargado correctamente.');
+      } catch (error) {
+        alert('No se pudo cargar el JSON: ' + error.message);
+      }
+    };
+    reader.readAsText(file);
+    event.target.value = '';
+  });
+
+  function printReport() {
+    syncSprintFromSidebar();
+    const s = sprint();
+    const ops = s.opportunities || [];
+    const results = s.results || {};
+    const date = new Date().toLocaleString('es');
+
+    const metricRows = (s.metrics || []).map(metric => `
+      <tr><td>${escapeHTML(metric.name)}</td><td>${escapeHTML(metric.unit)}</td><td>${escapeHTML(metric.baseline)}</td><td>${escapeHTML(metric.target)}</td><td>${escapeHTML(metric.actual)}</td></tr>
+    `).join('') || '<tr><td colspan="5">No se registraron indicadores.</td></tr>';
+
+    const opportunityRows = ops.map(op => `
+      <tr><td>${escapeHTML(op.class)}</td><td>${escapeHTML(op.title)}</td><td>${escapeHTML(op.owner)}</td><td>${escapeHTML(op.due)}</td><td>${escapeHTML(op.status)}</td></tr>
+    `).join('') || '<tr><td colspan="5">No se registraron oportunidades.</td></tr>';
+
+    const html = `<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Reporte Kaizen — ${escapeHTML(s.code || 'Sprint')}</title>
+<style>
+  @page{size:A4 landscape;margin:12mm}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:Arial,sans-serif;color:#111;font-size:10px}
+  h1{font-size:20px;color:#0b5b65;margin-bottom:4px}
+  h2{font-size:13px;color:#0b5b65;margin:14px 0 7px;border-bottom:1px solid #bbb;padding-bottom:3px}
+  .sub{color:#555;margin-bottom:10px}
+  .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+  .box{border:1px solid #bbb;border-radius:4px;padding:8px;min-height:54px}
+  .label{font-size:8px;font-weight:700;color:#666;text-transform:uppercase;margin-bottom:3px}
+  table{width:100%;border-collapse:collapse}
+  th,td{border:1px solid #bbb;padding:5px;text-align:left;vertical-align:top}
+  th{background:#eaf5f6;color:#17454c;font-size:8px;text-transform:uppercase}
+  .footer{color:#777;margin-top:10px;text-align:right;font-size:8px}
+</style>
+</head>
+<body>
+  <h1>改善 Gestión de Sprints Kaizen</h1>
+  <div class="sub">${escapeHTML(s.code || 'Sin código')} · ${escapeHTML(s.title || 'Sprint Kaizen')} · ${escapeHTML(s.status || '')}</div>
+  <div class="grid">
+    <div class="box"><div class="label">Organización / proceso</div>${escapeHTML(s.organization || '—')} · ${escapeHTML(s.area || '—')}</div>
+    <div class="box"><div class="label">Evento / fechas</div>${escapeHTML(s.eventType || '—')}<br>${escapeHTML(s.start || '—')} → ${escapeHTML(s.end || '—')}</div>
+    <div class="box"><div class="label">Objetivo SMART</div>${escapeHTML(s.objective || '—')}</div>
+    <div class="box"><div class="label">Equipo</div>${escapeHTML(s.team || '—')}</div>
+  </div>
+  <h2>Oportunidades del Sprint</h2>
+  <table><thead><tr><th>Clase</th><th>Oportunidad</th><th>Responsable</th><th>Compromiso</th><th>Estado</th></tr></thead><tbody>${opportunityRows}</tbody></table>
+  <h2>Indicadores antes y después</h2>
+  <table><thead><tr><th>Indicador</th><th>Unidad</th><th>Línea base</th><th>Meta</th><th>Resultado</th></tr></thead><tbody>${metricRows}</tbody></table>
+  <h2>Resultados y sostenimiento</h2>
+  <div class="grid">
+    <div class="box"><div class="label">Incremento implementado</div>${escapeHTML(results.increment || '—')}</div>
+    <div class="box"><div class="label">Beneficio</div>${escapeHTML(results.benefit || '—')}</div>
+    <div class="box"><div class="label">Nuevo estándar</div>${escapeHTML(results.standard || '—')}</div>
+    <div class="box"><div class="label">Sostenimiento</div>${escapeHTML(results.sustainment || '—')}</div>
+  </div>
+  <div class="footer">Largotek Lean Six Sigma Suite · Reporte generado: ${escapeHTML(date)}</div>
+  <script>window.onload=()=>window.print()<\/script>
+</body>
+</html>`;
+
+    const win = window.open('', '_blank', 'width=1100,height=750');
+    win.document.write(html);
+    win.document.close();
+  }
+
+  loadLocal();
+  populateSidebar();
+  clearOpportunityForm();
+  clearDailyForm();
+  renderAll();
+
+  ['s-code','s-title','s-status','s-event-type','s-organization','s-area','s-facilitator','s-sponsor','s-start','s-end','s-objective','s-problem','s-scope','s-team']
+    .forEach(field => byId(field).addEventListener('change', () => {
+      syncSprintFromSidebar();
+      renderAll();
+    }));
 </script>
+<script src="branding.js"></script>
 </body>
 </html>
